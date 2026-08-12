@@ -123,6 +123,15 @@ function renderPlayers(characters, players) {
   characters.forEach(c => { charById[c.id] = c; });
   const factionOrder = [...new Set(characters.map(c => c.faction))];
 
+  const playerNames = document.getElementById('player-names');
+  if (playerNames) {
+    players.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      playerNames.appendChild(opt);
+    });
+  }
+
   function renderPlayerBlock(p) {
     const owned = (p.owned || []).map(id => charById[id]).filter(Boolean);
     const locked = (p.locked || []).map(id => charById[id]).filter(Boolean);
@@ -151,13 +160,20 @@ function renderPlayers(characters, players) {
       return;
     }
 
-    const matches = players.filter(p => p.name.toLowerCase().includes(q));
+    const exact = players.find(p => p.name.toLowerCase() === q);
+    const matches = exact ? [exact] : players.filter(p => p.name.toLowerCase().includes(q));
+
     if (matches.length === 0) {
       container.innerHTML = '<div class="empty-state">Aucun joueur ne correspond à cette recherche.</div>';
       return;
     }
 
-    matches.forEach(p => container.appendChild(renderPlayerBlock(p)));
+    if (matches.length > 1) {
+      container.innerHTML = '<div class="empty-state">Plusieurs joueurs correspondent, précise le pseudo (utilise les suggestions).</div>';
+      return;
+    }
+
+    container.appendChild(renderPlayerBlock(matches[0]));
   }
 
   search.addEventListener('input', draw);

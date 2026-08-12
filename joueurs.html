@@ -27,7 +27,8 @@
     <p class="subtitle">Cherche ton pseudo Discord (ou celui d'un autre joueur) pour voir ses personnages débloqués et à débloquer.</p>
 
     <div class="filters">
-      <input type="text" id="player-search" placeholder="Rechercher un pseudo Discord...">
+      <input type="text" id="player-search" placeholder="Rechercher un pseudo Discord..." list="player-names" autocomplete="off">
+      <datalist id="player-names"></datalist>
     </div>
 
     <div id="players-list"></div>
