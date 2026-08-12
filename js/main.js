@@ -92,12 +92,31 @@ function renderCharacters(characters, players) {
   draw();
 }
 
+function groupByFaction(list, factionOrder) {
+  const groups = {};
+  list.forEach(c => {
+    groups[c.faction] = groups[c.faction] || [];
+    groups[c.faction].push(c);
+  });
+  return factionOrder.filter(f => groups[f]).map(f => ({ faction: f, chars: groups[f] }));
+}
+
+function renderCharGroups(groups, pillClass) {
+  return groups.map(g => `
+    <p style="margin:0.9rem 0 0.4rem;color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">${g.faction}</p>
+    <div class="tag-list">
+      ${g.chars.map(c => `<span class="pill ${pillClass}">${c.name}</span>`).join('')}
+    </div>
+  `).join('');
+}
+
 function renderPlayers(characters, players) {
   const container = document.getElementById('players-list');
   if (!container) return;
 
   const charById = {};
   characters.forEach(c => { charById[c.id] = c; });
+  const factionOrder = [...new Set(characters.map(c => c.faction))];
 
   if (players.length === 0) {
     container.innerHTML = '<div class="empty-state">Aucun joueur enregistré pour le moment.</div>';
@@ -108,19 +127,17 @@ function renderPlayers(characters, players) {
   players.forEach(p => {
     const owned = (p.owned || []).map(id => charById[id]).filter(Boolean);
     const locked = (p.locked || []).map(id => charById[id]).filter(Boolean);
+    const ownedGroups = groupByFaction(owned, factionOrder);
+    const lockedGroups = groupByFaction(locked, factionOrder);
 
     const block = document.createElement('div');
     block.className = 'player-block';
     block.innerHTML = `
       <h3>${p.name} <span class="count">${owned.length} personnage${owned.length > 1 ? 's' : ''} débloqué${owned.length > 1 ? 's' : ''}</span></h3>
-      <div class="tag-list">
-        ${owned.map(c => `<span class="pill">${c.name}</span>`).join('') || '<span class="pill locked">Aucun personnage débloqué</span>'}
-      </div>
-      ${locked.length ? `
-        <p style="margin:1rem 0 0.5rem;color:var(--text-dim);font-size:0.85rem;">À débloquer :</p>
-        <div class="tag-list">
-          ${locked.map(c => `<span class="pill locked">${c.name}</span>`).join('')}
-        </div>
+      ${ownedGroups.length ? renderCharGroups(ownedGroups, '') : '<div class="tag-list"><span class="pill locked">Aucun personnage débloqué</span></div>'}
+      ${lockedGroups.length ? `
+        <p style="margin-top:1.2rem;color:var(--text-dim);font-size:0.85rem;border-top:1px solid var(--border);padding-top:0.8rem;">À débloquer :</p>
+        ${renderCharGroups(lockedGroups, 'locked')}
       ` : ''}
     `;
     container.appendChild(block);
