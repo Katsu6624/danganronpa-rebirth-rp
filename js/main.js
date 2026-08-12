@@ -109,7 +109,7 @@ function renderCharGroups(groups, pillClass) {
   return groups.map(g => `
     <p style="margin:0.9rem 0 0.4rem;color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">${g.faction}</p>
     <div class="tag-list">
-      ${g.chars.map(c => `<span class="pill ${pillClass}">${c.name}</span>`).join('')}
+      ${g.chars.map(c => `<span class="pill ${pillClass}">${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}</span>`).join('')}
     </div>
   `).join('');
 }

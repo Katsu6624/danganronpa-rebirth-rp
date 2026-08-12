@@ -362,11 +362,22 @@ a {
 }
 
 .tag-list .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.82rem;
   padding: 0.3rem 0.65rem;
   border-radius: 3px;
   background: var(--bg-alt);
   border: 1px solid var(--border);
+}
+
+.tag-list .pill img {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  image-rendering: pixelated;
+  flex-shrink: 0;
 }
 
 .tag-list .pill.locked {
