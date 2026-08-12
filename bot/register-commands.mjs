@@ -56,15 +56,6 @@ const commands = [
       },
       {
         type: 1,
-        name: 'debloquer',
-        description: 'Ajouter un personnage à la liste "à débloquer" d\'un joueur',
-        options: [
-          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
-          { type: 3, name: 'personnage', description: 'Le personnage', required: true, autocomplete: true },
-        ],
-      },
-      {
-        type: 1,
         name: 'liste',
         description: 'Voir les personnages d\'un joueur',
         options: [

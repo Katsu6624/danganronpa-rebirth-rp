@@ -1,4 +1,4 @@
-# Bot Discord — gestion du roster
+# Bot Discord : gestion du roster
 
 Bot "serverless" (aucune machine à laisser allumée) : hébergé sur Cloudflare Workers,
 il répond aux commandes Discord `/roster ...` et met à jour `data/players.json`
@@ -6,10 +6,12 @@ directement sur GitHub, ce qui republie le site automatiquement.
 
 ## Commandes
 
-- `/roster donner joueur:@X personnage:<nom>` — attribue un personnage à un joueur
-- `/roster retirer joueur:@X personnage:<nom>` — retire un personnage
-- `/roster debloquer joueur:@X personnage:<nom>` — ajoute à la liste "à débloquer"
-- `/roster liste joueur:@X` — affiche le roster d'un joueur
+- `/register` : accessible à tout le monde, inscrit le joueur et débloque automatiquement
+  Trigger Happy Havoc, Goodbye Despair et Killing Harmony
+- `/help` : liste les commandes disponibles
+- `/roster donner joueur:@X personnage:<nom>` : attribue un personnage à un joueur
+- `/roster retirer joueur:@X personnage:<nom>` : retire un personnage
+- `/roster liste joueur:@X` : affiche le roster d'un joueur
 
 Par défaut, seuls les membres avec la permission Discord **"Gérer le serveur"**
 peuvent utiliser `/roster` (modifiable dans Discord : Paramètres du serveur →
@@ -75,7 +77,7 @@ Toujours dans `bot/` :
 $env:DISCORD_APP_ID="ton_application_id"; $env:DISCORD_BOT_TOKEN="ton_bot_token"; node register-commands.mjs
 ```
 
-Les commandes `/roster ...` apparaissent alors dans Discord — **jusqu'à 1h** pour des commandes
+Les commandes `/roster ...` apparaissent alors dans Discord : **jusqu'à 1h** pour des commandes
 globales (comportement par défaut). Pour un test instantané sur un seul serveur, ajoute
 `DISCORD_GUILD_ID` (clic droit sur l'icône du serveur en mode développeur → Copier l'ID) :
 

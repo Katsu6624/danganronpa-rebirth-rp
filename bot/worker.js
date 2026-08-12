@@ -116,13 +116,12 @@ function handleHelp() {
   const lines = [
     '**Commandes disponibles**',
     '',
-    '`/register` — T\'inscrire sur la page Joueurs du site. Accessible à tout le monde.',
-    '`/roster liste [joueur]` — Voir les personnages d\'un joueur (toi par défaut). Accessible à tout le monde.',
+    '`/register` : t\'inscrire sur la page Joueurs du site. Accessible à tout le monde.',
+    '`/roster liste [joueur]` : voir les personnages d\'un joueur (toi par défaut). Accessible à tout le monde.',
     '',
     '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
-    '`/roster donner <joueur> <personnage>` — Attribuer un personnage à un joueur.',
-    '`/roster retirer <joueur> <personnage>` — Retirer un personnage à un joueur.',
-    '`/roster debloquer <joueur> <personnage>` — Ajouter un personnage à la liste "à débloquer" d\'un joueur.',
+    '`/roster donner <joueur> <personnage>` : attribuer un personnage à un joueur.',
+    '`/roster retirer <joueur> <personnage>` : retirer un personnage à un joueur.',
   ];
   return reply(lines.join('\n'));
 }
@@ -177,12 +176,6 @@ async function handleCommand(env, interaction) {
     player.owned = player.owned.filter((id) => id !== charId);
     await writeJsonFile(env, 'data/players.json', players, sha, `Retrait de ${character.name} à ${targetUser.username}`);
     return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
-  }
-
-  if (subcommand === 'debloquer') {
-    if (!player.locked.includes(charId) && !player.owned.includes(charId)) player.locked.push(charId);
-    await writeJsonFile(env, 'data/players.json', players, sha, `${character.name} ajouté au déblocage de ${targetUser.username}`);
-    return reply(`✅ ${character.name} ajouté à la liste "à débloquer" de ${targetUser.username}.`);
   }
 
   return reply('Sous-commande inconnue.');
