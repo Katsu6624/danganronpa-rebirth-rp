@@ -50,7 +50,9 @@
       "ryoma-hoshi",
       "shuichi-saihara",
       "tenko-chabashira",
-      "tsumugi-shirogane",
+      "tsumugi-shirogane"
+    ],
+    "locked": [
       "komaru-naegi",
       "jataro-kemuri",
       "masaru-daimon",
@@ -139,7 +141,6 @@
       "seishi-yodogawa",
       "nikei"
     ],
-    "locked": [],
     "vip": false,
     "vipTier": null,
     "vipGrantedIds": []
