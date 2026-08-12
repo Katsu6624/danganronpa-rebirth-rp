@@ -72,9 +72,9 @@ async function discordRequest(env, path, options = {}) {
   }
 }
 
-async function setVipRole(env, userId, add) {
-  if (!env.DISCORD_GUILD_ID || !env.DISCORD_VIP_ROLE_ID) return;
-  const path = `/guilds/${env.DISCORD_GUILD_ID}/members/${userId}/roles/${env.DISCORD_VIP_ROLE_ID}`;
+async function setDiscordRole(env, userId, roleId, add) {
+  if (!env.DISCORD_GUILD_ID || !roleId) return;
+  const path = `/guilds/${env.DISCORD_GUILD_ID}/members/${userId}/roles/${roleId}`;
   await discordRequest(env, path, { method: add ? 'PUT' : 'DELETE' });
 }
 
@@ -143,16 +143,28 @@ function handleHelp() {
     '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
     '`/roster donner <joueur> <personnage>` : attribuer un personnage à un joueur.',
     '`/roster retirer <joueur> <personnage>` : retirer un personnage à un joueur.',
-    '`/vip donner <joueur>` : donne le rôle VIP et débloque tous les personnages.',
-    '`/vip retirer <joueur>` : retire le rôle VIP et reverrouille les personnages débloqués grâce au VIP (les attributions individuelles sont conservées).',
+    '`/vip espoir donner <joueur>` : donne le rôle Lycéen de l\'Espoir et débloque tous les personnages.',
+    '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
+    '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
+    '`/vip prepa retirer <joueur>` : retire le rôle Lycéen en Cours Préparatoire (les attributions individuelles sont conservées).',
   ];
   return reply(lines.join('\n'));
 }
 
+const VIP_TIERS = {
+  espoir: { roleEnvVar: 'DISCORD_ROLE_ESPOIR', label: "Lycéen de l'Espoir" },
+  prepa: { roleEnvVar: 'DISCORD_ROLE_PREPA', label: 'Lycéen en Cours Préparatoire' },
+};
+
 async function handleVip(env, interaction) {
-  const sub = interaction.data.options?.[0];
+  const group = interaction.data.options?.[0];
+  const tier = VIP_TIERS[group?.name];
+  if (!tier) return reply('Palier VIP inconnu.');
+
+  const sub = group.options?.[0];
   const targetId = sub?.options?.find((o) => o.name === 'joueur')?.value;
   const targetUser = interaction.data.resolved.users[targetId];
+  const roleId = env[tier.roleEnvVar];
 
   const [{ data: players, sha }, characters] = await Promise.all([getPlayers(env), getCharacters(env)]);
   const allIds = characters.map((c) => c.id);
@@ -172,10 +184,11 @@ async function handleVip(env, interaction) {
     player.owned = allIds.slice();
     player.locked = [];
     player.vip = true;
+    player.vipTier = group.name;
     player.vipGrantedIds = newlyGranted;
-    await writeJsonFile(env, 'data/players.json', players, sha, `VIP accordé à ${targetUser.username}`);
-    await setVipRole(env, targetUser.id, true);
-    return reply(`✅ ${targetUser.username} est maintenant VIP : tous les personnages sont débloqués.`);
+    await writeJsonFile(env, 'data/players.json', players, sha, `VIP (${tier.label}) accordé à ${targetUser.username}`);
+    await setDiscordRole(env, targetUser.id, roleId, true);
+    return reply(`✅ ${targetUser.username} a maintenant le rôle ${tier.label} : tous les personnages sont débloqués.`);
   }
 
   if (sub.name === 'retirer') {
@@ -184,10 +197,11 @@ async function handleVip(env, interaction) {
     const stillMissing = allIds.filter((id) => !player.owned.includes(id) && !freeIds.includes(id));
     player.locked = [...new Set([...(player.locked || []), ...stillMissing])];
     player.vip = false;
+    player.vipTier = null;
     player.vipGrantedIds = [];
-    await writeJsonFile(env, 'data/players.json', players, sha, `VIP retiré à ${targetUser.username}`);
-    await setVipRole(env, targetUser.id, false);
-    return reply(`✅ Le VIP de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`);
+    await writeJsonFile(env, 'data/players.json', players, sha, `VIP (${tier.label}) retiré à ${targetUser.username}`);
+    await setDiscordRole(env, targetUser.id, roleId, false);
+    return reply(`✅ Le rôle ${tier.label} de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`);
   }
 
   return reply('Sous-commande VIP inconnue.');

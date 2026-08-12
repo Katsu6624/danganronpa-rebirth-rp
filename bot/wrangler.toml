@@ -7,7 +7,8 @@ GITHUB_OWNER = "Katsu6624"
 GITHUB_REPO = "danganronpa-rebirth-rp"
 GITHUB_BRANCH = "master"
 DISCORD_GUILD_ID = "1178733678080294963"
-DISCORD_VIP_ROLE_ID = "REMPLACE_PAR_L_ID_DU_ROLE"
+DISCORD_ROLE_ESPOIR = "1185366817359790080"
+DISCORD_ROLE_PREPA = "1178869069823344672"
 
 # Secrets (ne jamais mettre en clair ici) : à définir avec :
 #   wrangler secret put DISCORD_PUBLIC_KEY

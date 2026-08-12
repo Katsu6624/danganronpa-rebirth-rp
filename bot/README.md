@@ -12,9 +12,13 @@ directement sur GitHub, ce qui republie le site automatiquement.
 - `/roster donner joueur:@X personnage:<nom>` : attribue un personnage à un joueur
 - `/roster retirer joueur:@X personnage:<nom>` : retire un personnage
 - `/roster liste joueur:@X` : affiche le roster d'un joueur
-- `/vip donner joueur:@X` : donne le rôle Discord VIP et débloque tous les personnages
-- `/vip retirer joueur:@X` : retire le rôle et reverrouille les personnages débloqués par le VIP
-  (les personnages attribués individuellement via `/roster donner` restent acquis, même après)
+- `/vip espoir donner joueur:@X` : donne le rôle Lycéen de l'Espoir et débloque tous les personnages
+- `/vip espoir retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP
+- `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages
+- `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP
+
+Pour les deux paliers `/vip`, les personnages attribués individuellement via `/roster donner`
+restent acquis même après le retrait du rôle.
 
 Par défaut, seuls les membres avec la permission Discord **"Gérer le serveur"**
 peuvent utiliser `/roster` (modifiable dans Discord : Paramètres du serveur →
@@ -34,14 +38,15 @@ Intégrations → Danganronpa Rebirth RP Bot).
    permission `Send Messages`. Ouvre l'URL générée pour inviter le bot sur ton serveur.
 
 ### 1bis. Pour la commande /vip (optionnel)
-Le bot doit pouvoir gérer le rôle VIP lui-même :
-1. Dans **Paramètres du serveur → Rôles**, place le rôle du bot **au-dessus** du rôle VIP
+Le bot doit pouvoir gérer les rôles Lycéen de l'Espoir et Lycéen en Cours Préparatoire lui-même :
+1. Dans **Paramètres du serveur → Rôles**, place le rôle du bot **au-dessus** de ces deux rôles
    dans la liste (Discord interdit à un bot de gérer un rôle placé au-dessus du sien).
 2. Coche la permission **Gérer les rôles** pour le bot (Paramètres du serveur → Intégrations
    → Danganronpa Rebirth RP Bot, ou en réinvitant le bot avec cette permission cochée dans
    l'URL Generator).
-3. Récupère l'**ID du rôle VIP** (mode développeur activé → clic droit sur le rôle → Copier l'ID)
-   et renseigne-le dans `bot/wrangler.toml`, champ `DISCORD_VIP_ROLE_ID`.
+3. Les IDs des deux rôles sont déjà renseignés dans `bot/wrangler.toml`
+   (`DISCORD_ROLE_ESPOIR`, `DISCORD_ROLE_PREPA`). Si tu dois les changer, mode développeur
+   activé → clic droit sur le rôle → Copier l'ID.
 
 ### 2. Créer un token GitHub (accès en écriture au repo)
 1. https://github.com/settings/tokens?type=beta → **Generate new token** (fine-grained).

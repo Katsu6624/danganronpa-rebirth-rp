@@ -66,24 +66,46 @@ const commands = [
   },
   {
     name: 'vip',
-    description: 'Gérer le statut VIP (débloque tous les personnages tant qu\'il est actif)',
+    description: 'Gérer les paliers VIP (débloquent tous les personnages tant qu\'ils sont actifs)',
     default_member_permissions: MANAGE_GUILD,
     dm_permission: false,
     options: [
       {
-        type: 1,
-        name: 'donner',
-        description: 'Donner le rôle VIP et débloquer tous les personnages',
+        type: 2, // SUB_COMMAND_GROUP
+        name: 'espoir',
+        description: 'Palier Lycéen de l\'Espoir',
         options: [
-          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+          {
+            type: 1,
+            name: 'donner',
+            description: 'Donner le rôle Lycéen de l\'Espoir et débloquer tous les personnages',
+            options: [{ type: 6, name: 'joueur', description: 'Le joueur', required: true }],
+          },
+          {
+            type: 1,
+            name: 'retirer',
+            description: 'Retirer le rôle Lycéen de l\'Espoir (attributions individuelles conservées)',
+            options: [{ type: 6, name: 'joueur', description: 'Le joueur', required: true }],
+          },
         ],
       },
       {
-        type: 1,
-        name: 'retirer',
-        description: 'Retirer le rôle VIP (les personnages attribués individuellement sont conservés)',
+        type: 2,
+        name: 'prepa',
+        description: 'Palier Lycéen en Cours Préparatoire',
         options: [
-          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+          {
+            type: 1,
+            name: 'donner',
+            description: 'Donner le rôle Lycéen en Cours Préparatoire et débloquer tous les personnages',
+            options: [{ type: 6, name: 'joueur', description: 'Le joueur', required: true }],
+          },
+          {
+            type: 1,
+            name: 'retirer',
+            description: 'Retirer le rôle Lycéen en Cours Préparatoire (attributions individuelles conservées)',
+            options: [{ type: 6, name: 'joueur', description: 'Le joueur', required: true }],
+          },
         ],
       },
     ],
