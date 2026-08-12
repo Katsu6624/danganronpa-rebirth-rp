@@ -75,7 +75,13 @@ Toujours dans `bot/` :
 $env:DISCORD_APP_ID="ton_application_id"; $env:DISCORD_BOT_TOKEN="ton_bot_token"; node register-commands.mjs
 ```
 
-Les commandes `/roster ...` apparaissent alors dans Discord (peut prendre 1 minute).
+Les commandes `/roster ...` apparaissent alors dans Discord — **jusqu'à 1h** pour des commandes
+globales (comportement par défaut). Pour un test instantané sur un seul serveur, ajoute
+`DISCORD_GUILD_ID` (clic droit sur l'icône du serveur en mode développeur → Copier l'ID) :
+
+```bash
+$env:DISCORD_APP_ID="..."; $env:DISCORD_BOT_TOKEN="..."; $env:DISCORD_GUILD_ID="id_du_serveur"; node register-commands.mjs
+```
 
 ---
 

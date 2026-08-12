@@ -2,11 +2,15 @@
 // Nécessite les variables d'environnement DISCORD_APP_ID et DISCORD_BOT_TOKEN (définis par toi localement,
 // jamais commités dans le repo).
 //
+// Sans DISCORD_GUILD_ID : commandes globales (propagation jusqu'à 1h, valables sur tous les serveurs).
+// Avec DISCORD_GUILD_ID : commandes propres à ce serveur (instantané, pratique pour tester).
+//
 // Usage (PowerShell) :
-//   $env:DISCORD_APP_ID="..."; $env:DISCORD_BOT_TOKEN="..."; node register-commands.mjs
+//   $env:DISCORD_APP_ID="..."; $env:DISCORD_BOT_TOKEN="..."; $env:DISCORD_GUILD_ID="..."; node register-commands.mjs
 
 const appId = process.env.DISCORD_APP_ID;
 const token = process.env.DISCORD_BOT_TOKEN;
+const guildId = process.env.DISCORD_GUILD_ID;
 
 if (!appId || !token) {
   console.error('DISCORD_APP_ID et DISCORD_BOT_TOKEN doivent être définis dans l\'environnement.');
@@ -61,7 +65,11 @@ const commands = [
   },
 ];
 
-const res = await fetch(`https://discord.com/api/v10/applications/${appId}/commands`, {
+const endpoint = guildId
+  ? `https://discord.com/api/v10/applications/${appId}/guilds/${guildId}/commands`
+  : `https://discord.com/api/v10/applications/${appId}/commands`;
+
+const res = await fetch(endpoint, {
   method: 'PUT',
   headers: {
     Authorization: `Bot ${token}`,
@@ -75,4 +83,4 @@ if (!res.ok) {
   process.exit(1);
 }
 
-console.log('Commandes enregistrées avec succès.');
+console.log(`Commandes enregistrées avec succès${guildId ? ' (serveur ' + guildId + ', instantané)' : ' (globales, jusqu\'à 1h de propagation)'}.`);
