@@ -25,10 +25,22 @@ function renderCharacters(characters, players) {
     factionFilter.appendChild(opt);
   });
 
+  const playerNames = document.getElementById('player-names');
+  if (playerNames) {
+    players.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      playerNames.appendChild(opt);
+    });
+  }
+
   function findPlayerByName(name) {
     const q = name.trim().toLowerCase();
     if (!q) return null;
-    return players.find(p => p.name.toLowerCase() === q) || null;
+    const exact = players.find(p => p.name.toLowerCase() === q);
+    if (exact) return exact;
+    const partial = players.filter(p => p.name.toLowerCase().includes(q));
+    return partial.length === 1 ? partial[0] : null;
   }
 
   function draw() {
