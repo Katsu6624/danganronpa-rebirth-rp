@@ -21,6 +21,11 @@ const MANAGE_GUILD = '32'; // permission bit pour restreindre par défaut aux me
 
 const commands = [
   {
+    name: 'help',
+    description: 'Voir toutes les commandes disponibles',
+    dm_permission: false,
+  },
+  {
     name: 'register',
     description: 'T\'inscrire sur la page Joueurs du site',
     dm_permission: false,

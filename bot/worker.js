@@ -106,9 +106,28 @@ async function handleRegister(env, interaction) {
   return reply(`✅ Tu es enregistré, ${user.username} ! Retrouve-toi sur la page Joueurs du site.`);
 }
 
+function handleHelp() {
+  const lines = [
+    '**Commandes disponibles**',
+    '',
+    '`/register` — T\'inscrire sur la page Joueurs du site. Accessible à tout le monde.',
+    '`/roster liste [joueur]` — Voir les personnages d\'un joueur (toi par défaut). Accessible à tout le monde.',
+    '',
+    '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
+    '`/roster donner <joueur> <personnage>` — Attribuer un personnage à un joueur.',
+    '`/roster retirer <joueur> <personnage>` — Retirer un personnage à un joueur.',
+    '`/roster debloquer <joueur> <personnage>` — Ajouter un personnage à la liste "à débloquer" d\'un joueur.',
+  ];
+  return reply(lines.join('\n'));
+}
+
 async function handleCommand(env, interaction) {
   if (interaction.data.name === 'register') {
     return handleRegister(env, interaction);
+  }
+
+  if (interaction.data.name === 'help') {
+    return handleHelp();
   }
 
   const { subcommand, opts } = getOptions(interaction);
