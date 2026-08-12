@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personnages — Danganronpa Rebirth RP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <a class="brand" href="index.html">Danganronpa Rebirth RP</a>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="regles.html">Règles</a>
+      <a href="personnages.html" class="active">Personnages</a>
+      <a href="joueurs.html">Joueurs</a>
+    </nav>
+  </header>
+
+  <section class="section">
+    <h2>Personnages</h2>
+    <p class="subtitle">Liste des personnages jouables et leur disponibilité actuelle.</p>
+
+    <div class="filters">
+      <input type="text" id="char-search" placeholder="Rechercher un nom ou un talent...">
+      <select id="char-faction">
+        <option value="">Toutes les classes</option>
+      </select>
+      <select id="char-status">
+        <option value="">Tous les statuts</option>
+        <option value="available">Disponible</option>
+        <option value="owned">Possédé</option>
+      </select>
+    </div>
+
+    <div class="grid" id="char-grid"></div>
+  </section>
+
+  <footer>
+    Danganronpa Rebirth RP — site communautaire non affilié à Spike Chunsoft.
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[
+  { "id": "makoto-naegi", "name": "Makoto Naegi", "ultimate": "Ultime Chance", "faction": "Classe 78" },
+  { "id": "kyoko-kirigiri", "name": "Kyoko Kirigiri", "ultimate": "Ultime ???", "faction": "Classe 78" },
+  { "id": "byakuya-togami", "name": "Byakuya Togami", "ultimate": "Ultime Héritier", "faction": "Classe 78" },
+  { "id": "kyoudai-hagakure", "name": "Yasuhiro Hagakure", "ultimate": "Ultime Voyant", "faction": "Classe 78" },
+  { "id": "sayaka-maizono", "name": "Sayaka Maizono", "ultimate": "Ultime Idole", "faction": "Classe 78" },
+  { "id": "hajime-hinata", "name": "Hajime Hinata", "ultimate": "Ultime ???", "faction": "Classe 77" },
+  { "id": "nagito-komaeda", "name": "Nagito Komaeda", "ultimate": "Ultime Chanceux", "faction": "Classe 77" },
+  { "id": "chiaki-nanami", "name": "Chiaki Nanami", "ultimate": "Ultime Joueuse", "faction": "Classe 77" },
+  { "id": "kokichi-oma", "name": "Kokichi Oma", "ultimate": "Ultime Chef Suprême", "faction": "Classe 79" },
+  { "id": "shuichi-saihara", "name": "Shuichi Saihara", "ultimate": "Ultime Détective", "faction": "Classe 79" },
+  { "id": "kaede-akamatsu", "name": "Kaede Akamatsu", "ultimate": "Ultime Pianiste", "faction": "Classe 79" }
+]
