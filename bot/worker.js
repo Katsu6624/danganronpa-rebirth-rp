@@ -180,13 +180,21 @@ async function handleVip(env, interaction) {
   player.locked = player.locked || [];
 
   if (sub.name === 'donner') {
-    const newlyGranted = allIds.filter((id) => !player.owned.includes(id));
+    const previousTier = player.vipTier;
+    if (!player.vip) {
+      // Ne recalcule "ce qui vient du VIP" que lors du premier octroi : réexécuter /vip donner
+      // sur un joueur déjà VIP ne doit pas effacer ce qu'on sait devoir reverrouiller plus tard.
+      player.vipGrantedIds = allIds.filter((id) => !player.owned.includes(id));
+    }
     player.owned = allIds.slice();
     player.locked = [];
     player.vip = true;
     player.vipTier = group.name;
-    player.vipGrantedIds = newlyGranted;
     await writeJsonFile(env, 'data/players.json', players, sha, `VIP (${tier.label}) accordé à ${targetUser.username}`);
+    if (previousTier && previousTier !== group.name) {
+      const previousRoleId = env[VIP_TIERS[previousTier].roleEnvVar];
+      await setDiscordRole(env, targetUser.id, previousRoleId, false);
+    }
     await setDiscordRole(env, targetUser.id, roleId, true);
     return reply(`✅ ${targetUser.username} a maintenant le rôle ${tier.label} : tous les personnages sont débloqués.`);
   }
