@@ -132,16 +132,23 @@ function renderPlayers(characters, players) {
     });
   }
 
+  const VIP_LABELS = {
+    espoir: "Lycéen de l'Espoir",
+    prepa: 'Lycéen en Cours Préparatoire',
+  };
+
   function renderPlayerBlock(p) {
     const owned = (p.owned || []).map(id => charById[id]).filter(Boolean);
     const locked = (p.locked || []).map(id => charById[id]).filter(Boolean);
     const ownedGroups = groupByFaction(owned, factionOrder);
     const lockedGroups = groupByFaction(locked, factionOrder);
+    const vipLabel = p.vip && VIP_LABELS[p.vipTier];
 
     const block = document.createElement('div');
     block.className = 'player-block';
     block.innerHTML = `
       <h3>${p.name} <span class="count">${owned.length} personnage${owned.length > 1 ? 's' : ''} débloqué${owned.length > 1 ? 's' : ''}</span></h3>
+      ${vipLabel ? `<p style="margin:0.2rem 0 1rem;color:var(--gold);font-size:0.82rem;">✨ Tout est débloqué grâce au rôle ${vipLabel}</p>` : ''}
       ${ownedGroups.length ? renderCharGroups(ownedGroups, '') : '<div class="tag-list"><span class="pill locked">Aucun personnage débloqué</span></div>'}
       ${lockedGroups.length ? `
         <p style="margin-top:1.2rem;color:var(--text-dim);font-size:0.85rem;border-top:1px solid var(--border);padding-top:0.8rem;">À débloquer :</p>
