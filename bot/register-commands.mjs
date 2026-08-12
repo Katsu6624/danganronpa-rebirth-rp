@@ -31,37 +31,31 @@ const commands = [
     dm_permission: false,
   },
   {
-    name: 'roster',
-    description: 'Gérer les personnages attribués aux joueurs',
+    name: 'liste',
+    description: 'Voir les personnages d\'un joueur',
+    dm_permission: false,
+    options: [
+      { type: 6, name: 'joueur', description: 'Le joueur (toi par défaut)', required: false },
+    ],
+  },
+  {
+    name: 'debloquer',
+    description: 'Attribuer un personnage à un joueur',
     default_member_permissions: MANAGE_GUILD,
     dm_permission: false,
     options: [
-      {
-        type: 1, // SUB_COMMAND
-        name: 'donner',
-        description: 'Attribuer un personnage à un joueur',
-        options: [
-          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
-          { type: 3, name: 'personnage', description: 'Le personnage', required: true, autocomplete: true },
-        ],
-      },
-      {
-        type: 1,
-        name: 'retirer',
-        description: 'Retirer un personnage à un joueur',
-        options: [
-          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
-          { type: 3, name: 'personnage', description: 'Le personnage', required: true, autocomplete: true },
-        ],
-      },
-      {
-        type: 1,
-        name: 'liste',
-        description: 'Voir les personnages d\'un joueur',
-        options: [
-          { type: 6, name: 'joueur', description: 'Le joueur (toi par défaut)', required: false },
-        ],
-      },
+      { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+      { type: 3, name: 'personnage', description: 'Le personnage', required: true, autocomplete: true },
+    ],
+  },
+  {
+    name: 'retirer',
+    description: 'Retirer un personnage à un joueur',
+    default_member_permissions: MANAGE_GUILD,
+    dm_permission: false,
+    options: [
+      { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+      { type: 3, name: 'personnage', description: 'Le personnage', required: true, autocomplete: true },
     ],
   },
   {

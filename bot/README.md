@@ -1,28 +1,27 @@
 # Bot Discord : gestion du roster
 
 Bot "serverless" (aucune machine à laisser allumée) : hébergé sur Cloudflare Workers,
-il répond aux commandes Discord `/roster ...` et met à jour `data/players.json`
-directement sur GitHub, ce qui republie le site automatiquement.
+il répond aux commandes Discord et met à jour `data/players.json` directement sur
+GitHub, ce qui republie le site automatiquement.
 
 ## Commandes
 
 - `/register` : accessible à tout le monde, inscrit le joueur et débloque automatiquement
   Trigger Happy Havoc, Goodbye Despair et Killing Harmony
 - `/help` : liste les commandes disponibles
-- `/roster donner joueur:@X personnage:<nom>` : attribue un personnage à un joueur
-- `/roster retirer joueur:@X personnage:<nom>` : retire un personnage
-- `/roster liste joueur:@X` : affiche le roster d'un joueur
-- `/vip espoir donner joueur:@X` : donne le rôle Lycéen de l'Espoir et débloque tous les personnages
-- `/vip espoir retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP
-- `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages
-- `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP
+- `/liste joueur:@X` : affiche le roster d'un joueur (accessible à tout le monde)
+- `/debloquer joueur:@X personnage:<nom>` : attribue un personnage à un joueur ⚠️ staff
+- `/retirer joueur:@X personnage:<nom>` : retire un personnage ⚠️ staff
+- `/vip espoir donner joueur:@X` : donne le rôle Lycéen de l'Espoir et débloque tous les personnages ⚠️ staff
+- `/vip espoir retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
+- `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages ⚠️ staff
+- `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
 
-Pour les deux paliers `/vip`, les personnages attribués individuellement via `/roster donner`
+Pour les deux paliers `/vip`, les personnages attribués individuellement via `/debloquer`
 restent acquis même après le retrait du rôle.
 
-Par défaut, seuls les membres avec la permission Discord **"Gérer le serveur"**
-peuvent utiliser `/roster` (modifiable dans Discord : Paramètres du serveur →
-Intégrations → Danganronpa Rebirth RP Bot).
+Les commandes marquées ⚠️ staff nécessitent la permission Discord **"Gérer le serveur"**
+(modifiable dans Discord : Paramètres du serveur → Intégrations → Danganronpa Rebirth RP Bot).
 
 ---
 

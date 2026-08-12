@@ -108,11 +108,10 @@ async function handleAutocomplete(env, interaction) {
   );
 }
 
-function getOptions(interaction) {
-  const sub = interaction.data.options?.[0];
+function getFlatOptions(interaction) {
   const opts = {};
-  (sub?.options || []).forEach((o) => { opts[o.name] = o.value; });
-  return { subcommand: sub?.name, opts };
+  (interaction.data.options || []).forEach((o) => { opts[o.name] = o.value; });
+  return opts;
 }
 
 const FREE_FACTIONS = ['Trigger Happy Havoc', 'Goodbye Despair', 'Killing Harmony'];
@@ -138,11 +137,11 @@ function handleHelp() {
     '**Commandes disponibles**',
     '',
     '`/register` : t\'inscrire sur la page Joueurs du site. Accessible à tout le monde.',
-    '`/roster liste [joueur]` : voir les personnages d\'un joueur (toi par défaut). Accessible à tout le monde.',
+    '`/liste [joueur]` : voir les personnages d\'un joueur (toi par défaut). Accessible à tout le monde.',
     '',
     '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
-    '`/roster donner <joueur> <personnage>` : attribuer un personnage à un joueur.',
-    '`/roster retirer <joueur> <personnage>` : retirer un personnage à un joueur.',
+    '`/debloquer <joueur> <personnage>` : attribuer un personnage à un joueur.',
+    '`/retirer <joueur> <personnage>` : retirer un personnage à un joueur.',
     '`/vip espoir donner <joueur>` : donne le rôle Lycéen de l\'Espoir et débloque tous les personnages.',
     '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
@@ -215,33 +214,23 @@ async function handleVip(env, interaction) {
   return reply('Sous-commande VIP inconnue.');
 }
 
-async function handleCommand(env, interaction) {
-  if (interaction.data.name === 'register') {
-    return handleRegister(env, interaction);
-  }
-
-  if (interaction.data.name === 'help') {
-    return handleHelp();
-  }
-
-  if (interaction.data.name === 'vip') {
-    return handleVip(env, interaction);
-  }
-
-  const { subcommand, opts } = getOptions(interaction);
+async function handleListe(env, interaction) {
+  const opts = getFlatOptions(interaction);
   const characters = await getCharacters(env);
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
+  const targetUser = opts.joueur ? interaction.data.resolved.users[opts.joueur] : interaction.member.user;
+  const { data: players } = await getPlayers(env);
+  const player = findPlayer(players, targetUser.id);
+  if (!player) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
+  const owned = (player.owned || []).map((id) => charById[id]?.name || id).join(', ') || 'aucun';
+  const locked = (player.locked || []).map((id) => charById[id]?.name || id).join(', ') || 'aucun';
+  return reply(`**${targetUser.username}**\nDébloqués : ${owned}\nÀ débloquer : ${locked}`);
+}
 
-  if (subcommand === 'liste') {
-    const targetUser = opts.joueur ? interaction.data.resolved.users[opts.joueur] : interaction.member.user;
-    const { data: players } = await getPlayers(env);
-    const player = findPlayer(players, targetUser.id);
-    if (!player) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
-    const owned = (player.owned || []).map((id) => charById[id]?.name || id).join(', ') || 'aucun';
-    const locked = (player.locked || []).map((id) => charById[id]?.name || id).join(', ') || 'aucun';
-    return reply(`**${targetUser.username}**\nDébloqués : ${owned}\nÀ débloquer : ${locked}`);
-  }
-
+async function handleDebloquer(env, interaction) {
+  const opts = getFlatOptions(interaction);
+  const characters = await getCharacters(env);
+  const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
   const charId = opts.personnage;
   const character = charById[charId];
   if (!character) return reply(`Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`);
@@ -258,21 +247,41 @@ async function handleCommand(env, interaction) {
     player.locked = player.locked || [];
   }
 
-  if (subcommand === 'donner') {
-    if (!player.owned.includes(charId)) player.owned.push(charId);
-    player.locked = player.locked.filter((id) => id !== charId);
-    if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => id !== charId);
-    await writeJsonFile(env, 'data/players.json', players, sha, `Attribution de ${character.name} à ${targetUser.username}`);
-    return reply(`✅ ${character.name} attribué à ${targetUser.username}.`);
-  }
+  if (!player.owned.includes(charId)) player.owned.push(charId);
+  player.locked = player.locked.filter((id) => id !== charId);
+  if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => id !== charId);
+  await writeJsonFile(env, 'data/players.json', players, sha, `Attribution de ${character.name} à ${targetUser.username}`);
+  return reply(`✅ ${character.name} attribué à ${targetUser.username}.`);
+}
 
-  if (subcommand === 'retirer') {
-    player.owned = player.owned.filter((id) => id !== charId);
-    await writeJsonFile(env, 'data/players.json', players, sha, `Retrait de ${character.name} à ${targetUser.username}`);
-    return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
-  }
+async function handleRetirer(env, interaction) {
+  const opts = getFlatOptions(interaction);
+  const characters = await getCharacters(env);
+  const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
+  const charId = opts.personnage;
+  const character = charById[charId];
+  if (!character) return reply(`Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`);
 
-  return reply('Sous-commande inconnue.');
+  const targetUser = interaction.data.resolved.users[opts.joueur];
+  const { data: players, sha } = await getPlayers(env);
+  const player = findPlayer(players, targetUser.id);
+  if (!player) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
+
+  player.owned = (player.owned || []).filter((id) => id !== charId);
+  await writeJsonFile(env, 'data/players.json', players, sha, `Retrait de ${character.name} à ${targetUser.username}`);
+  return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
+}
+
+async function handleCommand(env, interaction) {
+  switch (interaction.data.name) {
+    case 'register': return handleRegister(env, interaction);
+    case 'help': return handleHelp();
+    case 'vip': return handleVip(env, interaction);
+    case 'liste': return handleListe(env, interaction);
+    case 'debloquer': return handleDebloquer(env, interaction);
+    case 'retirer': return handleRetirer(env, interaction);
+    default: return reply('Commande inconnue.');
+  }
 }
 
 export default {
