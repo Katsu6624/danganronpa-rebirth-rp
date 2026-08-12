@@ -32,7 +32,7 @@ data/players.json     Qui possède quoi
 ```json
 {
   "name": "PseudoDuJoueur",
-  "discord": "",
+  "discordId": "",
   "owned": ["id-du-personnage-possede"],
   "locked": ["id-du-personnage-a-debloquer"]
 }
@@ -59,3 +59,10 @@ git push
 ```
 
 Le site se met à jour automatiquement sur GitHub Pages après le push (1-2 minutes).
+
+## Automatiser via Discord
+
+Un bot Discord (`bot/`) permet au staff d'attribuer/débloquer des personnages
+directement depuis Discord avec `/roster donner`, `/roster retirer`, etc. — il
+édite `data/players.json` et push automatiquement. Voir [bot/README.md](bot/README.md)
+pour la mise en place (nécessite des comptes Discord Developer et Cloudflare, gratuits).

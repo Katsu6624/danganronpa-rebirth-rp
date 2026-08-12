@@ -1,0 +1,12 @@
+name = "danganronpa-rebirth-rp-bot"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+GITHUB_OWNER = "Katsu6624"
+GITHUB_REPO = "danganronpa-rebirth-rp"
+GITHUB_BRANCH = "master"
+
+# Secrets (ne jamais mettre en clair ici) — à définir avec :
+#   wrangler secret put DISCORD_PUBLIC_KEY
+#   wrangler secret put GITHUB_TOKEN

@@ -1,7 +1,7 @@
 [
   {
     "name": "Katsu",
-    "discord": "",
+    "discordId": "",
     "owned": ["makoto-naegi", "chiaki-nanami"],
     "locked": ["kyoko-kirigiri", "nagito-komaeda"]
   }
