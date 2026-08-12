@@ -64,6 +64,30 @@ const commands = [
       },
     ],
   },
+  {
+    name: 'vip',
+    description: 'Gérer le statut VIP (débloque tous les personnages tant qu\'il est actif)',
+    default_member_permissions: MANAGE_GUILD,
+    dm_permission: false,
+    options: [
+      {
+        type: 1,
+        name: 'donner',
+        description: 'Donner le rôle VIP et débloquer tous les personnages',
+        options: [
+          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+        ],
+      },
+      {
+        type: 1,
+        name: 'retirer',
+        description: 'Retirer le rôle VIP (les personnages attribués individuellement sont conservés)',
+        options: [
+          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+        ],
+      },
+    ],
+  },
 ];
 
 const endpoint = guildId

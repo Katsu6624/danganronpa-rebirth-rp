@@ -57,6 +57,27 @@ function findPlayer(players, discordId) {
   return players.find((p) => p.discordId === discordId);
 }
 
+async function discordRequest(env, path, options = {}) {
+  const res = await fetch(`https://discord.com/api/v10${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+  if (!res.ok && res.status !== 204) {
+    const text = await res.text();
+    throw new Error(`Discord API ${res.status}: ${text}`);
+  }
+}
+
+async function setVipRole(env, userId, add) {
+  if (!env.DISCORD_GUILD_ID || !env.DISCORD_VIP_ROLE_ID) return;
+  const path = `/guilds/${env.DISCORD_GUILD_ID}/members/${userId}/roles/${env.DISCORD_VIP_ROLE_ID}`;
+  await discordRequest(env, path, { method: add ? 'PUT' : 'DELETE' });
+}
+
 function reply(content, ephemeral = true) {
   return new Response(
     JSON.stringify({
@@ -122,8 +143,54 @@ function handleHelp() {
     '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
     '`/roster donner <joueur> <personnage>` : attribuer un personnage à un joueur.',
     '`/roster retirer <joueur> <personnage>` : retirer un personnage à un joueur.',
+    '`/vip donner <joueur>` : donne le rôle VIP et débloque tous les personnages.',
+    '`/vip retirer <joueur>` : retire le rôle VIP et reverrouille les personnages débloqués grâce au VIP (les attributions individuelles sont conservées).',
   ];
   return reply(lines.join('\n'));
+}
+
+async function handleVip(env, interaction) {
+  const sub = interaction.data.options?.[0];
+  const targetId = sub?.options?.find((o) => o.name === 'joueur')?.value;
+  const targetUser = interaction.data.resolved.users[targetId];
+
+  const [{ data: players, sha }, characters] = await Promise.all([getPlayers(env), getCharacters(env)]);
+  const allIds = characters.map((c) => c.id);
+  const freeIds = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
+
+  let player = findPlayer(players, targetUser.id);
+  if (!player) {
+    player = { name: targetUser.username, discordId: targetUser.id, owned: [], locked: [] };
+    players.push(player);
+  }
+  player.name = targetUser.username;
+  player.owned = player.owned || [];
+  player.locked = player.locked || [];
+
+  if (sub.name === 'donner') {
+    const newlyGranted = allIds.filter((id) => !player.owned.includes(id));
+    player.owned = allIds.slice();
+    player.locked = [];
+    player.vip = true;
+    player.vipGrantedIds = newlyGranted;
+    await writeJsonFile(env, 'data/players.json', players, sha, `VIP accordé à ${targetUser.username}`);
+    await setVipRole(env, targetUser.id, true);
+    return reply(`✅ ${targetUser.username} est maintenant VIP : tous les personnages sont débloqués.`);
+  }
+
+  if (sub.name === 'retirer') {
+    const grantedByVip = new Set(player.vipGrantedIds || []);
+    player.owned = player.owned.filter((id) => !grantedByVip.has(id));
+    const stillMissing = allIds.filter((id) => !player.owned.includes(id) && !freeIds.includes(id));
+    player.locked = [...new Set([...(player.locked || []), ...stillMissing])];
+    player.vip = false;
+    player.vipGrantedIds = [];
+    await writeJsonFile(env, 'data/players.json', players, sha, `VIP retiré à ${targetUser.username}`);
+    await setVipRole(env, targetUser.id, false);
+    return reply(`✅ Le VIP de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`);
+  }
+
+  return reply('Sous-commande VIP inconnue.');
 }
 
 async function handleCommand(env, interaction) {
@@ -133,6 +200,10 @@ async function handleCommand(env, interaction) {
 
   if (interaction.data.name === 'help') {
     return handleHelp();
+  }
+
+  if (interaction.data.name === 'vip') {
+    return handleVip(env, interaction);
   }
 
   const { subcommand, opts } = getOptions(interaction);
@@ -168,6 +239,7 @@ async function handleCommand(env, interaction) {
   if (subcommand === 'donner') {
     if (!player.owned.includes(charId)) player.owned.push(charId);
     player.locked = player.locked.filter((id) => id !== charId);
+    if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => id !== charId);
     await writeJsonFile(env, 'data/players.json', players, sha, `Attribution de ${character.name} à ${targetUser.username}`);
     return reply(`✅ ${character.name} attribué à ${targetUser.username}.`);
   }

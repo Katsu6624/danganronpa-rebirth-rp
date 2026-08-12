@@ -6,7 +6,10 @@ compatibility_date = "2024-11-01"
 GITHUB_OWNER = "Katsu6624"
 GITHUB_REPO = "danganronpa-rebirth-rp"
 GITHUB_BRANCH = "master"
+DISCORD_GUILD_ID = "1178733678080294963"
+DISCORD_VIP_ROLE_ID = "REMPLACE_PAR_L_ID_DU_ROLE"
 
-# Secrets (ne jamais mettre en clair ici) — à définir avec :
+# Secrets (ne jamais mettre en clair ici) : à définir avec :
 #   wrangler secret put DISCORD_PUBLIC_KEY
 #   wrangler secret put GITHUB_TOKEN
+#   wrangler secret put DISCORD_BOT_TOKEN

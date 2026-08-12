@@ -12,6 +12,9 @@ directement sur GitHub, ce qui republie le site automatiquement.
 - `/roster donner joueur:@X personnage:<nom>` : attribue un personnage à un joueur
 - `/roster retirer joueur:@X personnage:<nom>` : retire un personnage
 - `/roster liste joueur:@X` : affiche le roster d'un joueur
+- `/vip donner joueur:@X` : donne le rôle Discord VIP et débloque tous les personnages
+- `/vip retirer joueur:@X` : retire le rôle et reverrouille les personnages débloqués par le VIP
+  (les personnages attribués individuellement via `/roster donner` restent acquis, même après)
 
 Par défaut, seuls les membres avec la permission Discord **"Gérer le serveur"**
 peuvent utiliser `/roster` (modifiable dans Discord : Paramètres du serveur →
@@ -29,6 +32,16 @@ Intégrations → Danganronpa Rebirth RP Bot).
 3. Onglet **General Information** → copie l'**Application ID** et la **Public Key**.
 4. Onglet **OAuth2 → URL Generator** : coche `bot` et `applications.commands`,
    permission `Send Messages`. Ouvre l'URL générée pour inviter le bot sur ton serveur.
+
+### 1bis. Pour la commande /vip (optionnel)
+Le bot doit pouvoir gérer le rôle VIP lui-même :
+1. Dans **Paramètres du serveur → Rôles**, place le rôle du bot **au-dessus** du rôle VIP
+   dans la liste (Discord interdit à un bot de gérer un rôle placé au-dessus du sien).
+2. Coche la permission **Gérer les rôles** pour le bot (Paramètres du serveur → Intégrations
+   → Danganronpa Rebirth RP Bot, ou en réinvitant le bot avec cette permission cochée dans
+   l'URL Generator).
+3. Récupère l'**ID du rôle VIP** (mode développeur activé → clic droit sur le rôle → Copier l'ID)
+   et renseigne-le dans `bot/wrangler.toml`, champ `DISCORD_VIP_ROLE_ID`.
 
 ### 2. Créer un token GitHub (accès en écriture au repo)
 1. https://github.com/settings/tokens?type=beta → **Generate new token** (fine-grained).
@@ -51,9 +64,11 @@ Ensuite, définis les secrets (ils te seront demandés en saisie masquée, jamai
 ```bash
 npx wrangler secret put DISCORD_PUBLIC_KEY
 npx wrangler secret put GITHUB_TOKEN
+npx wrangler secret put DISCORD_BOT_TOKEN
 ```
 
-Colle la Public Key Discord et le token GitHub quand demandé.
+Colle la Public Key Discord, le token GitHub, puis le **Bot Token** Discord (étape 1, nécessaire
+pour que le bot puisse attribuer/retirer le rôle VIP).
 
 Déploie :
 
