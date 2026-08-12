@@ -258,6 +258,27 @@ a {
   margin: 0.2rem 0;
 }
 
+.card-icon {
+  display: block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.05em;
+  color: var(--red);
+  margin-bottom: 0.6rem;
+}
+
+.card-link {
+  display: inline-block;
+  margin-top: 0.8rem;
+  color: var(--red);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.card-link:hover {
+  color: var(--text);
+}
+
 /* Character cards */
 .char-card {
   display: flex;
