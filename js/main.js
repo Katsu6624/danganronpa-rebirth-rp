@@ -8,41 +8,12 @@ async function loadData() {
   return { characters, players };
 }
 
-function buildOwnershipMaps(players) {
-  const ownersOf = {};
-  const lockedFor = {};
-  players.forEach(p => {
-    (p.owned || []).forEach(id => {
-      ownersOf[id] = ownersOf[id] || [];
-      ownersOf[id].push(p.name);
-    });
-    (p.locked || []).forEach(id => {
-      lockedFor[id] = lockedFor[id] || [];
-      lockedFor[id].push(p.name);
-    });
-  });
-  return { ownersOf, lockedFor };
-}
-
-function statusFor(charId, ownersOf) {
-  const owners = ownersOf[charId];
-  if (owners && owners.length) {
-    const label = owners.length === 1
-      ? `Débloqué par ${owners[0]}`
-      : `Débloqué par ${owners.length} joueurs`;
-    return { label, cls: 'owned' };
-  }
-  return { label: 'Encore débloqué par personne', cls: 'available' };
-}
-
-function renderCharacters(characters, players) {
+function renderCharacters(characters) {
   const grid = document.getElementById('char-grid');
   if (!grid) return;
 
-  const { ownersOf } = buildOwnershipMaps(players);
   const search = document.getElementById('char-search');
   const factionFilter = document.getElementById('char-faction');
-  const statusFilter = document.getElementById('char-status');
 
   const factions = [...new Set(characters.map(c => c.faction))].sort();
   factions.forEach(f => {
@@ -55,14 +26,11 @@ function renderCharacters(characters, players) {
   function draw() {
     const q = (search.value || '').toLowerCase();
     const faction = factionFilter.value;
-    const status = statusFilter.value;
 
     const filtered = characters.filter(c => {
       const matchesQ = c.name.toLowerCase().includes(q) || (c.ultimate || '').toLowerCase().includes(q);
       const matchesFaction = !faction || c.faction === faction;
-      const isOwned = !!(ownersOf[c.id] && ownersOf[c.id].length);
-      const matchesStatus = !status || (status === 'owned' ? isOwned : !isOwned);
-      return matchesQ && matchesFaction && matchesStatus;
+      return matchesQ && matchesFaction;
     });
 
     grid.innerHTML = '';
@@ -72,7 +40,6 @@ function renderCharacters(characters, players) {
     }
 
     filtered.forEach(c => {
-      const st = statusFor(c.id, ownersOf);
       const card = document.createElement('div');
       card.className = 'card char-card';
       const portraitStyle = c.image ? ` style="background-image:url('${c.image}')"` : '';
@@ -82,13 +49,12 @@ function renderCharacters(characters, players) {
         <span class="faction">${c.faction}${c.paid ? ' · payant' : ''}</span>
         <h3>${c.name}</h3>
         <p class="ultimate">${c.ultimate}</p>
-        <div class="status-line ${st.cls}"><span class="dot"></span>${st.label}</div>
       `;
       grid.appendChild(card);
     });
   }
 
-  [search, factionFilter, statusFilter].forEach(el => el.addEventListener('input', draw));
+  [search, factionFilter].forEach(el => el.addEventListener('input', draw));
   draw();
 }
 
@@ -183,6 +149,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!grid && !playersList) return;
 
   const { characters, players } = await loadData();
-  renderCharacters(characters, players);
+  renderCharacters(characters);
   renderPlayers(characters, players);
 });
