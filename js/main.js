@@ -72,7 +72,7 @@ function renderCharacters(characters, players) {
       const portraitText = c.image ? '' : 'Portrait';
       card.innerHTML = `
         <div class="media-slot char-portrait"${portraitStyle}>${portraitText}</div>
-        <span class="faction">${c.faction}</span>
+        <span class="faction">${c.faction}${c.paid ? ' · payant' : ''}</span>
         <h3>${c.name}</h3>
         <p class="ultimate">${c.ultimate}</p>
         <div class="status-line ${st.cls}"><span class="dot"></span>${st.label}</div>

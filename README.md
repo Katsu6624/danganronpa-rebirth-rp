@@ -21,14 +21,19 @@ data/players.json     Qui possède quoi
 Édite `data/characters.json` :
 
 ```json
-{ "id": "identifiant-unique", "name": "Nom affiché", "ultimate": "Ultime ...", "faction": "Classe 78" }
+{ "id": "identifiant-unique", "name": "Nom affiché", "ultimate": "Ultime ...", "faction": "Trigger Happy Havoc" }
 ```
 
-`id` doit être unique et sans espace (utilisé pour lier `players.json`).
+`id` doit être unique et sans espace (utilisé pour lier `players.json`). `faction` correspond
+au jeu/à la saison d'origine (ex: "Trigger Happy Havoc", "Goodbye Despair", "Killing Harmony",
+"Re:Birth" pour les personnages originaux du serveur).
 
 Champ optionnel `image` : chemin ou URL vers un portrait du personnage
 (ex: `"image": "assets/characters/makoto-naegi.jpg"`). Sans ce champ, la carte
 affiche juste un emplacement vide avec le mot "Portrait".
+
+Champ optionnel `paid` (`true`/`false`) : marque un personnage comme payant
+(débloqué contre monocoins). Affiche "· payant" à côté de la faction sur la fiche.
 
 ### Attribuer / débloquer un personnage à un joueur
 Édite `data/players.json` :
