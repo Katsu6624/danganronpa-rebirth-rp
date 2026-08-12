@@ -26,6 +26,10 @@ data/players.json     Qui possède quoi
 
 `id` doit être unique et sans espace (utilisé pour lier `players.json`).
 
+Champ optionnel `image` : chemin ou URL vers un portrait du personnage
+(ex: `"image": "assets/characters/makoto-naegi.jpg"`). Sans ce champ, la carte
+affiche juste un emplacement vide avec le mot "Portrait".
+
 ### Attribuer / débloquer un personnage à un joueur
 Édite `data/players.json` :
 
@@ -44,9 +48,18 @@ data/players.json     Qui possède quoi
 Un personnage ne devrait apparaître dans `owned` que pour **un seul joueur**.
 
 ### Liens à personnaliser
-Dans `index.html`, remplace :
-- `https://discord.gg/VOTRE_INVITE` par ton lien Discord.
-- `VOTRE.IP.SERVEUR:PORT` par l'IP/port de connexion du serveur GMod.
+Dans `index.html`, remplace `VOTRE.IP.SERVEUR:PORT` par l'IP/port de connexion du serveur GMod
+(bouton "Copier l'IP du serveur").
+
+### Ajouter des images (recommandé)
+Le site est volontairement construit sans dégradés ni décorations CSS. Les vraies images
+(bannière du serveur, portraits de personnages) sont ce qui donnera au site une identité propre.
+
+1. Crée un dossier `assets/` (ex: `assets/banner.jpg`, `assets/characters/makoto-naegi.jpg`).
+2. **Bannière d'accueil** : dans `index.html`, sur la ligne `<div class="media-slot hero-media">`,
+   ajoute `style="background-image:url('assets/banner.jpg')"` et vide le texte à l'intérieur.
+3. **Portraits de personnages** : ajoute le champ `image` dans `data/characters.json` (voir ci-dessus),
+   le portrait s'affiche automatiquement sur la page Personnages.
 
 ## Publier les changements
 
@@ -63,6 +76,6 @@ Le site se met à jour automatiquement sur GitHub Pages après le push (1-2 minu
 ## Automatiser via Discord
 
 Un bot Discord (`bot/`) permet au staff d'attribuer/débloquer des personnages
-directement depuis Discord avec `/roster donner`, `/roster retirer`, etc. — il
+directement depuis Discord avec `/roster donner`, `/roster retirer`, etc. Il
 édite `data/players.json` et push automatiquement. Voir [bot/README.md](bot/README.md)
 pour la mise en place (nécessite des comptes Discord Developer et Cloudflare, gratuits).

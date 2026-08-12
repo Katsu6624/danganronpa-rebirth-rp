@@ -68,11 +68,14 @@ function renderCharacters(characters, players) {
       const st = statusFor(c.id, ownerOf);
       const card = document.createElement('div');
       card.className = 'card char-card';
+      const portraitStyle = c.image ? ` style="background-image:url('${c.image}')"` : '';
+      const portraitText = c.image ? '' : 'Portrait';
       card.innerHTML = `
+        <div class="media-slot char-portrait"${portraitStyle}>${portraitText}</div>
         <span class="faction">${c.faction}</span>
         <h3>${c.name}</h3>
         <p class="ultimate">${c.ultimate}</p>
-        <span class="status-badge ${st.cls}">${st.label}</span>
+        <div class="status-line ${st.cls}"><span class="dot"></span>${st.label}</div>
       `;
       grid.appendChild(card);
     });
