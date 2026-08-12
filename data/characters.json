@@ -3,151 +3,176 @@
     "id": "makoto-naegi",
     "name": "Makoto Naegi",
     "ultimate": "Ultime Chanceux",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/makoto-naegi.png"
   },
   {
     "id": "aoi-asahina",
     "name": "Aoi Asahina",
     "ultimate": "Ultime Nageuse Pro",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/aoi-asahina.png"
   },
   {
     "id": "byakuya-togami",
     "name": "Byakuya Togami",
     "ultimate": "Ultime Héritier de l'Empire Togami",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/byakuya-togami.png"
   },
   {
     "id": "celestia-ludenberg",
     "name": "Célestia Ludenberg",
     "ultimate": "Ultime Gambleuse",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/celestia-ludenberg.png"
   },
   {
     "id": "chihiro-fujisaki",
     "name": "Chihiro Fujisaki",
     "ultimate": "Ultime Programmeuse",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/chihiro-fujisaki.png"
   },
   {
     "id": "hifumi-yamada",
     "name": "Hifumi Yamada",
     "ultimate": "Ultime Dôjinshika",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/hifumi-yamada.png"
   },
   {
     "id": "junko-enoshima",
     "name": "Junko Enoshima",
     "ultimate": "Ultime Gyaru",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/junko-enoshima.png"
   },
   {
     "id": "kiyotaka-ishimaru",
     "name": "Kiyotaka Ishimaru",
     "ultimate": "Ultime Membre du Conseil de la Vie Lycéenne",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/kiyotaka-ishimaru.png"
   },
   {
     "id": "kyoko-kirigiri",
     "name": "Kyoko Kirigiri",
     "ultimate": "Ultime Détective ou Ultime ???",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/kyoko-kirigiri.png"
   },
   {
     "id": "leon-kuwata",
     "name": "Leon Kuwata",
     "ultimate": "Ultime Joueur de Baseball",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/leon-kuwata.png"
   },
   {
     "id": "mondo-owada",
     "name": "Mondo Owada",
     "ultimate": "Ultime Chef de Gang de Motards",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/mondo-owada.png"
   },
   {
     "id": "mukuro-ikusaba",
     "name": "Mukuro Ikusaba",
     "ultimate": "Ultime Soldate",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/mukuro-ikusaba.png"
   },
   {
     "id": "sakura-ogami",
     "name": "Sakura Ôgami",
     "ultimate": "Ultime Combattante d'Arts Martiaux",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/sakura-ogami.png"
   },
   {
     "id": "sayaka-maizono",
     "name": "Sayaka Maizono",
     "ultimate": "Ultime Idol",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/sayaka-maizono.png"
   },
   {
     "id": "toko-fukawa",
     "name": "Toko Fukawa",
     "ultimate": "Ultime Écrivaine",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/toko-fukawa.png"
   },
   {
     "id": "yasuhiro-hagakure",
     "name": "Yasuhiro Hagakure",
     "ultimate": "Ultime Voyant",
-    "faction": "Trigger Happy Havoc"
+    "faction": "Trigger Happy Havoc",
+    "image": "assets/characters/yasuhiro-hagakure.png"
   },
   {
     "id": "hajime-hinata",
     "name": "Hajime Hinata",
     "ultimate": "Ultime ???",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/hajime-hinata.png"
   },
   {
     "id": "akane-owari",
     "name": "Akane Owari",
     "ultimate": "Ultime Membre du Club de Gymnastique",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/akane-owari.png"
   },
   {
     "id": "impostor-goodbye-despair",
     "name": "??? (Ultime Imposteur)",
     "ultimate": "Ultime Imposteur",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/impostor-goodbye-despair.png"
   },
   {
     "id": "chiaki-nanami",
     "name": "Chiaki Nanami",
     "ultimate": "Ultime Gameuse",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/chiaki-nanami.png"
   },
   {
     "id": "fuyuhiko-kuzuryu",
     "name": "Fuyuhiko Kuzuryu",
     "ultimate": "Ultime Yakuza",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/fuyuhiko-kuzuryu.png"
   },
   {
     "id": "gundham-tanaka",
     "name": "Gundham Tanaka",
     "ultimate": "Ultime Membre du Club d'Animaux",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/gundham-tanaka.png"
   },
   {
     "id": "hiyoko-saionji",
     "name": "Hiyoko Saionji",
     "ultimate": "Ultime Danseuse Traditionnelle Japonaise",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/hiyoko-saionji.png"
   },
   {
     "id": "ibuki-mioda",
     "name": "Ibuki Mioda",
     "ultimate": "Ultime Membre du Club de Musique Populaire",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/ibuki-mioda.png"
   },
   {
     "id": "kazuichi-soda",
     "name": "Kazuichi Sôda",
     "ultimate": "Ultime Mécanicien",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/kazuichi-soda.png"
   },
   {
     "id": "mahiru-koizumi",
@@ -160,133 +185,155 @@
     "id": "mikan-tsumiki",
     "name": "Mikan Tsumiki",
     "ultimate": "Ultime Membre du Club de Santé",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/mikan-tsumiki.png"
   },
   {
     "id": "nagito-komaeda",
     "name": "Nagito Komaeda",
     "ultimate": "Ultime Chanceux",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/nagito-komaeda.png"
   },
   {
     "id": "nekomaru-nidai",
     "name": "Nekomaru Nidai",
     "ultimate": "Ultime Manager d'Équipe",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/nekomaru-nidai.png"
   },
   {
     "id": "peko-pekoyama",
     "name": "Peko Pekoyama",
     "ultimate": "Ultime Kendoka",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/peko-pekoyama.png"
   },
   {
     "id": "sonia-nevermind",
     "name": "Sonia Nevermind",
     "ultimate": "Ultime Princesse",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/sonia-nevermind.png"
   },
   {
     "id": "teruteru-hanamura",
     "name": "Teruteru Hanamura",
     "ultimate": "Ultime Chef Cuisinier",
-    "faction": "Goodbye Despair"
+    "faction": "Goodbye Despair",
+    "image": "assets/characters/teruteru-hanamura.png"
   },
   {
     "id": "kaede-akamatsu",
     "name": "Kaede Akamatsu",
     "ultimate": "Ultime Pianiste",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/kaede-akamatsu.png"
   },
   {
     "id": "angie-yonaga",
     "name": "Angie Yonaga",
     "ultimate": "Ultime Membre du Club d'Arts",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/angie-yonaga.png"
   },
   {
     "id": "gonta-gokuhara",
     "name": "Gonta Gokuhara",
     "ultimate": "Ultime Entomologiste",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/gonta-gokuhara.png"
   },
   {
     "id": "himiko-yumeno",
     "name": "Himiko Yumeno",
     "ultimate": "Ultime Magicienne",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/himiko-yumeno.png"
   },
   {
     "id": "k1-b0",
     "name": "K1-B0",
     "ultimate": "Ultime Robot",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/k1-b0.png"
   },
   {
     "id": "kaito-momota",
     "name": "Kaito Momota",
     "ultimate": "Ultime Astronaute",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/kaito-momota.png"
   },
   {
     "id": "kirumi-tojo",
     "name": "Kirumi Tôjo",
     "ultimate": "Ultime Maid",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/kirumi-tojo.png"
   },
   {
     "id": "kokichi-oma",
     "name": "Kokichi Ôma",
     "ultimate": "Ultime Chef Suprême",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/kokichi-oma.png"
   },
   {
     "id": "korekiyo-shinguji",
     "name": "Korekiyo Shingûji",
     "ultimate": "Ultime Ethnologue",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/korekiyo-shinguji.png"
   },
   {
     "id": "maki-harukawa",
     "name": "Maki Harukawa",
     "ultimate": "Ultime Éducatrice Petite Enfance",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/maki-harukawa.png"
   },
   {
     "id": "miu-iruma",
     "name": "Miu Iruma",
     "ultimate": "Ultime Inventrice",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/miu-iruma.png"
   },
   {
     "id": "rantaro-amami",
     "name": "Rantaro Amami",
     "ultimate": "Ultime Aventurier ou Ultime ???",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/rantaro-amami.png"
   },
   {
     "id": "ryoma-hoshi",
     "name": "Ryoma Hoshi",
     "ultimate": "Ultime Joueur de Tennis",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/ryoma-hoshi.png"
   },
   {
     "id": "shuichi-saihara",
     "name": "Shuichi Saihara",
     "ultimate": "Ultime Détective",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/shuichi-saihara.png"
   },
   {
     "id": "tenko-chabashira",
     "name": "Tenko Chabashira",
     "ultimate": "Ultime Aikidoka",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/tenko-chabashira.png"
   },
   {
     "id": "tsumugi-shirogane",
     "name": "Tsumugi Shirogane",
     "ultimate": "Ultime Cosplayeuse",
-    "faction": "Killing Harmony"
+    "faction": "Killing Harmony",
+    "image": "assets/characters/tsumugi-shirogane.png"
   },
   {
     "id": "komaru-naegi",
@@ -363,84 +410,96 @@
     "name": "Chisa Yukisome",
     "ultimate": "Ancienne Ultime Domestique",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/chisa-yukisome.png"
   },
   {
     "id": "daisaku-bandai",
     "name": "Daisaku Bandai",
     "ultimate": "Ancien Ultime Fermier",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/daisaku-bandai.png"
   },
   {
     "id": "great-gozu",
     "name": "Great Gozu",
     "ultimate": "Ancien Ultime Catcheur",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/great-gozu.png"
   },
   {
     "id": "juzo-sakakura",
     "name": "Juzo Sakakura",
     "ultimate": "Ancien Ultime Boxeur",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/juzo-sakakura.png"
   },
   {
     "id": "kazuo-tengan",
     "name": "Kazuo Tengan",
     "ultimate": "Ultime Conseiller",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/kazuo-tengan.png"
   },
   {
     "id": "koichi-kizakura",
     "name": "Koichi Kizakura",
     "ultimate": "Ultime Rechercheur d'Ultimes",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/koichi-kizakura.png"
   },
   {
     "id": "kyosuke-munakata",
     "name": "Kyosuke Munakata",
     "ultimate": "Ultime Président du Conseil",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/kyosuke-munakata.png"
   },
   {
     "id": "miaya-gekkogahara",
     "name": "Miaya Gekkogahara",
     "ultimate": "Ultime Thérapeute",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/miaya-gekkogahara.png"
   },
   {
     "id": "ruruka-ando",
     "name": "Ruruka Ando",
     "ultimate": "Ultime Confiseuse",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/ruruka-ando.png"
   },
   {
     "id": "ryota-mitarai",
     "name": "Ryota Mitarai",
     "ultimate": "Ultime Animateur",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/ryota-mitarai.png"
   },
   {
     "id": "seiko-kimura",
     "name": "Seiko Kimura",
     "ultimate": "Ultime Pharmacienne",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/seiko-kimura.png"
   },
   {
     "id": "sonosuke-izayoi",
     "name": "Sonosuke Izayoi",
     "ultimate": "Ultime Forgeron",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "image": "assets/characters/sonosuke-izayoi.png"
   },
   {
     "id": "monaka-towa-adolescente",
