@@ -94,7 +94,23 @@ function getOptions(interaction) {
   return { subcommand: sub?.name, opts };
 }
 
+async function handleRegister(env, interaction) {
+  const user = interaction.member.user;
+  const { data: players, sha } = await getPlayers(env);
+  const existing = findPlayer(players, user.id);
+  if (existing) {
+    return reply(`Tu es déjà enregistré en tant que ${existing.name}. Retrouve-toi sur la page Joueurs du site.`);
+  }
+  players.push({ name: user.username, discordId: user.id, owned: [], locked: [] });
+  await writeJsonFile(env, 'data/players.json', players, sha, `Inscription de ${user.username} via /register`);
+  return reply(`✅ Tu es enregistré, ${user.username} ! Retrouve-toi sur la page Joueurs du site.`);
+}
+
 async function handleCommand(env, interaction) {
+  if (interaction.data.name === 'register') {
+    return handleRegister(env, interaction);
+  }
+
   const { subcommand, opts } = getOptions(interaction);
   const characters = await getCharacters(env);
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
