@@ -47,10 +47,14 @@ Champ optionnel `paid` (`true`/`false`) : marque un personnage comme payant
 }
 ```
 
-- `owned` : personnages déjà incarnés par ce joueur (apparaît "Possédé par X" sur la page Personnages).
-- `locked` : personnages que ce joueur pourra débloquer plus tard (juste indicatif sur sa fiche).
+- `owned` : personnages débloqués et jouables par ce joueur. Un même personnage peut être débloqué
+  par plusieurs joueurs en même temps (ce n'est pas une exclusivité) : la page Personnages affiche
+  "Débloqué par X" ou "Débloqué par N joueurs".
+- `locked` : personnages que ce joueur n'a pas encore débloqués (juste indicatif sur sa fiche).
 
-Un personnage ne devrait apparaître dans `owned` que pour **un seul joueur**.
+À l'inscription (commande Discord `/register`), tous les personnages de Trigger Happy Havoc,
+Goodbye Despair et Killing Harmony sont automatiquement ajoutés à `owned` ; le reste du roster
+(collections payantes) est ajouté à `locked`.
 
 ### Liens à personnaliser
 Dans `index.html`, remplace `VOTRE.IP.SERVEUR:PORT` par l'IP/port de connexion du serveur GMod

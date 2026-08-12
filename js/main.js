@@ -9,30 +9,37 @@ async function loadData() {
 }
 
 function buildOwnershipMaps(players) {
-  const ownerOf = {};
+  const ownersOf = {};
   const lockedFor = {};
   players.forEach(p => {
-    (p.owned || []).forEach(id => { ownerOf[id] = p.name; });
+    (p.owned || []).forEach(id => {
+      ownersOf[id] = ownersOf[id] || [];
+      ownersOf[id].push(p.name);
+    });
     (p.locked || []).forEach(id => {
       lockedFor[id] = lockedFor[id] || [];
       lockedFor[id].push(p.name);
     });
   });
-  return { ownerOf, lockedFor };
+  return { ownersOf, lockedFor };
 }
 
-function statusFor(charId, ownerOf) {
-  if (ownerOf[charId]) {
-    return { label: `Possédé par ${ownerOf[charId]}`, cls: 'owned' };
+function statusFor(charId, ownersOf) {
+  const owners = ownersOf[charId];
+  if (owners && owners.length) {
+    const label = owners.length === 1
+      ? `Débloqué par ${owners[0]}`
+      : `Débloqué par ${owners.length} joueurs`;
+    return { label, cls: 'owned' };
   }
-  return { label: 'Disponible', cls: 'available' };
+  return { label: 'Encore débloqué par personne', cls: 'available' };
 }
 
 function renderCharacters(characters, players) {
   const grid = document.getElementById('char-grid');
   if (!grid) return;
 
-  const { ownerOf } = buildOwnershipMaps(players);
+  const { ownersOf } = buildOwnershipMaps(players);
   const search = document.getElementById('char-search');
   const factionFilter = document.getElementById('char-faction');
   const statusFilter = document.getElementById('char-status');
@@ -53,7 +60,7 @@ function renderCharacters(characters, players) {
     const filtered = characters.filter(c => {
       const matchesQ = c.name.toLowerCase().includes(q) || (c.ultimate || '').toLowerCase().includes(q);
       const matchesFaction = !faction || c.faction === faction;
-      const isOwned = !!ownerOf[c.id];
+      const isOwned = !!(ownersOf[c.id] && ownersOf[c.id].length);
       const matchesStatus = !status || (status === 'owned' ? isOwned : !isOwned);
       return matchesQ && matchesFaction && matchesStatus;
     });
@@ -65,7 +72,7 @@ function renderCharacters(characters, players) {
     }
 
     filtered.forEach(c => {
-      const st = statusFor(c.id, ownerOf);
+      const st = statusFor(c.id, ownersOf);
       const card = document.createElement('div');
       card.className = 'card char-card';
       const portraitStyle = c.image ? ` style="background-image:url('${c.image}')"` : '';

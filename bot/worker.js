@@ -94,16 +94,22 @@ function getOptions(interaction) {
   return { subcommand: sub?.name, opts };
 }
 
+const FREE_FACTIONS = ['Trigger Happy Havoc', 'Goodbye Despair', 'Killing Harmony'];
+
 async function handleRegister(env, interaction) {
   const user = interaction.member.user;
-  const { data: players, sha } = await getPlayers(env);
+  const [{ data: players, sha }, characters] = await Promise.all([getPlayers(env), getCharacters(env)]);
   const existing = findPlayer(players, user.id);
   if (existing) {
     return reply(`Tu es déjà enregistré en tant que ${existing.name}. Retrouve-toi sur la page Joueurs du site.`);
   }
-  players.push({ name: user.username, discordId: user.id, owned: [], locked: [] });
+
+  const owned = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
+  const locked = characters.filter((c) => !FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
+
+  players.push({ name: user.username, discordId: user.id, owned, locked });
   await writeJsonFile(env, 'data/players.json', players, sha, `Inscription de ${user.username} via /register`);
-  return reply(`✅ Tu es enregistré, ${user.username} ! Retrouve-toi sur la page Joueurs du site.`);
+  return reply(`✅ Tu es enregistré, ${user.username} ! Tous les personnages de Trigger Happy Havoc, Goodbye Despair et Killing Harmony sont débloqués pour toi. Le reste est à débloquer. Retrouve-toi sur la page Joueurs du site.`);
 }
 
 function handleHelp() {
@@ -141,7 +147,7 @@ async function handleCommand(env, interaction) {
     if (!player) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
     const owned = (player.owned || []).map((id) => charById[id]?.name || id).join(', ') || 'aucun';
     const locked = (player.locked || []).map((id) => charById[id]?.name || id).join(', ') || 'aucun';
-    return reply(`**${targetUser.username}**\nPossédés : ${owned}\nÀ débloquer : ${locked}`);
+    return reply(`**${targetUser.username}**\nDébloqués : ${owned}\nÀ débloquer : ${locked}`);
   }
 
   const charId = opts.personnage;
@@ -161,10 +167,6 @@ async function handleCommand(env, interaction) {
   }
 
   if (subcommand === 'donner') {
-    const owner = players.find((p) => (p.owned || []).includes(charId));
-    if (owner && owner.discordId !== targetUser.id) {
-      return reply(`${character.name} est déjà possédé par ${owner.name}.`);
-    }
     if (!player.owned.includes(charId)) player.owned.push(charId);
     player.locked = player.locked.filter((id) => id !== charId);
     await writeJsonFile(env, 'data/players.json', players, sha, `Attribution de ${character.name} à ${targetUser.username}`);
