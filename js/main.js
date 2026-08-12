@@ -8,12 +8,14 @@ async function loadData() {
   return { characters, players };
 }
 
-function renderCharacters(characters) {
+function renderCharacters(characters, players) {
   const grid = document.getElementById('char-grid');
   if (!grid) return;
 
   const search = document.getElementById('char-search');
   const factionFilter = document.getElementById('char-faction');
+  const playerInput = document.getElementById('char-player');
+  const statusFilter = document.getElementById('char-status');
 
   const factions = [...new Set(characters.map(c => c.faction))].sort();
   factions.forEach(f => {
@@ -23,17 +25,35 @@ function renderCharacters(characters) {
     factionFilter.appendChild(opt);
   });
 
+  function findPlayerByName(name) {
+    const q = name.trim().toLowerCase();
+    if (!q) return null;
+    return players.find(p => p.name.toLowerCase() === q) || null;
+  }
+
   function draw() {
     const q = (search.value || '').toLowerCase();
     const faction = factionFilter.value;
+    const status = statusFilter.value;
+    const player = playerInput ? findPlayerByName(playerInput.value || '') : null;
+    const ownedSet = new Set(player?.owned || []);
+    const lockedSet = new Set(player?.locked || []);
 
     const filtered = characters.filter(c => {
       const matchesQ = c.name.toLowerCase().includes(q) || (c.ultimate || '').toLowerCase().includes(q);
       const matchesFaction = !faction || c.faction === faction;
-      return matchesQ && matchesFaction;
+      let matchesStatus = true;
+      if (status && player) {
+        matchesStatus = status === 'owned' ? ownedSet.has(c.id) : lockedSet.has(c.id);
+      }
+      return matchesQ && matchesFaction && matchesStatus;
     });
 
     grid.innerHTML = '';
+    if (playerInput && playerInput.value.trim() && !player) {
+      grid.innerHTML = '<div class="empty-state">Aucun joueur enregistré avec ce pseudo. Utilise /register sur Discord.</div>';
+      return;
+    }
     if (filtered.length === 0) {
       grid.innerHTML = '<div class="empty-state">Aucun personnage ne correspond à ta recherche.</div>';
       return;
@@ -44,17 +64,23 @@ function renderCharacters(characters) {
       card.className = 'card char-card';
       const portraitStyle = c.image ? ` style="background-image:url('${c.image}')"` : '';
       const portraitText = c.image ? '' : 'Portrait';
+      let statusLine = '';
+      if (player) {
+        if (ownedSet.has(c.id)) statusLine = '<div class="status-line owned"><span class="dot"></span>Débloqué</div>';
+        else if (lockedSet.has(c.id)) statusLine = '<div class="status-line available"><span class="dot"></span>À débloquer</div>';
+      }
       card.innerHTML = `
         <div class="media-slot char-portrait"${portraitStyle}>${portraitText}</div>
         <span class="faction">${c.faction}${c.paid ? ' · payant' : ''}</span>
         <h3>${c.name}</h3>
         <p class="ultimate">${c.ultimate}</p>
+        ${statusLine}
       `;
       grid.appendChild(card);
     });
   }
 
-  [search, factionFilter].forEach(el => el.addEventListener('input', draw));
+  [search, factionFilter, playerInput, statusFilter].filter(Boolean).forEach(el => el.addEventListener('input', draw));
   draw();
 }
 
@@ -149,6 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!grid && !playersList) return;
 
   const { characters, players } = await loadData();
-  renderCharacters(characters);
+  renderCharacters(characters, players);
   renderPlayers(characters, players);
 });
