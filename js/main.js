@@ -203,8 +203,33 @@ function setupIpCopy() {
   });
 }
 
+function setupScrollReveal() {
+  if (!('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.card, .rule-item, .player-block').forEach(el => {
+    if (el.dataset.revealBound) return;
+    el.dataset.revealBound = '1';
+    observer.observe(el);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setupIpCopy();
+  setupScrollReveal();
+
+  const container = document.getElementById('char-grid') || document.getElementById('players-list');
+  if (container) {
+    new MutationObserver(() => setupScrollReveal()).observe(container, { childList: true });
+  }
+
   const grid = document.getElementById('char-grid');
   const playersList = document.getElementById('players-list');
   if (!grid && !playersList) return;

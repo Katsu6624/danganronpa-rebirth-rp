@@ -95,6 +95,28 @@ a {
 .hero-inner {
   flex: 1 1 480px;
   max-width: 640px;
+  animation: fade-up 0.7s ease both;
+}
+
+.hero-video {
+  animation: fade-up 0.7s ease 0.15s both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-inner, .hero-video {
+    animation: none;
+  }
 }
 
 .hero-logo {
@@ -186,7 +208,16 @@ a {
   font-size: 0.9rem;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+  transition-duration: 0.05s;
 }
 
 .btn-primary {
@@ -196,6 +227,7 @@ a {
 
 .btn-primary:hover {
   background: var(--red-dark);
+  box-shadow: 0 6px 18px -6px rgba(222, 6, 104, 0.55);
 }
 
 .btn-outline {
@@ -241,6 +273,19 @@ a {
 .card {
   background: var(--card);
   padding: 1.4rem;
+  transition: background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+}
+
+.card:hover {
+  background: var(--bg-alt);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+.card-visual:hover {
+  transform: translateY(-4px) scale(1.01);
 }
 
 .card-visual {
@@ -413,6 +458,15 @@ a {
   border-style: dashed;
 }
 
+.tag-list .pill {
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.tag-list .pill:hover {
+  border-color: var(--red);
+  transform: translateY(-1px);
+}
+
 /* Rules page */
 .rule-item {
   background: var(--card);
@@ -420,6 +474,12 @@ a {
   border-left: 3px solid var(--red);
   padding: 1rem 1.2rem;
   margin-bottom: 0.7rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.rule-item:hover {
+  background: var(--bg-alt);
+  transform: translateX(3px);
 }
 
 .rule-item.espoir { border-left-color: var(--gold); }
@@ -475,5 +535,31 @@ footer a {
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
+  }
+}
+
+/* Scroll-reveal (progressive enhancement, only active once JS has run) */
+html.js .card,
+html.js .rule-item,
+html.js .player-block {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+html.js .card.in-view,
+html.js .rule-item.in-view,
+html.js .player-block.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .card,
+  html.js .rule-item,
+  html.js .player-block {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
