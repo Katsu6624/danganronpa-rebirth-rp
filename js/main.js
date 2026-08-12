@@ -114,17 +114,12 @@ function renderPlayers(characters, players) {
   const container = document.getElementById('players-list');
   if (!container) return;
 
+  const search = document.getElementById('player-search');
   const charById = {};
   characters.forEach(c => { charById[c.id] = c; });
   const factionOrder = [...new Set(characters.map(c => c.faction))];
 
-  if (players.length === 0) {
-    container.innerHTML = '<div class="empty-state">Aucun joueur enregistré pour le moment.</div>';
-    return;
-  }
-
-  container.innerHTML = '';
-  players.forEach(p => {
+  function renderPlayerBlock(p) {
     const owned = (p.owned || []).map(id => charById[id]).filter(Boolean);
     const locked = (p.locked || []).map(id => charById[id]).filter(Boolean);
     const ownedGroups = groupByFaction(owned, factionOrder);
@@ -140,8 +135,29 @@ function renderPlayers(characters, players) {
         ${renderCharGroups(lockedGroups, 'locked')}
       ` : ''}
     `;
-    container.appendChild(block);
-  });
+    return block;
+  }
+
+  function draw() {
+    const q = (search.value || '').trim().toLowerCase();
+    container.innerHTML = '';
+
+    if (!q) {
+      container.innerHTML = '<div class="empty-state">Tape un pseudo Discord ci-dessus pour voir sa fiche.</div>';
+      return;
+    }
+
+    const matches = players.filter(p => p.name.toLowerCase().includes(q));
+    if (matches.length === 0) {
+      container.innerHTML = '<div class="empty-state">Aucun joueur ne correspond à cette recherche.</div>';
+      return;
+    }
+
+    matches.forEach(p => container.appendChild(renderPlayerBlock(p)));
+  }
+
+  search.addEventListener('input', draw);
+  draw();
 }
 
 function setupIpCopy() {
