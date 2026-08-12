@@ -25,7 +25,7 @@
   { "id": "hiyoko-saionji", "name": "Hiyoko Saionji", "ultimate": "Ultime Danseuse Traditionnelle Japonaise", "faction": "Goodbye Despair" },
   { "id": "ibuki-mioda", "name": "Ibuki Mioda", "ultimate": "Ultime Membre du Club de Musique Populaire", "faction": "Goodbye Despair" },
   { "id": "kazuichi-soda", "name": "Kazuichi Sôda", "ultimate": "Ultime Mécanicien", "faction": "Goodbye Despair" },
-  { "id": "mahiru-koizumi", "name": "Mahiru Koizumi", "ultimate": "Ultime Photographe", "faction": "Goodbye Despair" },
+  { "id": "mahiru-koizumi", "name": "Mahiru Koizumi", "ultimate": "Ultime Photographe", "faction": "Goodbye Despair", "image": "assets/characters/mahiru-koizumi.png" },
   { "id": "mikan-tsumiki", "name": "Mikan Tsumiki", "ultimate": "Ultime Membre du Club de Santé", "faction": "Goodbye Despair" },
   { "id": "nagito-komaeda", "name": "Nagito Komaeda", "ultimate": "Ultime Chanceux", "faction": "Goodbye Despair" },
   { "id": "nekomaru-nidai", "name": "Nekomaru Nidai", "ultimate": "Ultime Manager d'Équipe", "faction": "Goodbye Despair" },
