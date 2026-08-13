@@ -341,7 +341,6 @@ function isGoogleFormUrl(url) {
 
 async function handleInscription(env, interaction) {
   const sub = interaction.data.options?.[0];
-  const channelId = env.DISCORD_CHANNEL_INSCRIPTION;
 
   if (sub?.name === 'ouvrir') {
     const lien = sub.options?.find((o) => o.name === 'lien')?.value || '';
@@ -349,62 +348,28 @@ async function handleInscription(env, interaction) {
       return reply('Le lien doit être une URL Google Forms valide (https://docs.google.com/forms/...).');
     }
 
-    const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
+    await updateJsonFile(env, 'data/inscription.json', (data) => {
       data.open = true;
       data.formUrl = lien;
       data.updatedAt = new Date().toISOString();
-      return { message: 'Ouverture des inscriptions', messageId: data.messageId };
+      return { message: 'Ouverture des inscriptions' };
     });
 
-    if (channelId) {
-      const content = `📝 **Les inscriptions sont ouvertes !**\n${lien}`;
-      await upsertInscriptionMessage(env, channelId, content, ctx.messageId);
-    }
-
-    return reply('✅ Inscriptions ouvertes. Le lien est en ligne sur la page Inscription du site et dans le salon dédié.', false);
+    return reply('✅ Inscriptions ouvertes. Le lien est en ligne sur la page Inscription du site.', false);
   }
 
   if (sub?.name === 'fermer') {
-    const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
+    await updateJsonFile(env, 'data/inscription.json', (data) => {
       data.open = false;
       data.formUrl = '';
       data.updatedAt = new Date().toISOString();
-      return { message: 'Fermeture des inscriptions', messageId: data.messageId };
+      return { message: 'Fermeture des inscriptions' };
     });
-
-    if (channelId) {
-      const content = `🔒 **Les inscriptions sont fermées.** Aucune saison n'est ouverte aux inscriptions pour le moment.`;
-      await upsertInscriptionMessage(env, channelId, content, ctx.messageId);
-    }
 
     return reply('✅ Inscriptions fermées.', false);
   }
 
   return reply('Sous-commande inconnue.');
-}
-
-async function upsertInscriptionMessage(env, channelId, content, existingMessageId) {
-  if (existingMessageId) {
-    try {
-      await discordRequest(env, `/channels/${channelId}/messages/${existingMessageId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ content }),
-      });
-      return;
-    } catch (err) {
-      // Le message a peut-être été supprimé manuellement : on en renvoie un nouveau.
-    }
-  }
-  const message = await discordRequest(env, `/channels/${channelId}/messages`, {
-    method: 'POST',
-    body: JSON.stringify({ content }),
-  });
-  if (message?.id) {
-    await updateJsonFile(env, 'data/inscription.json', (data) => {
-      data.messageId = message.id;
-      return { message: 'Mémorisation du message d\'inscription' };
-    });
-  }
 }
 
 async function handleCommand(env, interaction) {

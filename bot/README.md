@@ -17,15 +17,11 @@ GitHub, ce qui republie le site automatiquement.
 - `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages ⚠️ staff
 - `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
 - `/inscription ouvrir lien:<url Google Form>` : ouvre les inscriptions, met à jour la page
-  Inscription du site et poste (ou modifie) un message dans le salon dédié ⚠️ staff
+  Inscription du site ⚠️ staff
 - `/inscription fermer` : ferme les inscriptions, remet la page Inscription en état "fermé" ⚠️ staff
 
 Pour les deux paliers `/vip`, les personnages attribués individuellement via `/debloquer`
 restent acquis même après le retrait du rôle.
-
-Pour `/inscription`, renseigne l'ID du salon Discord dans `bot/wrangler.toml`
-(`DISCORD_CHANNEL_INSCRIPTION`, mode développeur activé → clic droit sur le salon → Copier l'ID).
-Sans cet ID, la commande met quand même à jour la page du site mais ne poste rien sur Discord.
 
 Les commandes marquées ⚠️ staff nécessitent la permission Discord **"Gérer le serveur"**
 (modifiable dans Discord : Paramètres du serveur → Intégrations → Danganronpa Rebirth RP Bot).
