@@ -592,8 +592,8 @@ footer {
 
 .season-loop-gif {
   display: block;
-  max-width: 260px;
-  width: 100%;
+  max-width: 700px;
+  width: 90%;
   height: auto;
   margin: 0 auto 1.4rem;
   border: 1px solid var(--border);
