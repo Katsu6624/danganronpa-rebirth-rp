@@ -535,7 +535,12 @@
     "name": "Monaka Towa (Jeune)",
     "ultimate": "Ultime Délégué",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader",
+      "Troublemaker",
+      "Analyste"
+    ]
   },
   {
     "id": "nagisa-shingetsu",
@@ -549,7 +554,11 @@
     "name": "Le Serviteur",
     "ultimate": "Ultime ??? ou Ultime Désespoir ou Ultime Chanceux",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker",
+      "Analyste"
+    ]
   },
   {
     "id": "haiji-towa",
@@ -570,7 +579,10 @@
     "name": "Taichi Fujisaki",
     "ultimate": "Ancien Ultime Programmeur ou Ultime ???",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "chisa-yukisome",
@@ -578,7 +590,11 @@
     "ultimate": "Ancienne Ultime Domestique",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/chisa-yukisome.png"
+    "image": "assets/characters/chisa-yukisome.png",
+    "roles": [
+      "Support",
+      "Fighter"
+    ]
   },
   {
     "id": "daisaku-bandai",
@@ -610,7 +626,12 @@
     "ultimate": "Ultime Conseiller",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/kazuo-tengan.png"
+    "image": "assets/characters/kazuo-tengan.png",
+    "roles": [
+      "Leader",
+      "Fighter",
+      "Analyste"
+    ]
   },
   {
     "id": "koichi-kizakura",
@@ -626,7 +647,11 @@
     "ultimate": "Ultime Président du Conseil",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/kyosuke-munakata.png"
+    "image": "assets/characters/kyosuke-munakata.png",
+    "roles": [
+      "Leader",
+      "Analyste"
+    ]
   },
   {
     "id": "miaya-gekkogahara",
@@ -642,7 +667,11 @@
     "ultimate": "Ultime Confiseuse",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/ruruka-ando.png"
+    "image": "assets/characters/ruruka-ando.png",
+    "roles": [
+      "Troublemaker",
+      "Support"
+    ]
   },
   {
     "id": "ryota-mitarai",
@@ -650,7 +679,11 @@
     "ultimate": "Ultime Animateur",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/ryota-mitarai.png"
+    "image": "assets/characters/ryota-mitarai.png",
+    "roles": [
+      "Support",
+      "Troublemaker"
+    ]
   },
   {
     "id": "seiko-kimura",
@@ -658,7 +691,11 @@
     "ultimate": "Ultime Pharmacienne",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/seiko-kimura.png"
+    "image": "assets/characters/seiko-kimura.png",
+    "roles": [
+      "Support",
+      "Fighter"
+    ]
   },
   {
     "id": "sonosuke-izayoi",
@@ -673,21 +710,34 @@
     "name": "Monaka Towa (Adolescente)",
     "ultimate": "Ultime Experte Robotique",
     "faction": "The End of Hope's Peak High School",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader",
+      "Troublemaker",
+      "Analyste"
+    ]
   },
   {
     "id": "kyoko-kirigiri-jeune",
     "name": "Kyoko Kirigiri (Jeune)",
     "ultimate": "Ultime Détective ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "yui-samidare",
     "name": "Yui Samidare",
     "ultimate": "Ultime Membre du Club de Détective",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader",
+      "Support",
+      "Analyste"
+    ]
   },
   {
     "id": "suisei-nanamura",
@@ -722,21 +772,33 @@
     "name": "Yasuke Matsuda",
     "ultimate": "Ultime Neurologue ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker",
+      "Analyste"
+    ]
   },
   {
     "id": "takumi-hijirihara",
     "name": "Takumi Hijirihara",
     "ultimate": "Ultime Criminologue ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Fighter",
+      "Analyste",
+      "Troublemaker"
+    ]
   },
   {
     "id": "yuto-kamishiro",
     "name": "Yuto Kamishiro",
     "ultimate": "Ultime Espion",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "shuji-fujigawa",
@@ -757,7 +819,11 @@
     "name": "Misaki Asano",
     "ultimate": "Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support",
+      "Analyste"
+    ]
   },
   {
     "id": "licorne",
@@ -771,7 +837,11 @@
     "name": "Natsumi Kuzuryu",
     "ultimate": "Ultime Petite Soeur ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker",
+      "Fighter"
+    ]
   },
   {
     "id": "kinji-uehara",
