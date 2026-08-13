@@ -9,6 +9,13 @@
   "tone": "",
   "planning": "",
   "openedBy": null,
-  "draft": null,
+  "draft": {
+    "titre": "Saison 69",
+    "type_saison": "Classique",
+    "places": "16",
+    "max_chapitres": "5",
+    "min_perso": "3",
+    "openedBy": "388041172574011404"
+  },
   "updatedAt": null
 }
