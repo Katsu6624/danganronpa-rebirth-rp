@@ -640,6 +640,10 @@ html.js .player-block.in-view {
   }
 }
 
+.season-gallery .card-visual {
+  min-height: 220px;
+}
+
 /* Back to top */
 .back-to-top {
   position: fixed;
