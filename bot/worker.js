@@ -57,6 +57,30 @@ function findPlayer(players, discordId) {
   return players.find((p) => p.discordId === discordId);
 }
 
+function isConflictError(err) {
+  return /GitHub API 409/.test(err.message);
+}
+
+// Réessaie en cas de 409 (deux joueurs qui écrivent players.json en même temps) :
+// relit le fichier, ré-applique la mutation, puis retente l'écriture.
+async function updatePlayersFile(env, updater, maxAttempts = 3) {
+  let lastErr;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { data: players, sha } = await getPlayers(env);
+    const ctx = await updater(players);
+    if (ctx.skipWrite) return ctx;
+    try {
+      await writeJsonFile(env, 'data/players.json', players, sha, ctx.message);
+      return ctx;
+    } catch (err) {
+      lastErr = err;
+      if (!isConflictError(err) || attempt === maxAttempts - 1) throw err;
+      await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+    }
+  }
+  throw lastErr;
+}
+
 async function discordRequest(env, path, options = {}) {
   const res = await fetch(`https://discord.com/api/v10${path}`, {
     ...options,
@@ -118,25 +142,28 @@ const FREE_FACTIONS = ['Trigger Happy Havoc', 'Goodbye Despair', 'Killing Harmon
 
 async function handleRegister(env, interaction) {
   const user = interaction.member.user;
-  const [{ data: players, sha }, characters] = await Promise.all([getPlayers(env), getCharacters(env)]);
-  const existing = findPlayer(players, user.id);
-  if (existing) {
-    return reply(`Tu es déjà enregistré en tant que ${existing.name}. Retrouve-toi sur la page Joueurs du site.`);
-  }
-
+  const characters = await getCharacters(env);
   const owned = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
   const locked = characters.filter((c) => !FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
 
-  players.push({ name: user.username, discordId: user.id, owned, locked });
-  await writeJsonFile(env, 'data/players.json', players, sha, `Inscription de ${user.username} via /register`);
-  return reply(`✅ Tu es enregistré, ${user.username} ! Tous les personnages de Trigger Happy Havoc, Goodbye Despair et Killing Harmony sont débloqués pour toi. Le reste est à débloquer. Retrouve-toi sur la page Joueurs du site.`);
+  const ctx = await updatePlayersFile(env, (players) => {
+    const existing = findPlayer(players, user.id);
+    if (existing) return { skipWrite: true, existingName: existing.name };
+    players.push({ name: user.username, discordId: user.id, owned, locked });
+    return { message: `Inscription de ${user.username} via /register` };
+  });
+
+  if (ctx.existingName) {
+    return reply(`Tu es déjà enregistré en tant que ${ctx.existingName}. Retrouve-toi sur la page Personnages du site (recherche ton pseudo).`);
+  }
+  return reply(`✅ Tu es enregistré, ${user.username} ! Tous les personnages de Trigger Happy Havoc, Goodbye Despair et Killing Harmony sont débloqués pour toi. Le reste est à débloquer. Retrouve-toi sur la page Personnages du site.`);
 }
 
 function handleHelp() {
   const lines = [
     '**Commandes disponibles**',
     '',
-    '`/register` : t\'inscrire sur la page Joueurs du site. Accessible à tout le monde.',
+    '`/register` : t\'inscrire sur la page Personnages du site (recherche ton pseudo). Accessible à tout le monde.',
     '`/liste [joueur]` : voir les personnages d\'un joueur (toi par défaut). Accessible à tout le monde.',
     '',
     '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
@@ -165,53 +192,61 @@ async function handleVip(env, interaction) {
   const targetUser = interaction.data.resolved.users[targetId];
   const roleId = env[tier.roleEnvVar];
 
-  const [{ data: players, sha }, characters] = await Promise.all([getPlayers(env), getCharacters(env)]);
+  const characters = await getCharacters(env);
   const allIds = characters.map((c) => c.id);
   const freeIds = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
 
-  let player = findPlayer(players, targetUser.id);
-  if (!player) {
-    player = { name: targetUser.username, discordId: targetUser.id, owned: [], locked: [] };
-    players.push(player);
-  }
-  player.name = targetUser.username;
-  player.owned = player.owned || [];
-  player.locked = player.locked || [];
-
-  if (sub.name === 'donner') {
-    const previousTier = player.vipTier;
-    if (!player.vip) {
-      // Ne recalcule "ce qui vient du VIP" que lors du premier octroi : réexécuter /vip donner
-      // sur un joueur déjà VIP ne doit pas effacer ce qu'on sait devoir reverrouiller plus tard.
-      player.vipGrantedIds = allIds.filter((id) => !player.owned.includes(id));
+  const ctx = await updatePlayersFile(env, (players) => {
+    let player = findPlayer(players, targetUser.id);
+    if (!player) {
+      player = { name: targetUser.username, discordId: targetUser.id, owned: [], locked: [] };
+      players.push(player);
     }
-    player.owned = allIds.slice();
-    player.locked = [];
-    player.vip = true;
-    player.vipTier = group.name;
-    await writeJsonFile(env, 'data/players.json', players, sha, `VIP (${tier.label}) accordé à ${targetUser.username}`);
-    if (previousTier && previousTier !== group.name) {
-      const previousRoleId = env[VIP_TIERS[previousTier].roleEnvVar];
+    player.name = targetUser.username;
+    player.owned = player.owned || [];
+    player.locked = player.locked || [];
+
+    if (sub.name === 'donner') {
+      const previousTier = player.vipTier;
+      if (!player.vip) {
+        // Ne recalcule "ce qui vient du VIP" que lors du premier octroi : réexécuter /vip donner
+        // sur un joueur déjà VIP ne doit pas effacer ce qu'on sait devoir reverrouiller plus tard.
+        player.vipGrantedIds = allIds.filter((id) => !player.owned.includes(id));
+      }
+      player.owned = allIds.slice();
+      player.locked = [];
+      player.vip = true;
+      player.vipTier = group.name;
+      return { message: `VIP (${tier.label}) accordé à ${targetUser.username}`, action: 'donner', previousTier };
+    }
+
+    if (sub.name === 'retirer') {
+      const grantedByVip = new Set(player.vipGrantedIds || []);
+      player.owned = player.owned.filter((id) => !grantedByVip.has(id));
+      const stillMissing = allIds.filter((id) => !player.owned.includes(id) && !freeIds.includes(id));
+      player.locked = [...new Set([...(player.locked || []), ...stillMissing])];
+      player.vip = false;
+      player.vipTier = null;
+      player.vipGrantedIds = [];
+      return { message: `VIP (${tier.label}) retiré à ${targetUser.username}`, action: 'retirer' };
+    }
+
+    return { skipWrite: true, unknownSub: true };
+  });
+
+  if (ctx.unknownSub) return reply('Sous-commande VIP inconnue.');
+
+  if (ctx.action === 'donner') {
+    if (ctx.previousTier && ctx.previousTier !== group.name) {
+      const previousRoleId = env[VIP_TIERS[ctx.previousTier].roleEnvVar];
       await setDiscordRole(env, targetUser.id, previousRoleId, false);
     }
     await setDiscordRole(env, targetUser.id, roleId, true);
     return reply(`✅ ${targetUser.username} a maintenant le rôle ${tier.label} : tous les personnages sont débloqués.`);
   }
 
-  if (sub.name === 'retirer') {
-    const grantedByVip = new Set(player.vipGrantedIds || []);
-    player.owned = player.owned.filter((id) => !grantedByVip.has(id));
-    const stillMissing = allIds.filter((id) => !player.owned.includes(id) && !freeIds.includes(id));
-    player.locked = [...new Set([...(player.locked || []), ...stillMissing])];
-    player.vip = false;
-    player.vipTier = null;
-    player.vipGrantedIds = [];
-    await writeJsonFile(env, 'data/players.json', players, sha, `VIP (${tier.label}) retiré à ${targetUser.username}`);
-    await setDiscordRole(env, targetUser.id, roleId, false);
-    return reply(`✅ Le rôle ${tier.label} de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`);
-  }
-
-  return reply('Sous-commande VIP inconnue.');
+  await setDiscordRole(env, targetUser.id, roleId, false);
+  return reply(`✅ Le rôle ${tier.label} de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`);
 }
 
 async function handleListe(env, interaction) {
@@ -236,21 +271,24 @@ async function handleDebloquer(env, interaction) {
   if (!character) return reply(`Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`);
 
   const targetUser = interaction.data.resolved.users[opts.joueur];
-  const { data: players, sha } = await getPlayers(env);
-  let player = findPlayer(players, targetUser.id);
-  if (!player) {
-    player = { name: targetUser.username, discordId: targetUser.id, owned: [], locked: [] };
-    players.push(player);
-  } else {
-    player.name = targetUser.username;
-    player.owned = player.owned || [];
-    player.locked = player.locked || [];
-  }
 
-  if (!player.owned.includes(charId)) player.owned.push(charId);
-  player.locked = player.locked.filter((id) => id !== charId);
-  if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => id !== charId);
-  await writeJsonFile(env, 'data/players.json', players, sha, `Attribution de ${character.name} à ${targetUser.username}`);
+  await updatePlayersFile(env, (players) => {
+    let player = findPlayer(players, targetUser.id);
+    if (!player) {
+      player = { name: targetUser.username, discordId: targetUser.id, owned: [], locked: [] };
+      players.push(player);
+    } else {
+      player.name = targetUser.username;
+      player.owned = player.owned || [];
+      player.locked = player.locked || [];
+    }
+
+    if (!player.owned.includes(charId)) player.owned.push(charId);
+    player.locked = player.locked.filter((id) => id !== charId);
+    if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => id !== charId);
+    return { message: `Attribution de ${character.name} à ${targetUser.username}` };
+  });
+
   return reply(`✅ ${character.name} attribué à ${targetUser.username}.`);
 }
 
@@ -263,12 +301,15 @@ async function handleRetirer(env, interaction) {
   if (!character) return reply(`Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`);
 
   const targetUser = interaction.data.resolved.users[opts.joueur];
-  const { data: players, sha } = await getPlayers(env);
-  const player = findPlayer(players, targetUser.id);
-  if (!player) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
 
-  player.owned = (player.owned || []).filter((id) => id !== charId);
-  await writeJsonFile(env, 'data/players.json', players, sha, `Retrait de ${character.name} à ${targetUser.username}`);
+  const ctx = await updatePlayersFile(env, (players) => {
+    const player = findPlayer(players, targetUser.id);
+    if (!player) return { skipWrite: true, notFound: true };
+    player.owned = (player.owned || []).filter((id) => id !== charId);
+    return { message: `Retrait de ${character.name} à ${targetUser.username}` };
+  });
+
+  if (ctx.notFound) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
   return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
 }
 
