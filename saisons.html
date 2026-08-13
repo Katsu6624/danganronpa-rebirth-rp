@@ -80,38 +80,14 @@
   <section class="section" style="padding-top:0;">
     <h2>Souvenirs de saisons</h2>
     <p class="subtitle">Quelques instantanés capturés en jeu par les joueurs pendant nos saisons passées.</p>
-    <div class="grid season-gallery">
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-1.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-2.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-3.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-4.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-4-paranoia.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-5.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-5-v2.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-6.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-7.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-8.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-9.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-11.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-13-v1.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-13-v2.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-13-v3.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-16.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-16-dormeurs.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-17.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-17-v2.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-27.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-30.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-35.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-36.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-39.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-46.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-47.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-47-v2.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-49.jpg');"></div>
-      <div class="card card-visual" style="background-image:url('assets/seasons/saison-49-v2.jpg');"></div>
-    </div>
+    <div class="grid season-gallery" id="season-gallery"></div>
   </section>
+
+  <dialog id="season-lightbox" class="modal lightbox-modal">
+    <button type="button" class="modal-close" id="season-lightbox-close" aria-label="Fermer">✕</button>
+    <img id="season-lightbox-img" src="" alt="Capture de saison">
+    <a id="season-lightbox-download" class="btn btn-primary" href="" download style="margin-top:1rem;">Télécharger l'image</a>
+  </dialog>
 
   <footer>
     Danganronpa Rebirth RP. Site communautaire non affilié à Spike Chunsoft.

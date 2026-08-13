@@ -244,6 +244,52 @@ function setupScrollReveal() {
   });
 }
 
+const SEASON_IMAGES = [
+  'saison-1', 'saison-2', 'saison-3', 'saison-4', 'saison-4-paranoia',
+  'saison-5', 'saison-5-v2', 'saison-6', 'saison-7', 'saison-8', 'saison-9',
+  'saison-11', 'saison-13-v1', 'saison-13-v2', 'saison-13-v3',
+  'saison-16', 'saison-16-dormeurs', 'saison-17', 'saison-17-v2',
+  'saison-27', 'saison-30', 'saison-35', 'saison-36', 'saison-39', 'saison-46',
+  'saison-47', 'saison-47-v2', 'saison-49', 'saison-49-v2',
+];
+
+function setupSeasonGallery() {
+  const gallery = document.getElementById('season-gallery');
+  if (!gallery) return;
+
+  gallery.innerHTML = SEASON_IMAGES.map(slug => `
+    <div class="card card-visual" style="background-image:url('assets/seasons/${slug}.jpg');" data-src="assets/seasons/${slug}.jpg" data-name="${slug}.jpg" role="button" tabindex="0" aria-label="Agrandir l'image ${slug}"></div>
+  `).join('');
+
+  const lightbox = document.getElementById('season-lightbox');
+  const lightboxImg = document.getElementById('season-lightbox-img');
+  const lightboxDownload = document.getElementById('season-lightbox-download');
+  const closeBtn = document.getElementById('season-lightbox-close');
+  if (!lightbox) return;
+
+  function openLightbox(el) {
+    lightboxImg.src = el.dataset.src;
+    lightboxDownload.href = el.dataset.src;
+    lightboxDownload.download = el.dataset.name;
+    lightbox.showModal();
+  }
+
+  gallery.querySelectorAll('.card-visual').forEach(el => {
+    el.addEventListener('click', () => openLightbox(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(el);
+      }
+    });
+  });
+
+  closeBtn.addEventListener('click', () => lightbox.close());
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) lightbox.close();
+  });
+}
+
 function setupBackToTop() {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -264,6 +310,7 @@ function setupBackToTop() {
 document.addEventListener('DOMContentLoaded', async () => {
   setupIpCopy();
   setupUnlockInfoModal();
+  setupSeasonGallery();
   setupScrollReveal();
   setupBackToTop();
 
