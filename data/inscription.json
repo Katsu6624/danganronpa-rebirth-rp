@@ -1,14 +1,14 @@
 {
-  "open": false,
-  "title": "",
-  "seasonType": "",
-  "slots": null,
-  "maxChapters": null,
-  "minCharacters": null,
-  "bannedCharacters": "",
-  "tone": "",
-  "planning": "",
-  "openedBy": null,
+  "open": true,
+  "title": "qkfjsdkjgf",
+  "seasonType": "Classique",
+  "slots": "5",
+  "maxChapters": "5",
+  "minCharacters": "5",
+  "bannedCharacters": "sqdfdsf",
+  "tone": "dqsfqsd",
+  "planning": "ffqdsfdqsfqdsf",
+  "openedBy": "388041172574011404",
   "imageUrl": "",
-  "updatedAt": "2026-08-13T18:21:25.551Z"
+  "updatedAt": "2026-08-13T20:49:02.891Z"
 }
