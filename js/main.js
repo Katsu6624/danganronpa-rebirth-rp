@@ -237,10 +237,28 @@ function setupScrollReveal() {
   });
 }
 
+function setupBackToTop() {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'back-to-top';
+  btn.setAttribute('aria-label', 'Revenir en haut de la page');
+  btn.textContent = '↑';
+  document.body.appendChild(btn);
+
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 500);
+  });
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setupIpCopy();
   setupUnlockInfoModal();
   setupScrollReveal();
+  setupBackToTop();
 
   const grid = document.getElementById('char-grid');
   if (grid) {
