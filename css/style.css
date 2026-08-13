@@ -361,6 +361,25 @@ a {
   font-size: 0.85rem;
 }
 
+.role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.role-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--bg-alt);
+  border: 1px solid var(--purple-dark);
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .status-line {
   display: flex;
   align-items: center;

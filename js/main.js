@@ -16,6 +16,7 @@ function renderCharacters(characters, players) {
   const factionFilter = document.getElementById('char-faction');
   const playerInput = document.getElementById('char-player');
   const statusFilter = document.getElementById('char-status');
+  const roleFilter = document.getElementById('char-role');
 
   const factions = [...new Set(characters.map(c => c.faction))].sort();
   factions.forEach(f => {
@@ -24,6 +25,16 @@ function renderCharacters(characters, players) {
     opt.textContent = f;
     factionFilter.appendChild(opt);
   });
+
+  if (roleFilter) {
+    const allRoles = [...new Set(characters.flatMap(c => c.roles || []))].sort();
+    allRoles.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r;
+      opt.textContent = r;
+      roleFilter.appendChild(opt);
+    });
+  }
 
   const playerNames = document.getElementById('player-names');
   if (playerNames) {
@@ -47,6 +58,7 @@ function renderCharacters(characters, players) {
     const q = (search.value || '').toLowerCase();
     const faction = factionFilter.value;
     const status = statusFilter.value;
+    const role = roleFilter ? roleFilter.value : '';
     const player = playerInput ? findPlayerByName(playerInput.value || '') : null;
     const ownedSet = new Set(player?.owned || []);
     const lockedSet = new Set(player?.locked || []);
@@ -54,11 +66,12 @@ function renderCharacters(characters, players) {
     const filtered = characters.filter(c => {
       const matchesQ = c.name.toLowerCase().includes(q) || (c.ultimate || '').toLowerCase().includes(q);
       const matchesFaction = !faction || c.faction === faction;
+      const matchesRole = !role || (c.roles || []).includes(role);
       let matchesStatus = true;
       if (status && player) {
         matchesStatus = status === 'owned' ? ownedSet.has(c.id) : lockedSet.has(c.id);
       }
-      return matchesQ && matchesFaction && matchesStatus;
+      return matchesQ && matchesFaction && matchesRole && matchesStatus;
     });
 
     grid.innerHTML = '';
@@ -81,18 +94,20 @@ function renderCharacters(characters, players) {
         if (ownedSet.has(c.id)) statusLine = '<div class="status-line owned"><span class="dot"></span>Débloqué</div>';
         else if (lockedSet.has(c.id)) statusLine = '<div class="status-line available"><span class="dot"></span>À débloquer</div>';
       }
+      const roleTags = (c.roles || []).map(r => `<span class="role-tag">${r}</span>`).join('');
       card.innerHTML = `
         <div class="media-slot char-portrait"${portraitStyle}>${portraitText}</div>
         <span class="faction">${c.faction}${c.paid ? ' · payant' : ''}</span>
         <h3>${c.name}</h3>
         <p class="ultimate">${c.ultimate}</p>
+        ${roleTags ? `<div class="role-tags">${roleTags}</div>` : ''}
         ${statusLine}
       `;
       grid.appendChild(card);
     });
   }
 
-  [search, factionFilter, playerInput, statusFilter].filter(Boolean).forEach(el => el.addEventListener('input', draw));
+  [search, factionFilter, playerInput, statusFilter, roleFilter].filter(Boolean).forEach(el => el.addEventListener('input', draw));
   draw();
 }
 
