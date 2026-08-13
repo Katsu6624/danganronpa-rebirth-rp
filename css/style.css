@@ -756,17 +756,26 @@ html.js .player-block.in-view {
 
 .history-images figure {
   margin: 0;
-  flex: 1 1 280px;
-  max-width: 360px;
+  flex: 1 1 360px;
+  max-width: 480px;
   background: var(--card);
   border: 1px solid var(--border);
+}
+
+.history-images figure:only-child {
+  flex: 1 1 100%;
+  max-width: 700px;
 }
 
 .history-images img {
   display: block;
   width: 100%;
-  height: 200px;
+  height: 320px;
   object-fit: cover;
+}
+
+.history-images figure:only-child img {
+  height: 420px;
 }
 
 .history-images figcaption {
