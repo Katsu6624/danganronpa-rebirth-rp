@@ -250,7 +250,7 @@ const SEASON_IMAGES = [
   'saison-11', 'saison-13-v1', 'saison-13-v2', 'saison-13-v3',
   'saison-16', 'saison-16-dormeurs', 'saison-17', 'saison-17-v2',
   'saison-27', 'saison-30', 'saison-35', 'saison-36', 'saison-39', 'saison-46',
-  'saison-47', 'saison-47-v2', 'saison-49', 'saison-49-v2',
+  'saison-47', 'saison-47-v2', 'saison-49-v2',
 ];
 
 function setupSeasonGallery() {
@@ -290,6 +290,17 @@ function setupSeasonGallery() {
   });
 }
 
+function setupSeasonLoopGif() {
+  const footer = document.querySelector('footer');
+  if (!footer) return;
+  const img = document.createElement('img');
+  img.src = 'assets/seasons/saison-49-loop.gif';
+  img.alt = 'Extrait animé d\'une saison Danganronpa Rebirth RP';
+  img.className = 'season-loop-gif';
+  img.loading = 'lazy';
+  footer.prepend(img);
+}
+
 function setupBackToTop() {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -311,6 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupIpCopy();
   setupUnlockInfoModal();
   setupSeasonGallery();
+  setupSeasonLoopGif();
   setupScrollReveal();
   setupBackToTop();
 

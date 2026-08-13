@@ -590,6 +590,15 @@ footer {
   margin-top: 2rem;
 }
 
+.season-loop-gif {
+  display: block;
+  max-width: 260px;
+  width: 100%;
+  height: auto;
+  margin: 0 auto 1.4rem;
+  border: 1px solid var(--border);
+}
+
 footer a {
   color: var(--text);
   border-bottom: 1px solid var(--border);
