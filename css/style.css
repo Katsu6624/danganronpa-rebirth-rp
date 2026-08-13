@@ -278,7 +278,7 @@ a {
 }
 
 .card:hover {
-  background: var(--bg-alt);
+  background-color: var(--bg-alt);
   transform: translateY(-4px);
   box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.6);
   z-index: 1;
