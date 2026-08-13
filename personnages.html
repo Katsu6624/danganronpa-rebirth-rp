@@ -28,6 +28,8 @@
     <h2>Personnages</h2>
     <p class="subtitle">Liste des personnages jouables du serveur.</p>
 
+    <button type="button" class="btn btn-outline" id="unlock-info-btn" style="margin-bottom:1.5rem;">Comment débloquer de nouveaux personnages ?</button>
+
     <div class="filters">
       <input type="text" id="char-search" placeholder="Rechercher un nom ou un talent...">
       <select id="char-faction">
@@ -42,6 +44,29 @@
 
     <div class="grid" id="char-grid"></div>
   </section>
+
+  <dialog id="unlock-info-modal" class="modal">
+    <button type="button" class="modal-close" id="unlock-info-close" aria-label="Fermer">✕</button>
+    <h2>Débloquer de nouveaux personnages</h2>
+    <div class="rules-list">
+      <div class="rule-item">
+        <h4>À l'inscription</h4>
+        <p>En utilisant <code>/register</code> sur Discord, tu débloques automatiquement tous les personnages de <strong>Trigger Happy Havoc</strong>, <strong>Goodbye Despair</strong> et <strong>Killing Harmony</strong>. Le reste est à débloquer.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Personnages payants (monocoins)</h4>
+        <p>Les personnages des autres collections (Another, Dôjinshika, Re:Birth...) se débloquent avec des monocoins, obtenus par don ou gratuitement en jeu. Détails et tarifs sur la page <a href="saisons.html" style="color:var(--red);">Saisons &amp; Monocoins</a>.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Rôles VIP</h4>
+        <p>Les rôles Discord <strong>Lycéen de l'Espoir</strong> et <strong>Lycéen en Cours Préparatoire</strong> débloquent automatiquement tous les personnages tant que le rôle est actif.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Attribution manuelle</h4>
+        <p>Le staff peut aussi t'attribuer un personnage individuellement via le bot Discord, selon ta progression RP ou une saison spécifique.</p>
+      </div>
+    </div>
+  </dialog>
 
   <footer>
     Danganronpa Rebirth RP. Site communautaire non affilié à Spike Chunsoft.

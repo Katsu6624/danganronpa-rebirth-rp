@@ -218,6 +218,18 @@ function setupIpCopy() {
   });
 }
 
+function setupUnlockInfoModal() {
+  const btn = document.getElementById('unlock-info-btn');
+  const modal = document.getElementById('unlock-info-modal');
+  const closeBtn = document.getElementById('unlock-info-close');
+  if (!btn || !modal) return;
+  btn.addEventListener('click', () => modal.showModal());
+  closeBtn.addEventListener('click', () => modal.close());
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.close();
+  });
+}
+
 function setupScrollReveal() {
   if (!('IntersectionObserver' in window)) return;
   const observer = new IntersectionObserver((entries) => {
@@ -238,6 +250,7 @@ function setupScrollReveal() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupIpCopy();
+  setupUnlockInfoModal();
   setupScrollReveal();
 
   const container = document.getElementById('char-grid') || document.getElementById('players-list');
