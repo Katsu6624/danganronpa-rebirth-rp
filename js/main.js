@@ -96,19 +96,21 @@ function renderCharacters(characters, players) {
     prepa: 'Lycéen en Cours Préparatoire',
   };
 
-  function renderPlayerView(player) {
+  function renderPlayerView(player, faction, role) {
     const charById = {};
     characters.forEach(c => { charById[c.id] = c; });
-    const owned = (player.owned || []).map(id => charById[id]).filter(Boolean);
-    const locked = (player.locked || []).map(id => charById[id]).filter(Boolean);
+    const matchesFilters = c => (!faction || c.faction === faction) && (!role || (c.roles || []).includes(role));
+    const owned = (player.owned || []).map(id => charById[id]).filter(Boolean).filter(matchesFilters);
+    const locked = (player.locked || []).map(id => charById[id]).filter(Boolean).filter(matchesFilters);
     const ownedGroups = groupByFaction(owned, factionOrder);
     const lockedGroups = groupByFaction(locked, factionOrder);
     const vipLabel = player.vip && VIP_LABELS[player.vipTier];
+    const filtersActive = faction || role;
 
     grid.classList.remove('grid');
     grid.innerHTML = `
       <div class="player-block">
-        <h3>${player.name} <span class="count">${owned.length} personnage${owned.length > 1 ? 's' : ''} débloqué${owned.length > 1 ? 's' : ''}</span></h3>
+        <h3>${player.name} <span class="count">${owned.length} personnage${owned.length > 1 ? 's' : ''} débloqué${owned.length > 1 ? 's' : ''}${filtersActive ? ' (filtré)' : ''}</span></h3>
         ${vipLabel ? `<p style="margin:0.2rem 0 1rem;color:var(--gold);font-size:0.82rem;display:flex;align-items:center;gap:0.4rem;"><img src="assets/vip-icon.webp" alt="" style="width:18px;height:18px;object-fit:contain;">Tout est débloqué grâce au rôle ${vipLabel}</p>` : ''}
         ${ownedGroups.length ? renderCharGroups(ownedGroups, '') : '<div class="tag-list"><span class="pill locked">Aucun personnage débloqué</span></div>'}
         ${lockedGroups.length ? `
@@ -131,7 +133,7 @@ function renderCharacters(characters, players) {
         grid.innerHTML = '<div class="empty-state">Aucun joueur enregistré avec ce pseudo. Utilise /register sur Discord.</div>';
         return;
       }
-      renderPlayerView(player);
+      renderPlayerView(player, faction, role);
       return;
     }
 
