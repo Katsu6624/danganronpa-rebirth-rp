@@ -54,31 +54,61 @@ function renderCharacters(characters, players) {
     return partial.length === 1 ? partial[0] : null;
   }
 
+  const factionOrder = [...new Set(characters.map(c => c.faction))];
+  const VIP_LABELS = {
+    espoir: "Lycéen de l'Espoir",
+    prepa: 'Lycéen en Cours Préparatoire',
+  };
+
+  function renderPlayerView(player) {
+    const charById = {};
+    characters.forEach(c => { charById[c.id] = c; });
+    const owned = (player.owned || []).map(id => charById[id]).filter(Boolean);
+    const locked = (player.locked || []).map(id => charById[id]).filter(Boolean);
+    const ownedGroups = groupByFaction(owned, factionOrder);
+    const lockedGroups = groupByFaction(locked, factionOrder);
+    const vipLabel = player.vip && VIP_LABELS[player.vipTier];
+
+    grid.classList.remove('grid');
+    grid.innerHTML = `
+      <div class="player-block">
+        <h3>${player.name} <span class="count">${owned.length} personnage${owned.length > 1 ? 's' : ''} débloqué${owned.length > 1 ? 's' : ''}</span></h3>
+        ${vipLabel ? `<p style="margin:0.2rem 0 1rem;color:var(--gold);font-size:0.82rem;display:flex;align-items:center;gap:0.4rem;"><img src="assets/vip-icon.webp" alt="" style="width:18px;height:18px;object-fit:contain;">Tout est débloqué grâce au rôle ${vipLabel}</p>` : ''}
+        ${ownedGroups.length ? renderCharGroups(ownedGroups, '') : '<div class="tag-list"><span class="pill locked">Aucun personnage débloqué</span></div>'}
+        ${lockedGroups.length ? `
+          <p style="margin-top:1.2rem;color:var(--text-dim);font-size:0.85rem;border-top:1px solid var(--border);padding-top:0.8rem;">À débloquer :</p>
+          ${renderCharGroups(lockedGroups, 'locked')}
+        ` : ''}
+      </div>
+    `;
+  }
+
   function draw() {
     const q = (search.value || '').toLowerCase();
     const faction = factionFilter.value;
-    const status = statusFilter ? statusFilter.value : '';
     const role = roleFilter ? roleFilter.value : '';
     const player = playerInput ? findPlayerByName(playerInput.value || '') : null;
-    const ownedSet = new Set(player?.owned || []);
-    const lockedSet = new Set(player?.locked || []);
+
+    if (playerInput && playerInput.value.trim()) {
+      if (!player) {
+        grid.classList.add('grid');
+        grid.innerHTML = '<div class="empty-state">Aucun joueur enregistré avec ce pseudo. Utilise /register sur Discord.</div>';
+        return;
+      }
+      renderPlayerView(player);
+      return;
+    }
+
+    grid.classList.add('grid');
 
     const filtered = characters.filter(c => {
       const matchesQ = c.name.toLowerCase().includes(q) || (c.ultimate || '').toLowerCase().includes(q);
       const matchesFaction = !faction || c.faction === faction;
       const matchesRole = !role || (c.roles || []).includes(role);
-      let matchesStatus = true;
-      if (status && player) {
-        matchesStatus = status === 'owned' ? ownedSet.has(c.id) : lockedSet.has(c.id);
-      }
-      return matchesQ && matchesFaction && matchesRole && matchesStatus;
+      return matchesQ && matchesFaction && matchesRole;
     });
 
     grid.innerHTML = '';
-    if (playerInput && playerInput.value.trim() && !player) {
-      grid.innerHTML = '<div class="empty-state">Aucun joueur enregistré avec ce pseudo. Utilise /register sur Discord.</div>';
-      return;
-    }
     if (filtered.length === 0) {
       grid.innerHTML = '<div class="empty-state">Aucun personnage ne correspond à ta recherche.</div>';
       return;
@@ -127,79 +157,6 @@ function renderCharGroups(groups, pillClass) {
       ${g.chars.map(c => `<span class="pill ${pillClass}">${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}</span>`).join('')}
     </div>
   `).join('');
-}
-
-function renderPlayers(characters, players) {
-  const container = document.getElementById('players-list');
-  if (!container) return;
-
-  const search = document.getElementById('player-search');
-  const charById = {};
-  characters.forEach(c => { charById[c.id] = c; });
-  const factionOrder = [...new Set(characters.map(c => c.faction))];
-
-  const playerNames = document.getElementById('player-names');
-  if (playerNames) {
-    players.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.name;
-      playerNames.appendChild(opt);
-    });
-  }
-
-  const VIP_LABELS = {
-    espoir: "Lycéen de l'Espoir",
-    prepa: 'Lycéen en Cours Préparatoire',
-  };
-
-  function renderPlayerBlock(p) {
-    const owned = (p.owned || []).map(id => charById[id]).filter(Boolean);
-    const locked = (p.locked || []).map(id => charById[id]).filter(Boolean);
-    const ownedGroups = groupByFaction(owned, factionOrder);
-    const lockedGroups = groupByFaction(locked, factionOrder);
-    const vipLabel = p.vip && VIP_LABELS[p.vipTier];
-
-    const block = document.createElement('div');
-    block.className = 'player-block';
-    block.innerHTML = `
-      <h3>${p.name} <span class="count">${owned.length} personnage${owned.length > 1 ? 's' : ''} débloqué${owned.length > 1 ? 's' : ''}</span></h3>
-      ${vipLabel ? `<p style="margin:0.2rem 0 1rem;color:var(--gold);font-size:0.82rem;display:flex;align-items:center;gap:0.4rem;"><img src="assets/vip-icon.webp" alt="" style="width:18px;height:18px;object-fit:contain;">Tout est débloqué grâce au rôle ${vipLabel}</p>` : ''}
-      ${ownedGroups.length ? renderCharGroups(ownedGroups, '') : '<div class="tag-list"><span class="pill locked">Aucun personnage débloqué</span></div>'}
-      ${lockedGroups.length ? `
-        <p style="margin-top:1.2rem;color:var(--text-dim);font-size:0.85rem;border-top:1px solid var(--border);padding-top:0.8rem;">À débloquer :</p>
-        ${renderCharGroups(lockedGroups, 'locked')}
-      ` : ''}
-    `;
-    return block;
-  }
-
-  function draw() {
-    const q = (search.value || '').trim().toLowerCase();
-    container.innerHTML = '';
-
-    if (!q) {
-      container.innerHTML = '<div class="empty-state">Tape un pseudo Discord ci-dessus pour voir sa fiche.</div>';
-      return;
-    }
-
-    const exact = players.find(p => p.name.toLowerCase() === q);
-    const matches = exact ? [exact] : players.filter(p => p.name.toLowerCase().includes(q));
-
-    if (matches.length === 0) {
-      container.innerHTML = '<div class="empty-state">Aucun joueur ne correspond à cette recherche.</div>';
-      return;
-    }
-
-    if (matches.length > 1) {
-      container.innerHTML = '<div class="empty-state">Plusieurs joueurs correspondent, précise le pseudo (utilise les suggestions).</div>';
-      return;
-    }
-
-    container.appendChild(renderPlayerBlock(matches[0]));
-  }
-
-  search.addEventListener('input', draw);
-  draw();
 }
 
 function setupIpCopy() {
@@ -253,16 +210,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupUnlockInfoModal();
   setupScrollReveal();
 
-  const container = document.getElementById('char-grid') || document.getElementById('players-list');
-  if (container) {
-    new MutationObserver(() => setupScrollReveal()).observe(container, { childList: true });
-  }
-
   const grid = document.getElementById('char-grid');
-  const playersList = document.getElementById('players-list');
-  if (!grid && !playersList) return;
+  if (grid) {
+    new MutationObserver(() => setupScrollReveal()).observe(grid, { childList: true });
+  }
+  if (!grid) return;
 
   const { characters, players } = await loadData();
   renderCharacters(characters, players);
-  renderPlayers(characters, players);
 });
