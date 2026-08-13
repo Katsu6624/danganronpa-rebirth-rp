@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupUnlockInfoModal();
   setupSeasonGallery();
   setupSeasonLoopGif();
-  setupInscription();
+  await setupInscription();
   setupScrollReveal();
   setupBackToTop();
 
