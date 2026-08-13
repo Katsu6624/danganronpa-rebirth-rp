@@ -17,7 +17,8 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/aoi-asahina.png",
     "roles": [
-      "Support"
+      "Support",
+      "Troublemaker"
     ]
   },
   {
@@ -28,7 +29,8 @@
     "image": "assets/characters/byakuya-togami.png",
     "roles": [
       "Leader",
-      "Analyste"
+      "Analyste",
+      "Troublemaker"
     ]
   },
   {
@@ -38,6 +40,7 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/celestia-ludenberg.png",
     "roles": [
+      "Leader",
       "Troublemaker"
     ]
   },
@@ -68,7 +71,11 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/junko-enoshima.png",
     "roles": [
-      "Troublemaker"
+      "Leader",
+      "Support",
+      "Troublemaker",
+      "Analyste",
+      "Fighter"
     ]
   },
   {
@@ -78,7 +85,8 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/kiyotaka-ishimaru.png",
     "roles": [
-      "Leader"
+      "Leader",
+      "Support"
     ]
   },
   {
@@ -98,7 +106,7 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/leon-kuwata.png",
     "roles": [
-      "Troublemaker"
+      "Fighter"
     ]
   },
   {
@@ -148,7 +156,7 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/toko-fukawa.png",
     "roles": [
-      "Troublemaker"
+      "Fighter"
     ]
   },
   {
@@ -158,7 +166,7 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/yasuhiro-hagakure.png",
     "roles": [
-      "Troublemaker"
+      "Support"
     ]
   },
   {
@@ -196,7 +204,8 @@
     "faction": "Goodbye Despair",
     "image": "assets/characters/chiaki-nanami.png",
     "roles": [
-      "Support"
+      "Support",
+      "Analyste"
     ]
   },
   {
@@ -206,7 +215,7 @@
     "faction": "Goodbye Despair",
     "image": "assets/characters/fuyuhiko-kuzuryu.png",
     "roles": [
-      "Leader"
+      "Fighter"
     ]
   },
   {
@@ -216,7 +225,8 @@
     "faction": "Goodbye Despair",
     "image": "assets/characters/gundham-tanaka.png",
     "roles": [
-      "Troublemaker"
+      "Support",
+      "Fighter"
     ]
   },
   {
@@ -277,7 +287,8 @@
     "faction": "Goodbye Despair",
     "image": "assets/characters/nagito-komaeda.png",
     "roles": [
-      "Troublemaker"
+      "Troublemaker",
+      "Analyste"
     ]
   },
   {
@@ -308,7 +319,6 @@
     "faction": "Goodbye Despair",
     "image": "assets/characters/sonia-nevermind.png",
     "roles": [
-      "Analyste",
       "Support"
     ]
   },
@@ -329,7 +339,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/kaede-akamatsu.png",
     "roles": [
-      "Leader"
+      "Leader",
+      "Analyste"
     ]
   },
   {
@@ -339,7 +350,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/angie-yonaga.png",
     "roles": [
-      "Support"
+      "Support",
+      "Leader"
     ]
   },
   {
@@ -349,7 +361,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/gonta-gokuhara.png",
     "roles": [
-      "Fighter"
+      "Fighter",
+      "Support"
     ]
   },
   {
@@ -369,7 +382,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/k1-b0.png",
     "roles": [
-      "Support"
+      "Support",
+      "Fighter"
     ]
   },
   {
@@ -379,7 +393,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/kaito-momota.png",
     "roles": [
-      "Leader"
+      "Leader",
+      "Support"
     ]
   },
   {
@@ -389,7 +404,7 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/kirumi-tojo.png",
     "roles": [
-      "Leader"
+      "Support"
     ]
   },
   {
@@ -399,7 +414,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/kokichi-oma.png",
     "roles": [
-      "Troublemaker"
+      "Troublemaker",
+      "Analyste"
     ]
   },
   {
@@ -409,6 +425,7 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/korekiyo-shinguji.png",
     "roles": [
+      "Analyste",
       "Troublemaker"
     ]
   },
@@ -419,7 +436,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/maki-harukawa.png",
     "roles": [
-      "Fighter"
+      "Fighter",
+      "Support"
     ]
   },
   {
@@ -439,7 +457,8 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/rantaro-amami.png",
     "roles": [
-      "Analyste"
+      "Analyste",
+      "Support"
     ]
   },
   {
@@ -449,6 +468,7 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/ryoma-hoshi.png",
     "roles": [
+      "Fighter",
       "Troublemaker"
     ]
   },
@@ -479,7 +499,7 @@
     "faction": "Killing Harmony",
     "image": "assets/characters/tsumugi-shirogane.png",
     "roles": [
-      "Troublemaker"
+      "Support"
     ]
   },
   {
