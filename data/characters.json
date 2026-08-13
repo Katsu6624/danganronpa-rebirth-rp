@@ -6,6 +6,7 @@
     "faction": "Trigger Happy Havoc",
     "image": "assets/characters/makoto-naegi.png",
     "roles": [
+      "Analyste",
       "Support"
     ]
   },
