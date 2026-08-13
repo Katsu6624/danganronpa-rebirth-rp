@@ -52,7 +52,12 @@ function renderCharacters(characters, players) {
 
     function renderOptions() {
       const q = playerInput.value.trim().toLowerCase();
-      const matches = (q ? names.filter(n => n.toLowerCase().includes(q)) : names).slice(0, 8);
+      if (!q) {
+        dropdown.classList.remove('open');
+        dropdown.innerHTML = '';
+        return;
+      }
+      const matches = names.filter(n => n.toLowerCase().includes(q)).slice(0, 8);
       dropdown.innerHTML = '';
       if (matches.length === 0) {
         dropdown.innerHTML = '<div class="option empty">Aucun joueur trouvé</div>';
