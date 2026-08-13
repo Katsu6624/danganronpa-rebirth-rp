@@ -1071,7 +1071,10 @@
     "name": "Sora",
     "ultimate": "Ultime ???",
     "faction": "Another 2",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "shobai-hashimoto",
