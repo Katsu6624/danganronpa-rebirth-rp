@@ -649,16 +649,20 @@ html.js .player-block.in-view {
   }
 }
 
-.season-gallery .card-visual {
+.season-gallery .card-visual,
+.season-gallery .card-visual:hover,
+.season-gallery .card-visual:focus-visible {
+  transform: none !important;
   min-height: 220px;
   cursor: pointer;
-  transition: box-shadow 0.2s ease, outline-color 0.2s ease;
+  transition: border-color 0.2s ease;
+  border: 2px solid transparent;
 }
 
 .season-gallery .card-visual:hover,
 .season-gallery .card-visual:focus-visible {
-  transform: none;
-  box-shadow: 0 0 0 2px var(--red);
+  border-color: var(--red);
+  box-shadow: none;
   outline: none;
 }
 
