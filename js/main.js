@@ -268,10 +268,13 @@ function setupSeasonGallery() {
   if (!lightbox) return;
 
   function openLightbox(el) {
+    const scrollY = window.scrollY;
     lightboxImg.src = el.dataset.src;
     lightboxDownload.href = el.dataset.src;
     lightboxDownload.download = el.dataset.name;
     lightbox.showModal();
+    window.scrollTo(0, scrollY);
+    requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }
 
   gallery.querySelectorAll('.card-visual').forEach(el => {
