@@ -780,7 +780,11 @@ html.js .player-block.in-view {
   width: 90vw;
   max-height: 85vh;
   overflow-y: auto;
-  position: relative;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
 }
 
 .modal::backdrop {
