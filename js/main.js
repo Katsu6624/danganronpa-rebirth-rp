@@ -1,14 +1,15 @@
-async function setupInscription() {
-  const container = document.getElementById('inscription-content');
-  if (!container) return;
-
-  let state;
+async function fetchInscriptionState() {
   try {
     const res = await fetch('data/inscription.json');
-    state = await res.json();
+    return await res.json();
   } catch (e) {
-    state = { open: false };
+    return { open: false };
   }
+}
+
+function renderInscriptionPage(state) {
+  const container = document.getElementById('inscription-content');
+  if (!container) return;
 
   if (state.open && state.formUrl) {
     const embedUrl = state.formUrl.includes('?')
@@ -34,6 +35,48 @@ async function setupInscription() {
       </div>
     `;
   }
+}
+
+function renderInscriptionNavBadge(state) {
+  const link = document.getElementById('nav-inscription');
+  if (!link) return;
+  const existing = link.querySelector('.nav-badge');
+  if (state.open) {
+    if (!existing) {
+      const badge = document.createElement('span');
+      badge.className = 'nav-badge';
+      badge.textContent = '!';
+      link.appendChild(badge);
+    }
+  } else if (existing) {
+    existing.remove();
+  }
+}
+
+function renderInscriptionBanner(state) {
+  const banner = document.getElementById('inscription-banner');
+  if (!banner) return;
+  if (state.open && state.formUrl) {
+    banner.innerHTML = `
+      <div class="card" style="border-left:3px solid var(--red);">
+        <span class="card-icon">!</span>
+        <h3>Les inscriptions sont ouvertes !</h3>
+        <p>Inscris-toi dès maintenant pour participer à la prochaine saison.</p>
+        <a class="btn btn-primary" href="inscription.html" style="margin-top:0.8rem;">S'inscrire →</a>
+      </div>
+    `;
+    banner.style.display = '';
+  } else {
+    banner.innerHTML = '';
+    banner.style.display = 'none';
+  }
+}
+
+async function setupInscription() {
+  const state = await fetchInscriptionState();
+  renderInscriptionPage(state);
+  renderInscriptionNavBadge(state);
+  renderInscriptionBanner(state);
 }
 
 async function loadData() {
