@@ -37,8 +37,10 @@
       <select id="char-role">
         <option value="">Tous les rôles</option>
       </select>
-      <input type="text" id="char-player" placeholder="Voir la fiche d'un joueur (pseudo Discord)..." list="player-names" autocomplete="off">
-      <datalist id="player-names"></datalist>
+      <div class="player-search">
+        <input type="text" id="char-player" placeholder="Voir la fiche d'un joueur (pseudo Discord)..." autocomplete="off">
+        <div class="player-dropdown" id="player-dropdown"></div>
+      </div>
     </div>
 
     <div class="grid" id="char-grid"></div>

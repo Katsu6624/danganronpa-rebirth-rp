@@ -36,15 +36,6 @@ function renderCharacters(characters, players) {
     });
   }
 
-  const playerNames = document.getElementById('player-names');
-  if (playerNames) {
-    players.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.name;
-      playerNames.appendChild(opt);
-    });
-  }
-
   function findPlayerByName(name) {
     const q = name.trim().toLowerCase();
     if (!q) return null;
@@ -52,6 +43,46 @@ function renderCharacters(characters, players) {
     if (exact) return exact;
     const partial = players.filter(p => p.name.toLowerCase().includes(q));
     return partial.length === 1 ? partial[0] : null;
+  }
+
+  function setupPlayerDropdown(onSelect) {
+    const dropdown = document.getElementById('player-dropdown');
+    if (!playerInput || !dropdown) return;
+    const names = players.map(p => p.name);
+
+    function renderOptions() {
+      const q = playerInput.value.trim().toLowerCase();
+      const matches = (q ? names.filter(n => n.toLowerCase().includes(q)) : names).slice(0, 8);
+      dropdown.innerHTML = '';
+      if (matches.length === 0) {
+        dropdown.innerHTML = '<div class="option empty">Aucun joueur trouvé</div>';
+      } else {
+        matches.forEach(name => {
+          const opt = document.createElement('div');
+          opt.className = 'option';
+          opt.textContent = name;
+          opt.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            playerInput.value = name;
+            dropdown.classList.remove('open');
+            onSelect();
+          });
+          dropdown.appendChild(opt);
+        });
+      }
+      dropdown.classList.add('open');
+    }
+
+    playerInput.addEventListener('focus', renderOptions);
+    playerInput.addEventListener('input', renderOptions);
+    playerInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') dropdown.classList.remove('open');
+    });
+    document.addEventListener('click', (e) => {
+      if (e.target !== playerInput && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
   }
 
   const factionOrder = [...new Set(characters.map(c => c.faction))];
@@ -138,6 +169,7 @@ function renderCharacters(characters, players) {
   }
 
   [search, factionFilter, playerInput, statusFilter, roleFilter].filter(Boolean).forEach(el => el.addEventListener('input', draw));
+  setupPlayerDropdown(draw);
   draw();
 }
 

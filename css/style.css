@@ -424,6 +424,63 @@ a {
   min-width: 200px;
 }
 
+.player-search {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.player-search input[type="text"] {
+  width: 100%;
+}
+
+.player-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 20;
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+.player-dropdown.open {
+  display: block;
+}
+
+.player-dropdown .option {
+  padding: 0.6rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.player-dropdown .option:last-child {
+  border-bottom: none;
+}
+
+.player-dropdown .option:hover,
+.player-dropdown .option.active {
+  background: var(--bg-alt);
+  color: var(--red);
+}
+
+.player-dropdown .option.empty {
+  color: var(--text-dim);
+  cursor: default;
+}
+
+.player-dropdown .option.empty:hover {
+  background: transparent;
+  color: var(--text-dim);
+}
+
 /* Players page */
 .player-block {
   background: var(--card);
