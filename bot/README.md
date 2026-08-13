@@ -16,12 +16,25 @@ GitHub, ce qui republie le site automatiquement.
 - `/vip espoir retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
 - `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages ⚠️ staff
 - `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
-- `/inscription ouvrir lien:<url Google Form>` : ouvre les inscriptions, met à jour la page
-  Inscription du site ⚠️ staff
+- `/inscription ouvrir` : ouvre un formulaire Discord en 2 étapes (titre, type de saison, places,
+  chapitres max, perso minimum, puis bannis/ton/planning) pour configurer et ouvrir les
+  inscriptions à une saison ⚠️ staff
 - `/inscription fermer` : ferme les inscriptions, remet la page Inscription en état "fermé" ⚠️ staff
 
 Pour les deux paliers `/vip`, les personnages attribués individuellement via `/debloquer`
 restent acquis même après le retrait du rôle.
+
+### Inscriptions à une saison
+
+`/inscription ouvrir` remplace l'ancien lien Google Form par un vrai formulaire construit
+sur le site (page Inscription), qui ne propose à chaque joueur que les personnages qu'il
+possède réellement (vérifié aussi côté serveur, impossible de tricher en modifiant le
+formulaire). Les réponses des joueurs sont envoyées en MP Discord à la personne qui a
+ouvert les inscriptions.
+
+Pour que la page du site puisse envoyer les réponses au bot, renseigne l'URL de ton Worker
+déployé (la même que ton "Interactions Endpoint URL" du Developer Portal) dans
+`js/main.js`, constante `INSCRIPTION_WORKER_URL`, en haut du fichier.
 
 Les commandes marquées ⚠️ staff nécessitent la permission Discord **"Gérer le serveur"**
 (modifiable dans Discord : Paramètres du serveur → Intégrations → Danganronpa Rebirth RP Bot).

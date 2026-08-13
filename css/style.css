@@ -776,23 +776,42 @@ html.js .player-block.in-view {
   flex: 1 1 260px;
 }
 
-.gform-embed {
-  margin-top: 1.2rem;
-  border: 1px solid var(--border);
-  background: var(--card);
-}
-
-.gform-embed iframe {
-  display: block;
+.insc-input {
   width: 100%;
-  height: 1400px;
-  border: none;
+  max-width: 420px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.55rem 0.9rem;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  font-family: inherit;
 }
 
-@media (max-width: 640px) {
-  .gform-embed iframe {
-    height: 1800px;
-  }
+textarea.insc-input {
+  max-width: 100%;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.insc-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+
+.insc-radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.insc-radio-group-vertical {
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .history-images {

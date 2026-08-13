@@ -1,3 +1,14 @@
+// Remplace par l'URL de ton Worker Cloudflare (la même que ton "Interactions Endpoint URL" sur le Developer Portal).
+const INSCRIPTION_WORKER_URL = 'https://danganronpa-rebirth-rp-bot.TON-SOUS-DOMAINE.workers.dev';
+
+const PLACE_RESERVEE_OPTIONS = [
+  'Pas de place réservée',
+  "C'est ma première saison, je suis donc prioritaire",
+  'J\'utilise une place réservée (Katsu vous demandera de le faire plus tard, ne le faites pas tout de suite)',
+  'J\'ai le rôle vip de Cours Préparatoire',
+  "J'ai le rôle Lycéen de l'Espoir",
+];
+
 async function fetchInscriptionState() {
   try {
     const res = await fetch('data/inscription.json');
@@ -7,26 +18,11 @@ async function fetchInscriptionState() {
   }
 }
 
-function renderInscriptionPage(state) {
+async function renderInscriptionPage(state) {
   const container = document.getElementById('inscription-content');
   if (!container) return;
 
-  if (state.open && state.formUrl) {
-    const embedUrl = state.formUrl.includes('?')
-      ? `${state.formUrl}&embedded=true`
-      : `${state.formUrl}?embedded=true`;
-    container.innerHTML = `
-      <div class="rules-list">
-        <div class="rule-item">
-          <p>Les inscriptions sont ouvertes ! Remplis le formulaire ci-dessous pour t'inscrire à la prochaine saison.</p>
-        </div>
-      </div>
-      <div class="gform-embed">
-        <iframe src="${embedUrl}" title="Formulaire d'inscription">Chargement du formulaire…</iframe>
-      </div>
-      <p class="subtitle" style="margin-top:1rem;"><a href="${state.formUrl}" target="_blank" rel="noopener" style="color:var(--red);">Ouvrir le formulaire dans un nouvel onglet →</a></p>
-    `;
-  } else {
+  if (!state.open) {
     container.innerHTML = `
       <div class="rules-list">
         <div class="rule-item">
@@ -34,7 +30,180 @@ function renderInscriptionPage(state) {
         </div>
       </div>
     `;
+    return;
   }
+
+  const { characters, players } = await loadData();
+  const minCharacters = Number(state.minCharacters) || 1;
+
+  container.innerHTML = `
+    <div class="rules-list">
+      <div class="rule-item">
+        <p>Pour vous inscrire à la saison ${state.title}, veuillez répondre à ce formulaire.</p>
+      </div>
+    </div>
+    <div class="rules-list" style="margin-top:1rem;">
+      <div class="rule-item">
+        <h4>Infos de la saison</h4>
+        <p><strong>Type :</strong> ${state.seasonType || '—'}</p>
+        <p style="margin-top:0.3rem;"><strong>Chapitres max :</strong> ${state.maxChapters || '—'}</p>
+        <p style="margin-top:0.3rem;"><strong>Places disponibles :</strong> ${state.slots || '—'}</p>
+        <p style="margin-top:0.3rem;"><strong>Personnages bannis :</strong> ${state.bannedCharacters || 'Aucun'}</p>
+        <p style="margin-top:0.3rem;"><strong>Ton et attentes RP :</strong> ${state.tone || '—'}</p>
+        <p style="margin-top:0.3rem;white-space:pre-line;"><strong>Planning :</strong>\n${state.planning || '—'}</p>
+      </div>
+    </div>
+
+    <form id="insc-form" class="rules-list" style="margin-top:1.5rem;">
+      <div class="rule-item">
+        <h4>Quel est ton pseudo Discord ?</h4>
+        <input type="text" id="insc-pseudo" class="insc-input" placeholder="Ton pseudo" required autocomplete="off">
+        <button type="button" class="btn btn-outline" id="insc-load-chars" style="margin-top:0.6rem;">Charger mes personnages</button>
+        <p id="insc-pseudo-status" style="margin-top:0.5rem;font-size:0.85rem;"></p>
+      </div>
+
+      <div class="rule-item">
+        <h4>Es-tu présent tous les jours de la saison ?</h4>
+        <div class="insc-radio-group">
+          <label><input type="radio" name="presence" value="oui" checked> Oui</label>
+          <label><input type="radio" name="presence" value="non"> Non</label>
+        </div>
+        <textarea id="insc-remplacant" class="insc-input" style="display:none;margin-top:0.6rem;" placeholder="As-tu un remplaçant, ou vas-tu essayer d'en trouver un ?"></textarea>
+      </div>
+
+      <div class="rule-item">
+        <h4>Quel(s) personnage(s) voudrais-tu jouer ? (minimum ${minCharacters})</h4>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.6rem;">Charge d'abord tes personnages avec ton pseudo ci-dessus.</p>
+        <div id="insc-char-list" class="tag-list"></div>
+      </div>
+
+      <div class="rule-item">
+        <h4>As-tu l'intention de tuer ?</h4>
+        <div class="insc-radio-group">
+          <label><input type="radio" name="intentionTuer" value="non" checked> Non</label>
+          <label><input type="radio" name="intentionTuer" value="oui"> Oui</label>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <h4>Place réservée</h4>
+        <div class="insc-radio-group insc-radio-group-vertical">
+          ${PLACE_RESERVEE_OPTIONS.map((opt, i) => `
+            <label><input type="radio" name="placeReservee" value="${opt.replace(/"/g, '&quot;')}" ${i === 0 ? 'checked' : ''}> ${opt}</label>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <h4>Voudrais-tu être le mastermind ?</h4>
+        <div class="insc-radio-group">
+          <label><input type="radio" name="mastermind" value="non" checked> Non</label>
+          <label><input type="radio" name="mastermind" value="oui"> Oui</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Envoyer mon inscription</button>
+      <p id="insc-result" style="margin-top:0.8rem;"></p>
+    </form>
+  `;
+
+  setupInscriptionForm(state, characters, players, minCharacters);
+}
+
+function setupInscriptionForm(state, characters, players, minCharacters) {
+  const form = document.getElementById('insc-form');
+  const pseudoInput = document.getElementById('insc-pseudo');
+  const loadBtn = document.getElementById('insc-load-chars');
+  const status = document.getElementById('insc-pseudo-status');
+  const charList = document.getElementById('insc-char-list');
+  const presenceRadios = form.querySelectorAll('input[name="presence"]');
+  const remplacantBox = document.getElementById('insc-remplacant');
+  const resultEl = document.getElementById('insc-result');
+
+  const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
+  let currentPlayer = null;
+
+  presenceRadios.forEach((r) => r.addEventListener('change', () => {
+    remplacantBox.style.display = form.presence.value === 'non' ? 'block' : 'none';
+  }));
+
+  loadBtn.addEventListener('click', () => {
+    const q = pseudoInput.value.trim().toLowerCase();
+    currentPlayer = players.find((p) => p.name.toLowerCase() === q) || null;
+    if (!currentPlayer) {
+      status.textContent = 'Pseudo non reconnu. Utilise /register sur Discord avant de t\'inscrire.';
+      status.style.color = 'var(--red)';
+      charList.innerHTML = '';
+      return;
+    }
+    const owned = (currentPlayer.owned || []).map((id) => charById[id]).filter(Boolean);
+    if (owned.length === 0) {
+      status.textContent = 'Tu n\'as encore aucun personnage débloqué.';
+      status.style.color = 'var(--red)';
+      charList.innerHTML = '';
+      return;
+    }
+    status.textContent = `${owned.length} personnage(s) chargé(s).`;
+    status.style.color = 'var(--gold)';
+    charList.innerHTML = owned.map((c) => `
+      <label class="pill" style="cursor:pointer;">
+        <input type="checkbox" name="personnage" value="${c.id}" style="margin-right:0.4rem;">${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}
+      </label>
+    `).join('');
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resultEl.textContent = '';
+
+    if (!currentPlayer) {
+      resultEl.textContent = 'Charge d\'abord tes personnages avec ton pseudo Discord.';
+      resultEl.style.color = 'var(--red)';
+      return;
+    }
+
+    const chosen = [...form.querySelectorAll('input[name="personnage"]:checked')].map((el) => el.value);
+    if (chosen.length < minCharacters) {
+      resultEl.textContent = `Choisis au moins ${minCharacters} personnage(s).`;
+      resultEl.style.color = 'var(--red)';
+      return;
+    }
+
+    const payload = {
+      pseudo: currentPlayer.name,
+      presence: form.presence.value,
+      remplacant: remplacantBox.value.trim(),
+      personnages: chosen,
+      intentionTuer: form.intentionTuer.value,
+      placeReservee: form.placeReservee.value,
+      mastermind: form.mastermind.value,
+    };
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    resultEl.textContent = 'Envoi en cours…';
+    resultEl.style.color = 'var(--text-dim)';
+
+    try {
+      const res = await fetch(`${INSCRIPTION_WORKER_URL}/submit-inscription`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur inconnue.');
+      resultEl.textContent = '✅ Inscription envoyée ! Tu recevras une réponse du Monokuma.';
+      resultEl.style.color = 'var(--gold)';
+      form.reset();
+      charList.innerHTML = '';
+      status.textContent = '';
+    } catch (err) {
+      resultEl.textContent = `Erreur : ${err.message}`;
+      resultEl.style.color = 'var(--red)';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
 }
 
 function renderInscriptionNavBadge(state) {
@@ -56,12 +225,12 @@ function renderInscriptionNavBadge(state) {
 function renderInscriptionBanner(state) {
   const banner = document.getElementById('inscription-banner');
   if (!banner) return;
-  if (state.open && state.formUrl) {
+  if (state.open) {
     banner.innerHTML = `
       <div class="card" style="border-left:3px solid var(--red);">
         <span class="card-icon">!</span>
         <h3>Les inscriptions sont ouvertes !</h3>
-        <p>Inscris-toi dès maintenant pour participer à la prochaine saison.</p>
+        <p>Inscris-toi dès maintenant pour participer à ${state.title || 'la prochaine saison'}.</p>
         <a class="btn btn-primary" href="inscription.html" style="margin-top:0.8rem;">S'inscrire →</a>
       </div>
     `;
@@ -74,7 +243,7 @@ function renderInscriptionBanner(state) {
 
 async function setupInscription() {
   const state = await fetchInscriptionState();
-  renderInscriptionPage(state);
+  await renderInscriptionPage(state);
   renderInscriptionNavBadge(state);
   renderInscriptionBanner(state);
 }

@@ -113,8 +113,7 @@ const commands = [
       {
         type: 1,
         name: 'ouvrir',
-        description: 'Ouvrir les inscriptions avec un lien Google Form',
-        options: [{ type: 3, name: 'lien', description: 'Lien du Google Form', required: true }],
+        description: 'Ouvrir un formulaire (2 étapes) pour configurer et ouvrir les inscriptions',
       },
       {
         type: 1,

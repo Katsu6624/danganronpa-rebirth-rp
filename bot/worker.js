@@ -1,10 +1,11 @@
 import { verifyKey } from 'discord-interactions';
 
-const InteractionType = { PING: 1, APPLICATION_COMMAND: 2, APPLICATION_COMMAND_AUTOCOMPLETE: 4 };
+const InteractionType = { PING: 1, APPLICATION_COMMAND: 2, APPLICATION_COMMAND_AUTOCOMPLETE: 4, MODAL_SUBMIT: 5 };
 const InteractionResponseType = {
   PONG: 1,
   CHANNEL_MESSAGE_WITH_SOURCE: 4,
   APPLICATION_COMMAND_AUTOCOMPLETE_RESULT: 8,
+  MODAL: 9,
 };
 
 async function githubRequest(env, path, options = {}) {
@@ -193,7 +194,7 @@ function handleHelp() {
     '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
     '`/vip prepa retirer <joueur>` : retire le rôle Lycéen en Cours Préparatoire (les attributions individuelles sont conservées).',
-    '`/inscription ouvrir <lien>` : ouvre les inscriptions avec un lien de Google Form (mis à jour sur le site et dans le salon d\'inscription).',
+    '`/inscription ouvrir` : ouvre un formulaire Discord (2 étapes) pour configurer et ouvrir les inscriptions à une saison.',
     '`/inscription fermer` : ferme les inscriptions.',
   ];
   return reply(lines.join('\n'));
@@ -335,34 +336,70 @@ async function handleRetirer(env, interaction) {
   return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
 }
 
-function isGoogleFormUrl(url) {
-  return /^https:\/\/docs\.google\.com\/forms\//.test(url);
+function modalResponse(customId, title, fields) {
+  return new Response(
+    JSON.stringify({
+      type: InteractionResponseType.MODAL,
+      data: {
+        custom_id: customId,
+        title,
+        components: fields.map((f) => ({
+          type: 1,
+          components: [
+            {
+              type: 4,
+              custom_id: f.id,
+              label: f.label,
+              style: f.style || 1, // 1 = court, 2 = paragraphe
+              required: f.required !== false,
+              placeholder: f.placeholder,
+              max_length: f.maxLength,
+            },
+          ],
+        })),
+      },
+    }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+}
+
+function getModalValues(interaction) {
+  const values = {};
+  (interaction.data.components || []).forEach((row) => {
+    const input = row.components?.[0];
+    if (input) values[input.custom_id] = input.value;
+  });
+  return values;
 }
 
 async function handleInscription(env, interaction) {
   const sub = interaction.data.options?.[0];
 
   if (sub?.name === 'ouvrir') {
-    const lien = sub.options?.find((o) => o.name === 'lien')?.value || '';
-    if (!isGoogleFormUrl(lien)) {
-      return reply('Le lien doit être une URL Google Forms valide (https://docs.google.com/forms/...).');
-    }
-
-    await updateJsonFile(env, 'data/inscription.json', (data) => {
-      data.open = true;
-      data.formUrl = lien;
-      data.updatedAt = new Date().toISOString();
-      return { message: 'Ouverture des inscriptions' };
-    });
-
-    return reply('✅ Inscriptions ouvertes. Le lien est en ligne sur la page Inscription du site.', false);
+    return modalResponse('inscription_meta', 'Nouvelle saison (1/2)', [
+      { id: 'titre', label: 'Titre de la saison (ex : Saison 50)', placeholder: 'Saison 50' },
+      { id: 'type_saison', label: 'Type de saison', placeholder: 'Classique / Alternatif / Grande Échelle / Libre' },
+      { id: 'places', label: 'Nombre de places disponibles', placeholder: '10' },
+      { id: 'max_chapitres', label: 'Nombre de chapitres max (1 à 6)', placeholder: '5' },
+      { id: 'min_perso', label: 'Nombre min. de personnages à proposer', placeholder: '3' },
+    ]);
   }
 
   if (sub?.name === 'fermer') {
     await updateJsonFile(env, 'data/inscription.json', (data) => {
-      data.open = false;
-      data.formUrl = '';
-      data.updatedAt = new Date().toISOString();
+      Object.assign(data, {
+        open: false,
+        title: '',
+        seasonType: '',
+        slots: null,
+        maxChapters: null,
+        minCharacters: null,
+        bannedCharacters: '',
+        tone: '',
+        planning: '',
+        openedBy: null,
+        updatedAt: new Date().toISOString(),
+      });
       return { message: 'Fermeture des inscriptions' };
     });
 
@@ -370,6 +407,58 @@ async function handleInscription(env, interaction) {
   }
 
   return reply('Sous-commande inconnue.');
+}
+
+async function handleInscriptionMetaSubmit(interaction) {
+  const v = getModalValues(interaction);
+  // On mémorise le brouillon dans le custom_id du modal suivant, encodé en base64,
+  // le Worker étant sans état entre deux interactions séparées.
+  const draft = {
+    titre: v.titre,
+    type_saison: v.type_saison,
+    places: v.places,
+    max_chapitres: v.max_chapitres,
+    min_perso: v.min_perso,
+    openedBy: interaction.member.user.id,
+  };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(draft))));
+  return modalResponse(`inscription_details:${encoded}`, 'Nouvelle saison (2/2)', [
+    { id: 'bannis', label: 'Personnages bannis (laisser vide sinon)', style: 2, required: false, placeholder: 'Aucun' },
+    { id: 'ton', label: 'Ton et attentes RP', style: 2 },
+    { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
+  ]);
+}
+
+async function handleInscriptionDetailsSubmit(env, interaction) {
+  const encoded = interaction.data.custom_id.split(':').slice(1).join(':');
+  const draft = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+  const v = getModalValues(interaction);
+
+  await updateJsonFile(env, 'data/inscription.json', (data) => {
+    Object.assign(data, {
+      open: true,
+      title: draft.titre,
+      seasonType: draft.type_saison,
+      slots: draft.places,
+      maxChapters: draft.max_chapitres,
+      minCharacters: draft.min_perso,
+      bannedCharacters: v.bannis || '',
+      tone: v.ton,
+      planning: v.planning,
+      openedBy: draft.openedBy,
+      updatedAt: new Date().toISOString(),
+    });
+    return { message: `Ouverture des inscriptions : ${draft.titre}` };
+  });
+
+  return reply(`✅ Inscriptions ouvertes pour **${draft.titre}**. Le formulaire est en ligne sur la page Inscription du site.`, false);
+}
+
+async function handleModalSubmit(env, interaction) {
+  const customId = interaction.data.custom_id;
+  if (customId === 'inscription_meta') return handleInscriptionMetaSubmit(interaction);
+  if (customId.startsWith('inscription_details:')) return handleInscriptionDetailsSubmit(env, interaction);
+  return reply('Formulaire inconnu.');
 }
 
 async function handleCommand(env, interaction) {
@@ -385,8 +474,102 @@ async function handleCommand(env, interaction) {
   }
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+function jsonResponse(status, body) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+  });
+}
+
+async function sendDirectMessage(env, userId, content) {
+  const channel = await discordRequest(env, '/users/@me/channels', {
+    method: 'POST',
+    body: JSON.stringify({ recipient_id: userId }),
+  });
+  await discordRequest(env, `/channels/${channel.id}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  });
+}
+
+async function handleInscriptionResponse(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch (e) {
+    return jsonResponse(400, { error: 'JSON invalide.' });
+  }
+
+  const { pseudo, presence, remplacant, personnages, intentionTuer, placeReservee, mastermind } = payload;
+  if (!pseudo || !Array.isArray(personnages) || personnages.length === 0) {
+    return jsonResponse(400, { error: 'Champs manquants.' });
+  }
+
+  const { data: inscription } = await readJsonFile(env, 'data/inscription.json');
+  if (!inscription.open) {
+    return jsonResponse(400, { error: 'Les inscriptions sont fermées.' });
+  }
+
+  const { data: players } = await getPlayers(env);
+  const player = players.find((p) => p.name.toLowerCase() === String(pseudo).toLowerCase());
+  if (!player) {
+    return jsonResponse(400, { error: 'Pseudo non reconnu. Utilise /register sur Discord avant de t\'inscrire.' });
+  }
+
+  const owned = new Set(player.owned || []);
+  const invalid = personnages.filter((id) => !owned.has(id));
+  if (invalid.length > 0) {
+    return jsonResponse(400, { error: 'Un ou plusieurs personnages choisis ne t\'appartiennent pas.' });
+  }
+
+  const minCharacters = Number(inscription.minCharacters) || 1;
+  if (personnages.length < minCharacters) {
+    return jsonResponse(400, { error: `Propose au moins ${minCharacters} personnage(s).` });
+  }
+
+  if (!inscription.openedBy) {
+    return jsonResponse(500, { error: 'Aucun responsable d\'inscription enregistré, contacte le staff.' });
+  }
+
+  const characters = await getCharacters(env);
+  const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
+  const persoNames = personnages.map((id) => charById[id]?.name || id).join(', ');
+
+  const lines = [
+    `📋 **Nouvelle inscription — ${inscription.title || 'saison en cours'}**`,
+    `Pseudo : **${player.name}** (<@${player.discordId}>)`,
+    `Présent tous les jours : ${presence === 'non' ? 'Non' : 'Oui'}${presence === 'non' && remplacant ? ` — remplaçant : ${remplacant}` : ''}`,
+    `Personnages proposés : ${persoNames}`,
+    `Intention de tuer : ${intentionTuer === 'oui' ? 'Oui' : 'Non'}`,
+    `Place réservée : ${placeReservee || 'Pas de place réservée'}`,
+    `Souhaite être mastermind : ${mastermind === 'oui' ? 'Oui' : 'Non'}`,
+  ];
+
+  try {
+    await sendDirectMessage(env, inscription.openedBy, lines.join('\n'));
+  } catch (err) {
+    return jsonResponse(500, { error: 'Inscription enregistrée mais échec de l\'envoi du MP au staff : ' + err.message });
+  }
+
+  return jsonResponse(200, { ok: true });
+}
+
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/submit-inscription') {
+      if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
+      if (request.method !== 'POST') return jsonResponse(405, { error: 'Méthode non autorisée.' });
+      return handleInscriptionResponse(request, env);
+    }
+
     if (request.method !== 'POST') return new Response('Bot Danganronpa Rebirth RP en ligne.', { status: 200 });
 
     const signature = request.headers.get('X-Signature-Ed25519');
@@ -410,6 +593,14 @@ export default {
     if (interaction.type === InteractionType.APPLICATION_COMMAND) {
       try {
         return await handleCommand(env, interaction);
+      } catch (err) {
+        return reply(`Erreur : ${err.message}`);
+      }
+    }
+
+    if (interaction.type === InteractionType.MODAL_SUBMIT) {
+      try {
+        return await handleModalSubmit(env, interaction);
       } catch (err) {
         return reply(`Erreur : ${err.message}`);
       }
