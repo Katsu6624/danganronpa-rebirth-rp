@@ -1,5 +1,5 @@
 // Remplace par l'URL de ton Worker Cloudflare (la même que ton "Interactions Endpoint URL" sur le Developer Portal).
-const INSCRIPTION_WORKER_URL = 'https://danganronpa-rebirth-rp-bot.TON-SOUS-DOMAINE.workers.dev';
+const INSCRIPTION_WORKER_URL = 'https://danganronpa-rebirth-rp-bot.shiney273.workers.dev';
 
 const PLACE_RESERVEE_OPTIONS = [
   'Pas de place réservée',
