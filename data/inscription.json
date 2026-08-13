@@ -1,14 +1,14 @@
 {
-  "open": true,
-  "title": "qkfjsdkjgf",
-  "seasonType": "Classique",
-  "slots": "5",
-  "maxChapters": "5",
-  "minCharacters": "5",
-  "bannedCharacters": "sqdfdsf",
-  "tone": "dqsfqsd",
-  "planning": "ffqdsfdqsfqdsf",
-  "openedBy": "388041172574011404",
-  "imageUrl": "https://media.discordapp.net/attachments/1483261089105055868/1536894902707683379/image.png?ex=6a7f0aaa&is=6a7db92a&hm=5b2a13aa9d6b34caadcd234ac3c0fb9538c4670a23b6240ab48f3af2331a1bf3&=&format=webp&quality=lossless",
-  "updatedAt": "2026-08-13T20:49:16.234Z"
+  "open": false,
+  "title": "",
+  "seasonType": "",
+  "slots": null,
+  "maxChapters": null,
+  "minCharacters": null,
+  "bannedCharacters": "",
+  "tone": "",
+  "planning": "",
+  "openedBy": null,
+  "imageUrl": "",
+  "updatedAt": "2026-08-13T20:51:23.239Z"
 }
