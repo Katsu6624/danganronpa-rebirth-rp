@@ -377,11 +377,11 @@ async function handleInscription(env, interaction) {
 
   if (sub?.name === 'ouvrir') {
     return modalResponse('inscription_meta', 'Nouvelle saison (1/2)', [
-      { id: 'titre', label: 'Titre de la saison (ex : Saison 50)', placeholder: 'Saison 50' },
-      { id: 'type_saison', label: 'Type de saison', placeholder: 'Classique / Alternatif / Grande Échelle / Libre' },
-      { id: 'places', label: 'Nombre de places disponibles', placeholder: '10' },
-      { id: 'max_chapitres', label: 'Nombre de chapitres max (1 à 6)', placeholder: '5' },
-      { id: 'min_perso', label: 'Nombre min. de personnages à proposer', placeholder: '3' },
+      { id: 'titre', label: 'Titre de la saison (ex : Saison 50)', placeholder: 'Saison 50', maxLength: 25 },
+      { id: 'type_saison', label: 'Type de saison', placeholder: 'Classique / Alternatif / Grande Échelle / Libre', maxLength: 20 },
+      { id: 'places', label: 'Nombre de places disponibles', placeholder: '10', maxLength: 3 },
+      { id: 'max_chapitres', label: 'Nombre de chapitres max (1 à 6)', placeholder: '5', maxLength: 1 },
+      { id: 'min_perso', label: 'Nombre min. de personnages à proposer', placeholder: '3', maxLength: 2 },
     ]);
   }
 
@@ -398,7 +398,6 @@ async function handleInscription(env, interaction) {
         tone: '',
         planning: '',
         openedBy: null,
-        draft: null,
         updatedAt: new Date().toISOString(),
       });
       return { message: 'Fermeture des inscriptions' };
@@ -410,24 +409,14 @@ async function handleInscription(env, interaction) {
   return reply('Sous-commande inconnue.');
 }
 
-async function handleInscriptionMetaSubmit(env, interaction) {
+function handleInscriptionMetaSubmit(interaction) {
   const v = getModalValues(interaction);
-  // Le Worker est sans état entre deux interactions séparées (custom_id limité à 100
-  // caractères, trop court pour y stocker tout le brouillon) : on le persiste dans
-  // data/inscription.json le temps de récupérer la seconde fenêtre.
-  await updateJsonFile(env, 'data/inscription.json', (data) => {
-    data.draft = {
-      titre: v.titre,
-      type_saison: v.type_saison,
-      places: v.places,
-      max_chapitres: v.max_chapitres,
-      min_perso: v.min_perso,
-      openedBy: interaction.member.user.id,
-    };
-    return { message: 'Brouillon de saison (étape 1/2)' };
-  });
-
-  return modalResponse('inscription_details', 'Nouvelle saison (2/2)', [
+  // Le Worker est sans état entre deux interactions séparées, et un modal doit répondre
+  // en moins de 3s (impossible d'écrire sur GitHub entre les deux étapes) : le brouillon
+  // transite donc dans le custom_id de la seconde fenêtre (limité à 100 caractères,
+  // d'où les longueurs max serrées sur les champs de la première fenêtre).
+  const draft = [v.titre, v.type_saison, v.places, v.max_chapitres, v.min_perso].join('|');
+  return modalResponse(`insc2:${draft}`, 'Nouvelle saison (2/2)', [
     { id: 'bannis', label: 'Personnages bannis (laisser vide sinon)', style: 2, required: false, placeholder: 'Aucun' },
     { id: 'ton', label: 'Ton et attentes RP', style: 2 },
     { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
@@ -435,39 +424,36 @@ async function handleInscriptionMetaSubmit(env, interaction) {
 }
 
 async function handleInscriptionDetailsSubmit(env, interaction) {
+  const [titre, type_saison, places, max_chapitres, min_perso] = interaction.data.custom_id
+    .slice('insc2:'.length)
+    .split('|');
   const v = getModalValues(interaction);
+  const openedBy = interaction.member.user.id;
 
-  const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
-    const draft = data.draft;
-    if (!draft) return { skipWrite: true, missingDraft: true };
+  await updateJsonFile(env, 'data/inscription.json', (data) => {
     Object.assign(data, {
       open: true,
-      title: draft.titre,
-      seasonType: draft.type_saison,
-      slots: draft.places,
-      maxChapters: draft.max_chapitres,
-      minCharacters: draft.min_perso,
+      title: titre,
+      seasonType: type_saison,
+      slots: places,
+      maxChapters: max_chapitres,
+      minCharacters: min_perso,
       bannedCharacters: v.bannis || '',
       tone: v.ton,
       planning: v.planning,
-      openedBy: draft.openedBy,
-      draft: null,
+      openedBy,
       updatedAt: new Date().toISOString(),
     });
-    return { message: `Ouverture des inscriptions : ${draft.titre}`, title: draft.titre };
+    return { message: `Ouverture des inscriptions : ${titre}` };
   });
 
-  if (ctx.missingDraft) {
-    return reply('Le brouillon de la première étape a expiré, relance /inscription ouvrir.');
-  }
-
-  return reply(`✅ Inscriptions ouvertes pour **${ctx.title}**. Le formulaire est en ligne sur la page Inscription du site.`, false);
+  return reply(`✅ Inscriptions ouvertes pour **${titre}**. Le formulaire est en ligne sur la page Inscription du site.`, false);
 }
 
 async function handleModalSubmit(env, interaction) {
   const customId = interaction.data.custom_id;
-  if (customId === 'inscription_meta') return handleInscriptionMetaSubmit(env, interaction);
-  if (customId === 'inscription_details') return handleInscriptionDetailsSubmit(env, interaction);
+  if (customId === 'inscription_meta') return handleInscriptionMetaSubmit(interaction);
+  if (customId.startsWith('insc2:')) return handleInscriptionDetailsSubmit(env, interaction);
   return reply('Formulaire inconnu.');
 }
 
