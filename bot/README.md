@@ -16,9 +16,9 @@ GitHub, ce qui republie le site automatiquement.
 - `/vip espoir retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
 - `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages ⚠️ staff
 - `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
-- `/inscription ouvrir` : ouvre un formulaire Discord en 2 étapes (titre, type de saison, places,
-  chapitres max, perso minimum, puis bannis/ton/planning) pour configurer et ouvrir les
-  inscriptions à une saison ⚠️ staff
+- `/inscription ouvrir titre type places max_chapitres min_perso` : remplis ces 5 options
+  directement dans Discord, puis un modal s'ouvre pour les 3 derniers champs (personnages
+  bannis, ton et attentes RP, planning) ; valide pour ouvrir les inscriptions ⚠️ staff
 - `/inscription fermer` : ferme les inscriptions, remet la page Inscription en état "fermé" ⚠️ staff
 
 Pour les deux paliers `/vip`, les personnages attribués individuellement via `/debloquer`

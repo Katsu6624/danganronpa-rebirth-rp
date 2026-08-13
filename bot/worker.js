@@ -194,7 +194,7 @@ function handleHelp() {
     '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
     '`/vip prepa retirer <joueur>` : retire le rôle Lycéen en Cours Préparatoire (les attributions individuelles sont conservées).',
-    '`/inscription ouvrir` : ouvre un formulaire Discord (2 étapes) pour configurer et ouvrir les inscriptions à une saison.',
+    '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning) puis ouvre les inscriptions à une saison.',
     '`/inscription fermer` : ferme les inscriptions.',
   ];
   return reply(lines.join('\n'));
@@ -376,12 +376,15 @@ async function handleInscription(env, interaction) {
   const sub = interaction.data.options?.[0];
 
   if (sub?.name === 'ouvrir') {
-    return modalResponse('inscription_meta', 'Nouvelle saison (1/2)', [
-      { id: 'titre', label: 'Titre de la saison (ex : Saison 50)', placeholder: 'Saison 50', maxLength: 25 },
-      { id: 'type_saison', label: 'Type de saison', placeholder: 'Classique / Alternatif / Grande Échelle / Libre', maxLength: 20 },
-      { id: 'places', label: 'Nombre de places disponibles', placeholder: '10', maxLength: 3 },
-      { id: 'max_chapitres', label: 'Nombre de chapitres max (1 à 6)', placeholder: '5', maxLength: 1 },
-      { id: 'min_perso', label: 'Nombre min. de personnages à proposer', placeholder: '3', maxLength: 2 },
+    const opts = Object.fromEntries((sub.options || []).map((o) => [o.name, o.value]));
+    // Un seul modal (pas de chaînage de modals, peu fiable côté API Discord) : les champs
+    // courts sont des options de la commande, saisies avant l'envoi ; le custom_id du modal
+    // les transporte jusqu'à la soumission (le Worker est sans état entre deux interactions).
+    const draft = [opts.titre, opts.type, opts.places, opts.max_chapitres, opts.min_perso].join('|');
+    return modalResponse(`insc_details:${draft}`, 'Ouverture des inscriptions', [
+      { id: 'bannis', label: 'Personnages bannis (laisser vide sinon)', style: 2, required: false, placeholder: 'Aucun' },
+      { id: 'ton', label: 'Ton et attentes RP', style: 2 },
+      { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
     ]);
   }
 
@@ -409,23 +412,9 @@ async function handleInscription(env, interaction) {
   return reply('Sous-commande inconnue.');
 }
 
-function handleInscriptionMetaSubmit(interaction) {
-  const v = getModalValues(interaction);
-  // Le Worker est sans état entre deux interactions séparées, et un modal doit répondre
-  // en moins de 3s (impossible d'écrire sur GitHub entre les deux étapes) : le brouillon
-  // transite donc dans le custom_id de la seconde fenêtre (limité à 100 caractères,
-  // d'où les longueurs max serrées sur les champs de la première fenêtre).
-  const draft = [v.titre, v.type_saison, v.places, v.max_chapitres, v.min_perso].join('|');
-  return modalResponse(`insc2:${draft}`, 'Nouvelle saison (2/2)', [
-    { id: 'bannis', label: 'Personnages bannis (laisser vide sinon)', style: 2, required: false, placeholder: 'Aucun' },
-    { id: 'ton', label: 'Ton et attentes RP', style: 2 },
-    { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
-  ]);
-}
-
 async function handleInscriptionDetailsSubmit(env, interaction) {
   const [titre, type_saison, places, max_chapitres, min_perso] = interaction.data.custom_id
-    .slice('insc2:'.length)
+    .slice('insc_details:'.length)
     .split('|');
   const v = getModalValues(interaction);
   const openedBy = interaction.member.user.id;
@@ -452,8 +441,7 @@ async function handleInscriptionDetailsSubmit(env, interaction) {
 
 async function handleModalSubmit(env, interaction) {
   const customId = interaction.data.custom_id;
-  if (customId === 'inscription_meta') return handleInscriptionMetaSubmit(interaction);
-  if (customId.startsWith('insc2:')) return handleInscriptionDetailsSubmit(env, interaction);
+  if (customId.startsWith('insc_details:')) return handleInscriptionDetailsSubmit(env, interaction);
   return reply('Formulaire inconnu.');
 }
 

@@ -113,7 +113,25 @@ const commands = [
       {
         type: 1,
         name: 'ouvrir',
-        description: 'Ouvrir un formulaire (2 étapes) pour configurer et ouvrir les inscriptions',
+        description: 'Ouvrir les inscriptions à une saison',
+        options: [
+          { type: 3, name: 'titre', description: 'Titre de la saison (ex : Saison 50)', required: true, max_length: 30 },
+          {
+            type: 3,
+            name: 'type',
+            description: 'Type de saison',
+            required: true,
+            choices: [
+              { name: 'Classique', value: 'Classique' },
+              { name: 'Jeu de la Mort Alternatif', value: 'Jeu de la Mort Alternatif' },
+              { name: 'Grande Échelle', value: 'Grande Échelle' },
+              { name: 'Libre', value: 'Libre' },
+            ],
+          },
+          { type: 4, name: 'places', description: 'Nombre de places disponibles', required: true, min_value: 1 },
+          { type: 4, name: 'max_chapitres', description: 'Nombre de chapitres max', required: true, min_value: 1, max_value: 6 },
+          { type: 4, name: 'min_perso', description: 'Nombre min. de personnages à proposer', required: true, min_value: 1 },
+        ],
       },
       {
         type: 1,
