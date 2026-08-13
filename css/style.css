@@ -84,15 +84,17 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  margin-left: 0.3rem;
+  width: 20px;
+  height: 20px;
+  margin-left: 0.4rem;
   border-radius: 50%;
   background: var(--red);
   color: #fff;
-  font-size: 0.65rem;
+  font-family: 'Rubik', 'Segoe UI', sans-serif;
+  font-size: 0.85rem;
   font-weight: 700;
   line-height: 1;
+  vertical-align: middle;
   animation: badge-pulse 1.6s ease-in-out infinite;
 }
 
