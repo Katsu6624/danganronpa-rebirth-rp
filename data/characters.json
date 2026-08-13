@@ -195,7 +195,10 @@
     "name": "??? (Ultime Imposteur)",
     "ultimate": "Ultime Imposteur",
     "faction": "Goodbye Despair",
-    "image": "assets/characters/impostor-goodbye-despair.png"
+    "image": "assets/characters/impostor-goodbye-despair.png",
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "chiaki-nanami",
@@ -507,28 +510,42 @@
     "name": "Komaru Naegi",
     "ultimate": "Ultime ???",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support",
+      "Fighter"
+    ]
   },
   {
     "id": "jataro-kemuri",
     "name": "Jataro Kemuri",
     "ultimate": "Ultime Élève d'Arts Plastiques",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "masaru-daimon",
     "name": "Masaru Daimon",
     "ultimate": "Ultime Élève d'EPS",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader",
+      "Fighter"
+    ]
   },
   {
     "id": "kotoko-uetsugi",
     "name": "Kotoko Uetsugi",
     "ultimate": "Ultime Élève de Spectacle",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "monaka-towa-jeune",
@@ -547,7 +564,10 @@
     "name": "Nagisa Shingetsu",
     "ultimate": "Ultime Élève d'Enseignement Moral et Civique",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "le-serviteur",
@@ -565,14 +585,21 @@
     "name": "Haiji Tôwa",
     "ultimate": "Ultime Résistant ou Ultime ???",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader",
+      "Troublemaker"
+    ]
   },
   {
     "id": "yuta-asahina",
     "name": "Yuta Asahina",
     "ultimate": "Ultime Élève d'EPS ou Ultime ???",
     "faction": "Ultra Despair Girls",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "taichi-fujisaki",
@@ -602,7 +629,10 @@
     "ultimate": "Ancien Ultime Fermier",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/daisaku-bandai.png"
+    "image": "assets/characters/daisaku-bandai.png",
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "great-gozu",
@@ -610,7 +640,11 @@
     "ultimate": "Ancien Ultime Catcheur",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/great-gozu.png"
+    "image": "assets/characters/great-gozu.png",
+    "roles": [
+      "Fighter",
+      "Support"
+    ]
   },
   {
     "id": "juzo-sakakura",
@@ -618,7 +652,10 @@
     "ultimate": "Ancien Ultime Boxeur",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/juzo-sakakura.png"
+    "image": "assets/characters/juzo-sakakura.png",
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "kazuo-tengan",
@@ -639,7 +676,11 @@
     "ultimate": "Ultime Rechercheur d'Ultimes",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/koichi-kizakura.png"
+    "image": "assets/characters/koichi-kizakura.png",
+    "roles": [
+      "Analyste",
+      "Support"
+    ]
   },
   {
     "id": "kyosuke-munakata",
@@ -659,7 +700,10 @@
     "ultimate": "Ultime Thérapeute",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/miaya-gekkogahara.png"
+    "image": "assets/characters/miaya-gekkogahara.png",
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "ruruka-ando",
@@ -703,7 +747,10 @@
     "ultimate": "Ultime Forgeron",
     "faction": "The End of Hope's Peak High School",
     "paid": true,
-    "image": "assets/characters/sonosuke-izayoi.png"
+    "image": "assets/characters/sonosuke-izayoi.png",
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "monaka-towa-adolescente",
@@ -744,28 +791,41 @@
     "name": "Suisei Nanamura",
     "ultimate": "Ultime Détective ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste",
+      "Fighter"
+    ]
   },
   {
     "id": "polaris-p-polanski",
     "name": "Polaris P. Polanski",
     "ultimate": "Ultime Assistante Détective ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "ao-ink",
     "name": "Ao Ink",
     "ultimate": "Ultime Secrétaire",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "ryoko-otonashi",
     "name": "Ryoko Otonashi",
     "ultimate": "Ultime Analyste ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "yasuke-matsuda",
@@ -805,14 +865,20 @@
     "name": "Shûji Fujigawa",
     "ultimate": "Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "soshun-murasame",
     "name": "Sôshun Murasame",
     "ultimate": "Ultime Président du Conseil Étudiant",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader"
+    ]
   },
   {
     "id": "misaki-asano",
@@ -830,7 +896,11 @@
     "name": "Licorne",
     "ultimate": "Ultime Détective ou Ultime ???",
     "faction": "Dôjinshika",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste",
+      "Fighter"
+    ]
   },
   {
     "id": "natsumi-kuzuryu",
@@ -848,98 +918,142 @@
     "name": "Kinji Uehara",
     "ultimate": "Ultime Prêtre",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "kizuna-tomori",
     "name": "Kizuna Tomori",
     "ultimate": "Ultime Pom-Pom Girl",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "tsurugi-kinjo",
     "name": "Tsurugi Kinjo",
     "ultimate": "Ultime Policier",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste",
+      "Fighter"
+    ]
   },
   {
     "id": "mitsuhiro-higa",
     "name": "Mitsuhiro Higa",
     "ultimate": "Ultime Footballer",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "mikako-kurokawa",
     "name": "Mikako Kurokawa",
     "ultimate": "Ultime Exorciste",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "rei-mekaru",
     "name": "Rei Mekaru",
     "ultimate": "Ultime Prof",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader"
+    ]
   },
   {
     "id": "haruhiko-kobashikawa",
     "name": "Haruhiko Kobashikawa",
     "ultimate": "Ultime Aviateur",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader"
+    ]
   },
   {
     "id": "kakeru-yamaguchi",
     "name": "Kakeru Yamaguchi",
     "ultimate": "Ultime Avocat",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "kanata-inori",
     "name": "Kanata Inori",
     "ultimate": "Ultime Chirurgienne",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "akane-taira",
     "name": "Akane Taira",
     "ultimate": "Ultime Maid",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "ayame-hatano",
     "name": "Ayame Hatano",
     "ultimate": "Ultime Spinteuse",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "kiyoka-maki",
     "name": "Kiyoka Maki",
     "ultimate": "Ultime Snipeuse",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "satsuki-iranami",
     "name": "Satsuki Iranami",
     "ultimate": "Ultime Clown",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support",
+      "Troublemaker"
+    ]
   },
   {
     "id": "yamato-kisaragi",
     "name": "Yamato Kisaragi",
     "ultimate": "Ultime Inventeur",
     "faction": "Another Despair Academy",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "teruya-otori",
@@ -947,7 +1061,10 @@
     "ultimate": "Ancien Ultime Marchant",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/teruya-otori.png"
+    "image": "assets/characters/teruya-otori.png",
+    "roles": [
+      "Leader"
+    ]
   },
   {
     "id": "sora",
@@ -961,7 +1078,10 @@
     "name": "Shobai Hashimoto",
     "ultimate": "Ultime Courtier",
     "faction": "Another 2",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "iroha-nijiue",
@@ -969,7 +1089,10 @@
     "ultimate": "Ultime Peintre",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/iroha-nijiue.png"
+    "image": "assets/characters/iroha-nijiue.png",
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "emma-magorobi",
@@ -977,7 +1100,10 @@
     "ultimate": "Ultime Actrice",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/emma-magorobi.png"
+    "image": "assets/characters/emma-magorobi.png",
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "hajime-makunouchi",
@@ -985,7 +1111,10 @@
     "ultimate": "Ultime Boxer",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/hajime-makunouchi.png"
+    "image": "assets/characters/hajime-makunouchi.png",
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "hibiki-otonokoji",
@@ -993,7 +1122,10 @@
     "ultimate": "Ultime Chanteuse",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/hibiki-otonokoji.png"
+    "image": "assets/characters/hibiki-otonokoji.png",
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "kanade-otonokoji",
@@ -1001,7 +1133,10 @@
     "ultimate": "Ultime Guitariste",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/kanade-otonokoji.png"
+    "image": "assets/characters/kanade-otonokoji.png",
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "kokoro-mitsume",
@@ -1009,7 +1144,11 @@
     "ultimate": "Ultime Psychologue",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/kokoro-mitsume.png"
+    "image": "assets/characters/kokoro-mitsume.png",
+    "roles": [
+      "Support",
+      "Analyste"
+    ]
   },
   {
     "id": "mikado-sannoji",
@@ -1017,21 +1156,30 @@
     "ultimate": "Ultime Sorcier",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/mikado-sannoji.png"
+    "image": "assets/characters/mikado-sannoji.png",
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "yuri-kagarin",
     "name": "Yuri Kagarin",
     "ultimate": "Ultime Astronaute",
     "faction": "Another 2",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader"
+    ]
   },
   {
     "id": "yuki-maeda",
     "name": "Yuki Maeda",
     "ultimate": "Ultime Chanceux",
     "faction": "Another 2",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "setsuka-chiebukuro",
@@ -1039,7 +1187,10 @@
     "ultimate": "Ultime Joueuse de Billard",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/setsuka-chiebukuro.png"
+    "image": "assets/characters/setsuka-chiebukuro.png",
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "shinji-kasai",
@@ -1047,154 +1198,221 @@
     "ultimate": "Ultime Pompier",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/shinji-kasai.png"
+    "image": "assets/characters/shinji-kasai.png",
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "yoruko-kabuya",
     "name": "Yoruko Kabuya",
     "ultimate": "Ultime Hôtesse",
     "faction": "Another 2",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "wolfgang-akire",
     "name": "Wolfgang Akire",
     "ultimate": "Ultime Avocat",
     "faction": "Eden's Garden",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "damon-maitsu",
     "name": "Damon Maitsu",
     "ultimate": "Ultime Débatteur",
     "faction": "Eden's Garden",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "eva-tsunaka",
     "name": "Eva Tsunaka",
     "ultimate": "Ultime Menteuse",
     "faction": "Eden's Garden",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "grace-madison",
     "name": "Grace Madison",
     "ultimate": "Ultime Golfeuse",
     "faction": "Eden's Garden",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "kai-monteago",
     "name": "Kai Monteago",
     "ultimate": "Ultime Influenceur",
     "faction": "Eden's Garden",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "wenona",
     "name": "Wenona",
     "ultimate": "Ultime Entrepreneuse",
     "faction": "Eden's Garden",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Leader"
+    ]
   },
   {
     "id": "eloise",
     "name": "Eloise",
     "ultimate": "Ultime Escrimeuse",
     "faction": "Eden's Garden",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "ayumu-fujimori",
     "name": "Ayumu Fujimori",
     "ultimate": "Ultime Malchanceuse",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "akira-tsuchiya",
     "name": "Akira Tsuchiya",
     "ultimate": "Ultime NEET",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "aruma-todoroki",
     "name": "Aruma Todoroki",
     "ultimate": "Ultime Entraîneuse d'Animal",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "kasumi-izumo",
     "name": "Kasumi Izumo",
     "ultimate": "Ultime Médium",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker"
+    ]
   },
   {
     "id": "kazuomi-samejima",
     "name": "Kazuomi Samejima",
     "ultimate": "Ultime Karatéka",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Fighter"
+    ]
   },
   {
     "id": "maiko-kagura",
     "name": "Maiko Kagura",
     "ultimate": "Ultime Danseuse",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "marin-mizuta",
     "name": "Marin Mizuta",
     "ultimate": "Ultime Présentatrice Météo",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "mikoto-itsuki",
     "name": "Mikoto Itsuki",
     "ultimate": "Ultime Espion",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Troublemaker",
+      "Analyste"
+    ]
   },
   {
     "id": "misuzu-aisaka",
     "name": "Misuzu Aisaka",
     "ultimate": "Ultime Miko",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "mitsunari-koga",
     "name": "Mitsunari Koga",
     "ultimate": "Ultime Ventriloque",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "nico-himuro",
     "name": "Nico Himuro",
     "ultimate": "Ultime Poétesse",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Support"
+    ]
   },
   {
     "id": "saiji-rokudo",
     "name": "Saiji Rokudō",
     "ultimate": "Ultime Croque-Mort",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "seishi-yodogawa",
     "name": "Seishi Yodogawa",
     "ultimate": "Ultime Mystery Novelist",
     "faction": "Re:Birth",
-    "paid": true
+    "paid": true,
+    "roles": [
+      "Analyste"
+    ]
   },
   {
     "id": "nikei",
@@ -1202,6 +1420,9 @@
     "ultimate": "Ultime Journaliste",
     "faction": "Another 2",
     "paid": true,
-    "image": "assets/characters/nikei.png"
+    "image": "assets/characters/nikei.png",
+    "roles": [
+      "Analyste"
+    ]
   }
 ]
