@@ -666,17 +666,19 @@ html.js .player-block.in-view {
   outline: none;
 }
 
-.lightbox-modal {
+.modal.lightbox-modal {
   background: var(--card);
   padding: 1.4rem;
-  max-width: 90vw;
+  max-width: 95vw;
+  width: auto;
+  max-height: 92vh;
   flex-direction: column;
   align-items: center;
 }
 
 .lightbox-modal img {
   max-width: 100%;
-  max-height: 78vh;
+  max-height: 85vh;
   object-fit: contain;
   border: 1px solid var(--border);
 }
