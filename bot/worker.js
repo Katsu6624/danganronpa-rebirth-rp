@@ -195,6 +195,7 @@ function handleHelp() {
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
     '`/vip prepa retirer <joueur>` : retire le rôle Lycéen en Cours Préparatoire (les attributions individuelles sont conservées).',
     '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning) puis ouvre les inscriptions à une saison.',
+    '`/inscription image url:<lien>` : ajoute une image à la page Inscription (inscriptions déjà ouvertes).',
     '`/inscription fermer` : ferme les inscriptions.',
   ];
   return reply(lines.join('\n'));
@@ -388,6 +389,21 @@ async function handleInscription(env, interaction) {
     ]);
   }
 
+  if (sub?.name === 'image') {
+    const url = sub.options?.find((o) => o.name === 'url')?.value || '';
+    if (!/^https?:\/\//.test(url)) {
+      return reply("L'image doit être une URL valide (http:// ou https://).");
+    }
+    const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
+      if (!data.open) return { skipWrite: true, notOpen: true };
+      data.imageUrl = url;
+      data.updatedAt = new Date().toISOString();
+      return { message: 'Ajout d\'une image aux inscriptions' };
+    });
+    if (ctx.notOpen) return reply('Aucune inscription n\'est ouverte actuellement.');
+    return reply('✅ Image ajoutée à la page Inscription.', false);
+  }
+
   if (sub?.name === 'fermer') {
     await updateJsonFile(env, 'data/inscription.json', (data) => {
       Object.assign(data, {
@@ -401,6 +417,7 @@ async function handleInscription(env, interaction) {
         tone: '',
         planning: '',
         openedBy: null,
+        imageUrl: '',
         updatedAt: new Date().toISOString(),
       });
       return { message: 'Fermeture des inscriptions' };
@@ -431,6 +448,7 @@ async function handleInscriptionDetailsSubmit(env, interaction) {
       tone: v.ton,
       planning: v.planning,
       openedBy,
+      imageUrl: '',
       updatedAt: new Date().toISOString(),
     });
     return { message: `Ouverture des inscriptions : ${titre}` };
@@ -490,7 +508,7 @@ async function handleInscriptionResponse(request, env) {
     return jsonResponse(400, { error: 'JSON invalide.' });
   }
 
-  const { pseudo, presence, remplacant, personnages, intentionTuer, placeReservee, mastermind } = payload;
+  const { pseudo, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind } = payload;
   if (!pseudo || !Array.isArray(personnages) || personnages.length === 0) {
     return jsonResponse(400, { error: 'Champs manquants.' });
   }
@@ -530,7 +548,7 @@ async function handleInscriptionResponse(request, env) {
     `Pseudo : **${player.name}** (<@${player.discordId}>)`,
     `Présent tous les jours : ${presence === 'non' ? 'Non' : 'Oui'}${presence === 'non' && remplacant ? ` — remplaçant : ${remplacant}` : ''}`,
     `Personnages proposés : ${persoNames}`,
-    `Intention de tuer : ${intentionTuer === 'oui' ? 'Oui' : 'Non'}`,
+    `Intention de tuer : ${intentionTuer === 'oui' ? 'Oui' : 'Non'}${intentionTuer === 'oui' && intentionTuerDetails ? ` — ${intentionTuerDetails}` : ''}`,
     `Place réservée : ${placeReservee || 'Pas de place réservée'}`,
     `Souhaite être mastermind : ${mastermind === 'oui' ? 'Oui' : 'Non'}`,
   ];

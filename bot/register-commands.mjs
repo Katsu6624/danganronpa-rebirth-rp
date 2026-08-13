@@ -135,6 +135,12 @@ const commands = [
       },
       {
         type: 1,
+        name: 'image',
+        description: 'Ajouter une image à la page Inscription (inscriptions déjà ouvertes)',
+        options: [{ type: 3, name: 'url', description: "Lien de l'image", required: true }],
+      },
+      {
+        type: 1,
         name: 'fermer',
         description: 'Fermer les inscriptions',
       },

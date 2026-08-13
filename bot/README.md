@@ -19,6 +19,9 @@ GitHub, ce qui republie le site automatiquement.
 - `/inscription ouvrir titre type places max_chapitres min_perso` : remplis ces 5 options
   directement dans Discord, puis un modal s'ouvre pour les 3 derniers champs (personnages
   bannis, ton et attentes RP, planning) ; valide pour ouvrir les inscriptions ⚠️ staff
+- `/inscription image url:<lien>` : ajoute une image en tête de la page Inscription (inscriptions
+  déjà ouvertes ; colle un lien d'image déjà hébergé ailleurs, pas de pièce jointe Discord car
+  ces liens expirent au bout de 24-48h) ⚠️ staff
 - `/inscription fermer` : ferme les inscriptions, remet la page Inscription en état "fermé" ⚠️ staff
 
 Pour les deux paliers `/vip`, les personnages attribués individuellement via `/debloquer`

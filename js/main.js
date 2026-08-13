@@ -37,6 +37,7 @@ async function renderInscriptionPage(state) {
   const minCharacters = Number(state.minCharacters) || 1;
 
   container.innerHTML = `
+    ${state.imageUrl ? `<img src="${state.imageUrl}" alt="${state.title}" style="display:block;width:100%;max-height:420px;object-fit:cover;border:1px solid var(--border);margin-bottom:1.2rem;">` : ''}
     <div class="rules-list">
       <div class="rule-item">
         <p>Pour vous inscrire à la saison ${state.title}, veuillez répondre à ce formulaire.</p>
@@ -57,7 +58,10 @@ async function renderInscriptionPage(state) {
     <form id="insc-form" class="rules-list" style="margin-top:1.5rem;">
       <div class="rule-item">
         <h4>Quel est ton pseudo Discord ?</h4>
-        <input type="text" id="insc-pseudo" class="insc-input" placeholder="Ton pseudo" required autocomplete="off">
+        <div class="player-search" style="max-width:420px;">
+          <input type="text" id="insc-pseudo" class="insc-input" placeholder="Ton pseudo" required autocomplete="off">
+          <div class="player-dropdown" id="insc-pseudo-dropdown"></div>
+        </div>
         <button type="button" class="btn btn-outline" id="insc-load-chars" style="margin-top:0.6rem;">Charger mes personnages</button>
         <p id="insc-pseudo-status" style="margin-top:0.5rem;font-size:0.85rem;"></p>
       </div>
@@ -73,7 +77,8 @@ async function renderInscriptionPage(state) {
 
       <div class="rule-item">
         <h4>Quel(s) personnage(s) voudrais-tu jouer ? (minimum ${minCharacters})</h4>
-        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.6rem;">Charge d'abord tes personnages avec ton pseudo ci-dessus.</p>
+        <p id="insc-char-hint" style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.6rem;">Charge d'abord tes personnages avec ton pseudo ci-dessus.</p>
+        <input type="text" id="insc-char-search" class="insc-input" placeholder="Rechercher un personnage..." style="display:none;margin-bottom:0.6rem;">
         <div id="insc-char-list" class="tag-list"></div>
       </div>
 
@@ -83,6 +88,7 @@ async function renderInscriptionPage(state) {
           <label><input type="radio" name="intentionTuer" value="non" checked> Non</label>
           <label><input type="radio" name="intentionTuer" value="oui"> Oui</label>
         </div>
+        <textarea id="insc-tuer-details" class="insc-input" style="display:none;margin-top:0.6rem;" placeholder="Détails (comment, sur qui si tu sais déjà, etc.)"></textarea>
       </div>
 
       <div class="rule-item">
@@ -113,11 +119,16 @@ async function renderInscriptionPage(state) {
 function setupInscriptionForm(state, characters, players, minCharacters) {
   const form = document.getElementById('insc-form');
   const pseudoInput = document.getElementById('insc-pseudo');
+  const pseudoDropdown = document.getElementById('insc-pseudo-dropdown');
   const loadBtn = document.getElementById('insc-load-chars');
   const status = document.getElementById('insc-pseudo-status');
+  const charHint = document.getElementById('insc-char-hint');
+  const charSearch = document.getElementById('insc-char-search');
   const charList = document.getElementById('insc-char-list');
   const presenceRadios = form.querySelectorAll('input[name="presence"]');
   const remplacantBox = document.getElementById('insc-remplacant');
+  const intentionTuerRadios = form.querySelectorAll('input[name="intentionTuer"]');
+  const tuerDetailsBox = document.getElementById('insc-tuer-details');
   const resultEl = document.getElementById('insc-result');
 
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
@@ -127,13 +138,18 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
     remplacantBox.style.display = form.presence.value === 'non' ? 'block' : 'none';
   }));
 
-  loadBtn.addEventListener('click', () => {
+  intentionTuerRadios.forEach((r) => r.addEventListener('change', () => {
+    tuerDetailsBox.style.display = form.intentionTuer.value === 'oui' ? 'block' : 'none';
+  }));
+
+  function loadCharacters() {
     const q = pseudoInput.value.trim().toLowerCase();
     currentPlayer = players.find((p) => p.name.toLowerCase() === q) || null;
     if (!currentPlayer) {
       status.textContent = 'Pseudo non reconnu. Utilise /register sur Discord avant de t\'inscrire.';
       status.style.color = 'var(--red)';
       charList.innerHTML = '';
+      charSearch.style.display = 'none';
       return;
     }
     const owned = (currentPlayer.owned || []).map((id) => charById[id]).filter(Boolean);
@@ -141,15 +157,68 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
       status.textContent = 'Tu n\'as encore aucun personnage débloqué.';
       status.style.color = 'var(--red)';
       charList.innerHTML = '';
+      charSearch.style.display = 'none';
       return;
     }
     status.textContent = `${owned.length} personnage(s) chargé(s).`;
     status.style.color = 'var(--gold)';
+    charHint.style.display = 'none';
+    charSearch.style.display = owned.length > 8 ? 'block' : 'none';
+    charSearch.value = '';
     charList.innerHTML = owned.map((c) => `
-      <label class="pill" style="cursor:pointer;">
+      <label class="pill" data-name="${c.name.toLowerCase()}" style="cursor:pointer;">
         <input type="checkbox" name="personnage" value="${c.id}" style="margin-right:0.4rem;">${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}
       </label>
     `).join('');
+  }
+
+  loadBtn.addEventListener('click', loadCharacters);
+
+  charSearch.addEventListener('input', () => {
+    const q = charSearch.value.trim().toLowerCase();
+    charList.querySelectorAll('.pill').forEach((pill) => {
+      pill.style.display = pill.dataset.name.includes(q) ? '' : 'none';
+    });
+  });
+
+  // Autocomplete du pseudo (mêmes principes que sur la page Personnages).
+  function renderPseudoOptions() {
+    const q = pseudoInput.value.trim().toLowerCase();
+    if (!q) {
+      pseudoDropdown.classList.remove('open');
+      pseudoDropdown.innerHTML = '';
+      return;
+    }
+    const matches = players
+      .map((p) => p.name)
+      .filter((n) => n.toLowerCase().includes(q))
+      .slice(0, 8);
+    pseudoDropdown.innerHTML = '';
+    if (matches.length === 0) {
+      pseudoDropdown.innerHTML = '<div class="option empty">Aucun joueur trouvé</div>';
+    } else {
+      matches.forEach((name) => {
+        const opt = document.createElement('div');
+        opt.className = 'option';
+        opt.textContent = name;
+        opt.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          pseudoInput.value = name;
+          pseudoDropdown.classList.remove('open');
+          loadCharacters();
+        });
+        pseudoDropdown.appendChild(opt);
+      });
+    }
+    pseudoDropdown.classList.add('open');
+  }
+
+  pseudoInput.addEventListener('focus', renderPseudoOptions);
+  pseudoInput.addEventListener('input', renderPseudoOptions);
+  document.addEventListener('click', (e) => {
+    if (e.target !== pseudoInput && !pseudoDropdown.contains(e.target)) {
+      pseudoDropdown.classList.remove('open');
+    }
   });
 
   form.addEventListener('submit', async (e) => {
@@ -175,6 +244,7 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
       remplacant: remplacantBox.value.trim(),
       personnages: chosen,
       intentionTuer: form.intentionTuer.value,
+      intentionTuerDetails: tuerDetailsBox.value.trim(),
       placeReservee: form.placeReservee.value,
       mastermind: form.mastermind.value,
     };
@@ -196,6 +266,8 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
       resultEl.style.color = 'var(--gold)';
       form.reset();
       charList.innerHTML = '';
+      charSearch.style.display = 'none';
+      charHint.style.display = 'block';
       status.textContent = '';
     } catch (err) {
       resultEl.textContent = `Erreur : ${err.message}`;
