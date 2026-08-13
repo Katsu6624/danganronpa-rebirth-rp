@@ -670,7 +670,6 @@ html.js .player-block.in-view {
   background: var(--card);
   padding: 1.4rem;
   max-width: 90vw;
-  display: flex;
   flex-direction: column;
   align-items: center;
 }
