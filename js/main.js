@@ -57,7 +57,7 @@ function renderCharacters(characters, players) {
   function draw() {
     const q = (search.value || '').toLowerCase();
     const faction = factionFilter.value;
-    const status = statusFilter.value;
+    const status = statusFilter ? statusFilter.value : '';
     const role = roleFilter ? roleFilter.value : '';
     const player = playerInput ? findPlayerByName(playerInput.value || '') : null;
     const ownedSet = new Set(player?.owned || []);
