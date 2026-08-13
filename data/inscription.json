@@ -1,13 +1,13 @@
 {
-  "open": true,
-  "title": "Saison 69",
-  "seasonType": "Classique",
-  "slots": "3",
-  "maxChapters": "5",
-  "minCharacters": "3",
-  "bannedCharacters": "Junko Enoshima",
-  "tone": "Blabla jouer serious RP",
-  "planning": "Chap 1 : Blabla\nChap 2 : Bla\nDFDF\n\nDF\nFD\nFD\nFD\nFD\nDF\nDF",
-  "openedBy": "388041172574011404",
-  "updatedAt": "2026-08-13T18:15:47.196Z"
+  "open": false,
+  "title": "",
+  "seasonType": "",
+  "slots": null,
+  "maxChapters": null,
+  "minCharacters": null,
+  "bannedCharacters": "",
+  "tone": "",
+  "planning": "",
+  "openedBy": null,
+  "updatedAt": "2026-08-13T18:21:25.551Z"
 }
