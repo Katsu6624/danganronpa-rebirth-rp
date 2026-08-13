@@ -398,6 +398,7 @@ async function handleInscription(env, interaction) {
         tone: '',
         planning: '',
         openedBy: null,
+        draft: null,
         updatedAt: new Date().toISOString(),
       });
       return { message: 'Fermeture des inscriptions' };
@@ -409,20 +410,24 @@ async function handleInscription(env, interaction) {
   return reply('Sous-commande inconnue.');
 }
 
-async function handleInscriptionMetaSubmit(interaction) {
+async function handleInscriptionMetaSubmit(env, interaction) {
   const v = getModalValues(interaction);
-  // On mémorise le brouillon dans le custom_id du modal suivant, encodé en base64,
-  // le Worker étant sans état entre deux interactions séparées.
-  const draft = {
-    titre: v.titre,
-    type_saison: v.type_saison,
-    places: v.places,
-    max_chapitres: v.max_chapitres,
-    min_perso: v.min_perso,
-    openedBy: interaction.member.user.id,
-  };
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(draft))));
-  return modalResponse(`inscription_details:${encoded}`, 'Nouvelle saison (2/2)', [
+  // Le Worker est sans état entre deux interactions séparées (custom_id limité à 100
+  // caractères, trop court pour y stocker tout le brouillon) : on le persiste dans
+  // data/inscription.json le temps de récupérer la seconde fenêtre.
+  await updateJsonFile(env, 'data/inscription.json', (data) => {
+    data.draft = {
+      titre: v.titre,
+      type_saison: v.type_saison,
+      places: v.places,
+      max_chapitres: v.max_chapitres,
+      min_perso: v.min_perso,
+      openedBy: interaction.member.user.id,
+    };
+    return { message: 'Brouillon de saison (étape 1/2)' };
+  });
+
+  return modalResponse('inscription_details', 'Nouvelle saison (2/2)', [
     { id: 'bannis', label: 'Personnages bannis (laisser vide sinon)', style: 2, required: false, placeholder: 'Aucun' },
     { id: 'ton', label: 'Ton et attentes RP', style: 2 },
     { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
@@ -430,11 +435,11 @@ async function handleInscriptionMetaSubmit(interaction) {
 }
 
 async function handleInscriptionDetailsSubmit(env, interaction) {
-  const encoded = interaction.data.custom_id.split(':').slice(1).join(':');
-  const draft = JSON.parse(decodeURIComponent(escape(atob(encoded))));
   const v = getModalValues(interaction);
 
-  await updateJsonFile(env, 'data/inscription.json', (data) => {
+  const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
+    const draft = data.draft;
+    if (!draft) return { skipWrite: true, missingDraft: true };
     Object.assign(data, {
       open: true,
       title: draft.titre,
@@ -446,18 +451,23 @@ async function handleInscriptionDetailsSubmit(env, interaction) {
       tone: v.ton,
       planning: v.planning,
       openedBy: draft.openedBy,
+      draft: null,
       updatedAt: new Date().toISOString(),
     });
-    return { message: `Ouverture des inscriptions : ${draft.titre}` };
+    return { message: `Ouverture des inscriptions : ${draft.titre}`, title: draft.titre };
   });
 
-  return reply(`✅ Inscriptions ouvertes pour **${draft.titre}**. Le formulaire est en ligne sur la page Inscription du site.`, false);
+  if (ctx.missingDraft) {
+    return reply('Le brouillon de la première étape a expiré, relance /inscription ouvrir.');
+  }
+
+  return reply(`✅ Inscriptions ouvertes pour **${ctx.title}**. Le formulaire est en ligne sur la page Inscription du site.`, false);
 }
 
 async function handleModalSubmit(env, interaction) {
   const customId = interaction.data.custom_id;
-  if (customId === 'inscription_meta') return handleInscriptionMetaSubmit(interaction);
-  if (customId.startsWith('inscription_details:')) return handleInscriptionDetailsSubmit(env, interaction);
+  if (customId === 'inscription_meta') return handleInscriptionMetaSubmit(env, interaction);
+  if (customId === 'inscription_details') return handleInscriptionDetailsSubmit(env, interaction);
   return reply('Formulaire inconnu.');
 }
 
