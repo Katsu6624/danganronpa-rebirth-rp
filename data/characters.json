@@ -1073,7 +1073,8 @@
     "faction": "Another 2",
     "paid": true,
     "roles": [
-      "Support"
+      "Support",
+      "Analyste"
     ]
   },
   {
