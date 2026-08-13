@@ -482,7 +482,7 @@ a {
   transform: translateX(3px);
 }
 
-.rule-item.espoir { border-left-color: var(--gold); }
+.rule-item.espoir { border-left-color: var(--purple); }
 .rule-item.neutralite { border-left-color: var(--purple); }
 .rule-item.desespoir { border-left-color: var(--red); }
 
