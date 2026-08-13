@@ -686,6 +686,46 @@ html.js .player-block.in-view {
   display: flex;
 }
 
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 2rem;
+  line-height: 1;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.lightbox-nav:hover {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.lightbox-prev {
+  left: 0.6rem;
+}
+
+.lightbox-next {
+  right: 0.6rem;
+}
+
+@media (max-width: 640px) {
+  .lightbox-nav {
+    width: 38px;
+    height: 38px;
+    font-size: 1.5rem;
+  }
+}
+
 /* Back to top */
 .back-to-top {
   position: fixed;

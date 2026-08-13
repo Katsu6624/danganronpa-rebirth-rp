@@ -265,26 +265,43 @@ function setupSeasonGallery() {
   const lightboxImg = document.getElementById('season-lightbox-img');
   const lightboxDownload = document.getElementById('season-lightbox-download');
   const closeBtn = document.getElementById('season-lightbox-close');
+  const prevBtn = document.getElementById('season-lightbox-prev');
+  const nextBtn = document.getElementById('season-lightbox-next');
   if (!lightbox) return;
 
-  function openLightbox(el) {
+  let currentIndex = 0;
+
+  function showIndex(index) {
+    currentIndex = (index + SEASON_IMAGES.length) % SEASON_IMAGES.length;
+    const slug = SEASON_IMAGES[currentIndex];
+    lightboxImg.src = `assets/seasons/${slug}.jpg`;
+    lightboxDownload.href = `assets/seasons/${slug}.jpg`;
+    lightboxDownload.download = `${slug}.jpg`;
+  }
+
+  function openLightbox(index) {
     const scrollY = window.scrollY;
-    lightboxImg.src = el.dataset.src;
-    lightboxDownload.href = el.dataset.src;
-    lightboxDownload.download = el.dataset.name;
+    showIndex(index);
     lightbox.showModal();
     window.scrollTo(0, scrollY);
     requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }
 
-  gallery.querySelectorAll('.card-visual').forEach(el => {
-    el.addEventListener('click', () => openLightbox(el));
+  gallery.querySelectorAll('.card-visual').forEach((el, index) => {
+    el.addEventListener('click', () => openLightbox(index));
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        openLightbox(el);
+        openLightbox(index);
       }
     });
+  });
+
+  prevBtn.addEventListener('click', () => showIndex(currentIndex - 1));
+  nextBtn.addEventListener('click', () => showIndex(currentIndex + 1));
+  lightbox.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') showIndex(currentIndex - 1);
+    if (e.key === 'ArrowRight') showIndex(currentIndex + 1);
   });
 
   closeBtn.addEventListener('click', () => lightbox.close());
