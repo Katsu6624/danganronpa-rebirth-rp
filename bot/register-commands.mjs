@@ -104,6 +104,25 @@ const commands = [
       },
     ],
   },
+  {
+    name: 'inscription',
+    description: 'Gérer les inscriptions à la saison en cours',
+    default_member_permissions: MANAGE_GUILD,
+    dm_permission: false,
+    options: [
+      {
+        type: 1,
+        name: 'ouvrir',
+        description: 'Ouvrir les inscriptions avec un lien Google Form',
+        options: [{ type: 3, name: 'lien', description: 'Lien du Google Form', required: true }],
+      },
+      {
+        type: 1,
+        name: 'fermer',
+        description: 'Fermer les inscriptions',
+      },
+    ],
+  },
 ];
 
 const endpoint = guildId

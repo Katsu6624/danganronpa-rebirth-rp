@@ -1,3 +1,41 @@
+async function setupInscription() {
+  const container = document.getElementById('inscription-content');
+  if (!container) return;
+
+  let state;
+  try {
+    const res = await fetch('data/inscription.json');
+    state = await res.json();
+  } catch (e) {
+    state = { open: false };
+  }
+
+  if (state.open && state.formUrl) {
+    const embedUrl = state.formUrl.includes('?')
+      ? `${state.formUrl}&embedded=true`
+      : `${state.formUrl}?embedded=true`;
+    container.innerHTML = `
+      <div class="rules-list">
+        <div class="rule-item">
+          <p>Les inscriptions sont ouvertes ! Remplis le formulaire ci-dessous pour t'inscrire à la prochaine saison.</p>
+        </div>
+      </div>
+      <div class="gform-embed">
+        <iframe src="${embedUrl}" title="Formulaire d'inscription">Chargement du formulaire…</iframe>
+      </div>
+      <p class="subtitle" style="margin-top:1rem;"><a href="${state.formUrl}" target="_blank" rel="noopener" style="color:var(--red);">Ouvrir le formulaire dans un nouvel onglet →</a></p>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="rules-list">
+        <div class="rule-item">
+          <p>Aucune saison n'est ouverte aux inscriptions.</p>
+        </div>
+      </div>
+    `;
+  }
+}
+
 async function loadData() {
   const [charactersRes, playersRes] = await Promise.all([
     fetch('data/characters.json'),
@@ -343,6 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupUnlockInfoModal();
   setupSeasonGallery();
   setupSeasonLoopGif();
+  setupInscription();
   setupScrollReveal();
   setupBackToTop();
 

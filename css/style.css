@@ -747,6 +747,25 @@ html.js .player-block.in-view {
   flex: 1 1 260px;
 }
 
+.gform-embed {
+  margin-top: 1.2rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.gform-embed iframe {
+  display: block;
+  width: 100%;
+  height: 1400px;
+  border: none;
+}
+
+@media (max-width: 640px) {
+  .gform-embed iframe {
+    height: 1800px;
+  }
+}
+
 .history-images {
   display: flex;
   flex-wrap: wrap;

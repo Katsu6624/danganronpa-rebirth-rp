@@ -81,6 +81,24 @@ async function updatePlayersFile(env, updater, maxAttempts = 3) {
   throw lastErr;
 }
 
+async function updateJsonFile(env, path, updater, maxAttempts = 3) {
+  let lastErr;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { data, sha } = await readJsonFile(env, path);
+    const ctx = await updater(data);
+    if (ctx.skipWrite) return ctx;
+    try {
+      await writeJsonFile(env, path, data, sha, ctx.message);
+      return ctx;
+    } catch (err) {
+      lastErr = err;
+      if (!isConflictError(err) || attempt === maxAttempts - 1) throw err;
+      await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+    }
+  }
+  throw lastErr;
+}
+
 async function discordRequest(env, path, options = {}) {
   const res = await fetch(`https://discord.com/api/v10${path}`, {
     ...options,
@@ -94,6 +112,8 @@ async function discordRequest(env, path, options = {}) {
     const text = await res.text();
     throw new Error(`Discord API ${res.status}: ${text}`);
   }
+  if (res.status === 204) return null;
+  return res.json();
 }
 
 async function setDiscordRole(env, userId, roleId, add) {
@@ -173,6 +193,8 @@ function handleHelp() {
     '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
     '`/vip prepa retirer <joueur>` : retire le rôle Lycéen en Cours Préparatoire (les attributions individuelles sont conservées).',
+    '`/inscription ouvrir <lien>` : ouvre les inscriptions avec un lien de Google Form (mis à jour sur le site et dans le salon d\'inscription).',
+    '`/inscription fermer` : ferme les inscriptions.',
   ];
   return reply(lines.join('\n'));
 }
@@ -313,6 +335,78 @@ async function handleRetirer(env, interaction) {
   return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
 }
 
+function isGoogleFormUrl(url) {
+  return /^https:\/\/docs\.google\.com\/forms\//.test(url);
+}
+
+async function handleInscription(env, interaction) {
+  const sub = interaction.data.options?.[0];
+  const channelId = env.DISCORD_CHANNEL_INSCRIPTION;
+
+  if (sub?.name === 'ouvrir') {
+    const lien = sub.options?.find((o) => o.name === 'lien')?.value || '';
+    if (!isGoogleFormUrl(lien)) {
+      return reply('Le lien doit être une URL Google Forms valide (https://docs.google.com/forms/...).');
+    }
+
+    const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
+      data.open = true;
+      data.formUrl = lien;
+      data.updatedAt = new Date().toISOString();
+      return { message: 'Ouverture des inscriptions', messageId: data.messageId };
+    });
+
+    if (channelId) {
+      const content = `📝 **Les inscriptions sont ouvertes !**\n${lien}`;
+      await upsertInscriptionMessage(env, channelId, content, ctx.messageId);
+    }
+
+    return reply('✅ Inscriptions ouvertes. Le lien est en ligne sur la page Inscription du site et dans le salon dédié.', false);
+  }
+
+  if (sub?.name === 'fermer') {
+    const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
+      data.open = false;
+      data.formUrl = '';
+      data.updatedAt = new Date().toISOString();
+      return { message: 'Fermeture des inscriptions', messageId: data.messageId };
+    });
+
+    if (channelId) {
+      const content = `🔒 **Les inscriptions sont fermées.** Aucune saison n'est ouverte aux inscriptions pour le moment.`;
+      await upsertInscriptionMessage(env, channelId, content, ctx.messageId);
+    }
+
+    return reply('✅ Inscriptions fermées.', false);
+  }
+
+  return reply('Sous-commande inconnue.');
+}
+
+async function upsertInscriptionMessage(env, channelId, content, existingMessageId) {
+  if (existingMessageId) {
+    try {
+      await discordRequest(env, `/channels/${channelId}/messages/${existingMessageId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ content }),
+      });
+      return;
+    } catch (err) {
+      // Le message a peut-être été supprimé manuellement : on en renvoie un nouveau.
+    }
+  }
+  const message = await discordRequest(env, `/channels/${channelId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  });
+  if (message?.id) {
+    await updateJsonFile(env, 'data/inscription.json', (data) => {
+      data.messageId = message.id;
+      return { message: 'Mémorisation du message d\'inscription' };
+    });
+  }
+}
+
 async function handleCommand(env, interaction) {
   switch (interaction.data.name) {
     case 'register': return handleRegister(env, interaction);
@@ -321,6 +415,7 @@ async function handleCommand(env, interaction) {
     case 'liste': return handleListe(env, interaction);
     case 'debloquer': return handleDebloquer(env, interaction);
     case 'retirer': return handleRetirer(env, interaction);
+    case 'inscription': return handleInscription(env, interaction);
     default: return reply('Commande inconnue.');
   }
 }
