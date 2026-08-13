@@ -289,6 +289,7 @@ a {
 }
 
 .card-visual {
+  display: block;
   min-height: 180px;
   padding: 0;
   background-size: cover;
@@ -725,6 +726,54 @@ html.js .player-block.in-view {
     height: 38px;
     font-size: 1.5rem;
   }
+}
+
+.rule-item-media {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.rule-item-media img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.rule-item-media > div {
+  flex: 1 1 260px;
+}
+
+.history-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.2rem 0;
+}
+
+.history-images figure {
+  margin: 0;
+  flex: 1 1 280px;
+  max-width: 360px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.history-images img {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.history-images figcaption {
+  padding: 0.6rem 0.8rem;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border);
 }
 
 /* Back to top */
