@@ -670,11 +670,26 @@ function setupBackToTop() {
   });
 }
 
+function setupAproposTabs() {
+  const tabs = document.querySelectorAll('.apropos-tab');
+  if (!tabs.length) return;
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.apropos-panel').forEach((panel) => {
+        panel.style.display = panel.id === `apropos-panel-${tab.dataset.tab}` ? '' : 'none';
+      });
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setupIpCopy();
   setupUnlockInfoModal();
   setupSeasonGallery();
   setupSeasonLoopGif();
+  setupAproposTabs();
   await setupInscription();
   setupScrollReveal();
   setupBackToTop();

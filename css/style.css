@@ -814,6 +814,19 @@ textarea.insc-input {
   gap: 0.6rem;
 }
 
+.apropos-tabs {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1.8rem;
+  flex-wrap: wrap;
+}
+
+.apropos-tab.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
 .history-images {
   display: flex;
   flex-wrap: wrap;
