@@ -12,7 +12,11 @@ const PLACE_RESERVEE_OPTIONS = [
 function inscriptionCountText(state) {
   const count = (state.registrations || []).length;
   const slots = state.slots ? ` / ${state.slots}` : '';
-  return `${count}${slots} joueur${count > 1 ? 's' : ''} déjà inscrit${count > 1 ? 's' : ''}.`;
+  let text = `${count}${slots} joueur${count > 1 ? 's' : ''} déjà inscrit${count > 1 ? 's' : ''}.`;
+  if (state.slots && count >= Number(state.slots)) {
+    text += " Il y a assez de gens inscrit pour la saison mais vous pouvez encore vous inscrire pour tenter votre chance !";
+  }
+  return text;
 }
 
 async function fetchInscriptionState() {
