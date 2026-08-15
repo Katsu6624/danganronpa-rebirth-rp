@@ -18,7 +18,6 @@
       <a href="regles.html">Règles</a>
       <a href="saisons.html">Saisons</a>
       <a href="inscription.html" id="nav-inscription">Inscription</a>
-      <a href="roles.html">Rôles</a>
       <a href="personnages.html" class="active">Personnages</a>
       <a href="monocoins.html">Monocoins</a>
       <a href="apropos.html">À propos</a>
@@ -32,6 +31,7 @@
     <div class="btn-row" style="margin-bottom:1.5rem;">
       <button type="button" class="btn btn-outline" id="unlock-info-btn">Comment débloquer de nouveaux personnages ?</button>
       <button type="button" class="btn btn-outline" id="oc-info-btn">Comment jouer mon propre personnage original ?</button>
+      <button type="button" class="btn btn-outline" id="roles-info-btn">Quels sont les rôles des personnages Danganronpa ?</button>
     </div>
 
     <div class="filters">
@@ -110,6 +110,67 @@
         <h4>Rendre son OC jouable par d'autres</h4>
         <p>Une fois validé, tu peux rendre ton OC jouable par d'autres joueurs. Soit tu le donnes gratuitement à une sélection de personnes (à annoncer dans le salon dédié sur le Discord), soit tu le rends "personnage payant" : tout le monde peut alors le débloquer avec 100 monocoins, ce qui aide au passage à financer le serveur.</p>
         <p style="margin-top:0.5rem;">Si jamais tu te fais bannir définitivement, tes OC seront récupérés et mis en "personnages payants".</p>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="roles-info-modal" class="modal">
+    <button type="button" class="modal-close" id="roles-info-close" aria-label="Fermer">✕</button>
+    <h2>Rôles</h2>
+    <div class="rules-list">
+      <div class="rule-item">
+        <h4>C'est quoi le Killing Game ?</h4>
+        <p>Notre serveur est un jeu de rôle multijoueur avec des éléments de thriller policier, dans lequel les participants doivent trouver un tueur pour survivre, ou le devenir pour vaincre. Réalise le meurtre parfait, déjoue l'enquête et déjoue tous les participants au procès pour sortir victorieux du Killing Game.</p>
+        <p style="margin-top:0.6rem;">Si tu veux sortir et gagner, il faut réaliser le meurtre parfait, interférer avec l'enquête, semer le doute pendant le procès, et survivre : pour gagner, tu dois trahir les autres. Si personne ne découvre que c'est toi qui as tué, tu peux sortir et tes amis seront exécutés. À l'inverse, si tu te fais démasquer, tu seras le seul à être exécuté.</p>
+        <p style="margin-top:0.6rem;">Si tu n'as pas tué, tu dois rechercher les preuves laissées après un meurtre pour reconstituer les événements et comprendre le mode opératoire du tueur. Ta vie et celle de tes amis en dépendent : si vous ne trouvez pas le "noirci" (celui qui a tué), vous mourrez tous sauf lui. Pendant le procès, fournis tes preuves et essaie de mettre en lumière le tueur.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Les 5 rôles</h4>
+        <p>Chaque personnage oscille dans ces 5 catégories. Certains vont avoir plusieurs rôles comme Byakuya qui est Leader et Analyste en même temps. Cette classification est utilisée aussi dans les OC pour mieux les comprendre.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Le leader</h4>
+        <p>Structure le groupe, prend les décisions difficiles, gère la logistique. Byakuya Togami (autoritaire) ou Kyosuke Munakata (chez Future Foundation) en sont de bons exemples.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Le support (conseillé pour les débutants)</h4>
+        <p>Maintient la cohésion émotionnelle, réconforte, désamorce les tensions. Sayaka Maizono ou Chiaki Nanami. Mais ça peut aussi être des comics reliefs en cassant la tension, souvent sous-estimé mais parfois crucial pour débloquer une situation. Hifumi, Teruteru, Kazuichi.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Le troublemaker</h4>
+        <p>Ni vraiment allié ni ennemi, agit selon sa propre logique alors même que cela pourrait être bénéfique pour le tueur. Nagito Komaeda est l'exemple ultime, son "espoir" tordu en fait un élément que le groupe ne peut ni ignorer ni totalement contrôler. En moins évident, Aoi est en un sens troublemaker au chapitre 4 de DR1.</p>
+      </div>
+      <div class="rule-item">
+        <h4>L'analyste</h4>
+        <p>Celui qui mène l'enquête, connecte les indices, pose les bonnes questions. Kyoko Kirigiri est l'archétype pur. Mais des personnages comme Byakuya Togami ou encore Junko Enoshima rentre dans ce rôle.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Le fighter</h4>
+        <p>Assure la sécurité physique du groupe, intervient en cas de danger direct. Sakura Ogami en est le meilleur exemple.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Ranking des difficultés</h4>
+        <p>Le staff conseille de commencer par des personnages de type "support" jugé plus facile à jouer que d'autres personnages qui ont besoin de prendre beaucoup d'initiatives. Voici le ranking des difficultés :</p>
+      </div>
+      <div class="rule-item">
+        <h4>1) Troublemaker</h4>
+        <p>Les personnages troublemakers sont difficiles à jouer par la complexité de leurs philosophies.</p>
+      </div>
+      <div class="rule-item">
+        <h4>2) Analyste</h4>
+        <p>Très difficile à jouer si vous n'êtes pas vous-même déjà un minimum sagace, tout dépendra de la gentillesse de votre Monokuma, soit il vous aidera beaucoup soit il vous laissera vous débrouillez vous-même.</p>
+      </div>
+      <div class="rule-item">
+        <h4>3) Leader</h4>
+        <p>Difficile à jouer car il faut savoir se faire respecter, avoir de l'autorité et se mettre en avant.</p>
+      </div>
+      <div class="rule-item">
+        <h4>4) Combattant</h4>
+        <p>Difficile à jouer car il faut savoir se battre dans Gmod avec les addons à votre disposition.</p>
+      </div>
+      <div class="rule-item">
+        <h4>5) Support</h4>
+        <p>Difficile à jouer car il faut pas abuser sur les blagues pour pas devenir un gag ambulant, il faut savoir quand on peut faire des blagues et quand on doit respecter le fear rp, et c'est dur car les Monokuma ont souvent tendance à donner que de petits rôles aux personnages supports.</p>
       </div>
     </div>
   </dialog>

@@ -561,6 +561,7 @@ function setupInfoModal(btnId, modalId, closeBtnId) {
 function setupUnlockInfoModal() {
   setupInfoModal('unlock-info-btn', 'unlock-info-modal', 'unlock-info-close');
   setupInfoModal('oc-info-btn', 'oc-info-modal', 'oc-info-close');
+  setupInfoModal('roles-info-btn', 'roles-info-modal', 'roles-info-close');
 }
 
 function setupScrollReveal() {
