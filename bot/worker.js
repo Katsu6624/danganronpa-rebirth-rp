@@ -266,10 +266,12 @@ async function handleVip(env, interaction) {
       await setDiscordRole(env, targetUser.id, previousRoleId, false);
     }
     await setDiscordRole(env, targetUser.id, roleId, true);
+    await notifyPlayer(env, targetUser.id, `✨ Le rôle **${tier.label}** vous a été donné par ${interaction.member.user.username} : tous les personnages sont débloqués.`);
     return reply(`✅ ${targetUser.username} a maintenant le rôle ${tier.label} : tous les personnages sont débloqués.`);
   }
 
   await setDiscordRole(env, targetUser.id, roleId, false);
+  await notifyPlayer(env, targetUser.id, `Le rôle **${tier.label}** vous a été retiré par ${interaction.member.user.username}. Les personnages attribués individuellement sont conservés.`);
   return reply(`✅ Le rôle ${tier.label} de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`);
 }
 
@@ -313,6 +315,8 @@ async function handleDebloquer(env, interaction) {
     return { message: `Attribution de ${character.name} à ${targetUser.username}` };
   });
 
+  await notifyPlayer(env, targetUser.id, `🔓 **${character.name}** vous a été débloqué par ${interaction.member.user.username}.`);
+
   return reply(`✅ ${character.name} attribué à ${targetUser.username}.`);
 }
 
@@ -334,6 +338,9 @@ async function handleRetirer(env, interaction) {
   });
 
   if (ctx.notFound) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
+
+  await notifyPlayer(env, targetUser.id, `🔒 **${character.name}** vous a été retiré par ${interaction.member.user.username}.`);
+
   return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
 }
 
@@ -498,6 +505,15 @@ async function sendDirectMessage(env, userId, content) {
     method: 'POST',
     body: JSON.stringify({ content }),
   });
+}
+
+// Best-effort : un joueur qui a désactivé ses MP ne doit pas faire échouer la commande staff.
+async function notifyPlayer(env, userId, content) {
+  try {
+    await sendDirectMessage(env, userId, content);
+  } catch (err) {
+    // silencieux
+  }
 }
 
 async function handleInscriptionResponse(request, env) {
