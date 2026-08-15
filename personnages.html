@@ -20,7 +20,6 @@
       <a href="inscription.html" id="nav-inscription">Inscription</a>
       <a href="roles.html">Rôles</a>
       <a href="personnages.html" class="active">Personnages</a>
-      <a href="oc.html">OC</a>
       <a href="monocoins.html">Monocoins</a>
       <a href="apropos.html">À propos</a>
     </nav>
@@ -30,7 +29,10 @@
     <h2>Personnages</h2>
     <p class="subtitle">Liste des personnages jouables du serveur, ou cherche ton pseudo discord pour voir ceux que tu as débloqué.</p>
 
-    <button type="button" class="btn btn-outline" id="unlock-info-btn" style="margin-bottom:1.5rem;">Comment débloquer de nouveaux personnages ?</button>
+    <div class="btn-row" style="margin-bottom:1.5rem;">
+      <button type="button" class="btn btn-outline" id="unlock-info-btn">Comment débloquer de nouveaux personnages ?</button>
+      <button type="button" class="btn btn-outline" id="oc-info-btn">Comment jouer mon propre personnage original ?</button>
+    </div>
 
     <div class="filters">
       <input type="text" id="char-search" placeholder="Rechercher un nom ou un talent...">
@@ -68,6 +70,46 @@
       <div class="rule-item">
         <h4>Devenir le Meurtrier</h4>
         <p>Si pendant un chapitre vous devenez le meurtrier, alors vous obtenez à la fin du chapitre le droit de débloquer le personnage que vous voulez.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="oc-info-modal" class="modal">
+    <button type="button" class="modal-close" id="oc-info-close" aria-label="Fermer">✕</button>
+    <h2>Personnages Originaux</h2>
+    <div class="rules-list">
+      <div class="rule-item">
+        <p>Un OC (Original Character) est un élève que tu incarnes au sein de l'académie, qui n'est pas déjà dans le roster mais un personnage que tu crées de toutes pièces.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Ce que possède ton lycéen</h4>
+        <p>Un talent Ultime, une personnalité unique, un passé (lore), et des motivations et secrets potentiels. Ton personnage doit pouvoir s'intégrer naturellement dans un Killing Game.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Critères d'acceptation</h4>
+        <p>Pour être accepté, ton élève doit être <strong>cohérent</strong> (son histoire et son comportement ont du sens), <strong>crédible</strong> (son talent reste réaliste dans l'univers), et <strong>équilibré</strong> (il n'est ni invincible ni intouchable).</p>
+        <p style="margin-top:0.5rem;">L'Académie rejettera tout étudiant présentant : un profil "parfait" (Mary Sue / Gary Stu), un talent abusé ou irréaliste, une histoire incohérente ou hors-univers, ou des capacités qui cassent les enquêtes et les procès.</p>
+      </div>
+      <div class="rule-item">
+        <h4>1. Paiement</h4>
+        <p>Tu procèdes au paiement de ton OC (voir la page <a href="monocoins.html" style="color:var(--red);">Monocoins</a>). Une fois validé par Katsu, tu peux passer à l'étape 2.</p>
+      </div>
+      <div class="rule-item">
+        <h4>2. Ticket OC</h4>
+        <p>Tu ouvres un ticket OC sur le Discord. Tu remplis ta feuille de personnage, tu cherches un playermodel sur le Workshop GMod qui colle à l'identité visuelle de Danganronpa, et tu envoies le tout dans ton ticket.</p>
+      </div>
+      <div class="rule-item">
+        <h4>3. Validation</h4>
+        <p>Le responsable Lore et le responsable Équilibrage se chargent de valider ta feuille de personnage. Si au moins deux staffs valident, le personnage passe chez Katsu pour une vérification finale.</p>
+      </div>
+      <div class="rule-item">
+        <h4>4. Implémentation</h4>
+        <p>Une fois que Katsu a validé, les artistes peuvent commencer à créer et implémenter les counters de ton personnage sur le serveur.</p>
+      </div>
+      <div class="rule-item">
+        <h4>Rendre son OC jouable par d'autres</h4>
+        <p>Une fois validé, tu peux rendre ton OC jouable par d'autres joueurs. Soit tu le donnes gratuitement à une sélection de personnes (à annoncer dans le salon dédié sur le Discord), soit tu le rends "personnage payant" : tout le monde peut alors le débloquer avec 100 monocoins, ce qui aide au passage à financer le serveur.</p>
+        <p style="margin-top:0.5rem;">Si jamais tu te fais bannir définitivement, tes OC seront récupérés et mis en "personnages payants".</p>
       </div>
     </div>
   </dialog>

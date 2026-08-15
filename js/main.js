@@ -546,16 +546,21 @@ function setupIpCopy() {
   });
 }
 
-function setupUnlockInfoModal() {
-  const btn = document.getElementById('unlock-info-btn');
-  const modal = document.getElementById('unlock-info-modal');
-  const closeBtn = document.getElementById('unlock-info-close');
+function setupInfoModal(btnId, modalId, closeBtnId) {
+  const btn = document.getElementById(btnId);
+  const modal = document.getElementById(modalId);
+  const closeBtn = document.getElementById(closeBtnId);
   if (!btn || !modal) return;
   btn.addEventListener('click', () => modal.showModal());
   closeBtn.addEventListener('click', () => modal.close());
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.close();
   });
+}
+
+function setupUnlockInfoModal() {
+  setupInfoModal('unlock-info-btn', 'unlock-info-modal', 'unlock-info-close');
+  setupInfoModal('oc-info-btn', 'oc-info-modal', 'oc-info-close');
 }
 
 function setupScrollReveal() {
