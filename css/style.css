@@ -19,10 +19,20 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: 'Rubik', 'Segoe UI', sans-serif;
   scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 480px 640px at 0% 50%, rgba(222, 6, 104, 0.05), transparent 70%),
+    radial-gradient(ellipse 480px 640px at 100% 50%, rgba(222, 6, 104, 0.05), transparent 70%),
+    repeating-conic-gradient(rgba(245, 242, 244, 0.015) 0% 25%, transparent 0% 50%);
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-size: auto, auto, 64px 64px;
+  background-attachment: fixed, fixed, fixed;
 }
 
 h1, h2, h3, .display {
