@@ -9,6 +9,12 @@ const PLACE_RESERVEE_OPTIONS = [
   "J'ai le rôle Lycéen de l'Espoir",
 ];
 
+function inscriptionCountText(state) {
+  const count = (state.registrations || []).length;
+  const slots = state.slots ? ` / ${state.slots}` : '';
+  return `${count}${slots} joueur${count > 1 ? 's' : ''} déjà inscrit${count > 1 ? 's' : ''}.`;
+}
+
 async function fetchInscriptionState() {
   try {
     const res = await fetch('data/inscription.json');
@@ -52,6 +58,7 @@ async function renderInscriptionPage(state) {
         <p style="margin-top:0.3rem;"><strong>Personnages bannis :</strong> ${state.bannedCharacters || 'Aucun'}</p>
         <p style="margin-top:0.3rem;"><strong>Ton et attentes RP :</strong> ${state.tone || '—'}</p>
         <p style="margin-top:0.3rem;white-space:pre-line;"><strong>Planning :</strong>\n${state.planning || '—'}</p>
+        <p id="insc-count" style="margin-top:0.6rem;color:var(--gold);font-weight:600;">${inscriptionCountText(state)}</p>
       </div>
     </div>
 
@@ -269,6 +276,9 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
       charSearch.style.display = 'none';
       charHint.style.display = 'block';
       status.textContent = '';
+      const freshState = await fetchInscriptionState();
+      const countEl = document.getElementById('insc-count');
+      if (countEl) countEl.textContent = inscriptionCountText(freshState);
     } catch (err) {
       resultEl.textContent = `Erreur : ${err.message}`;
       resultEl.style.color = 'var(--red)';

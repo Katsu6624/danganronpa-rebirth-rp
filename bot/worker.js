@@ -425,6 +425,7 @@ async function handleInscription(env, interaction) {
         planning: '',
         openedBy: null,
         imageUrl: '',
+        registrations: [],
         updatedAt: new Date().toISOString(),
       });
       return { message: 'Fermeture des inscriptions' };
@@ -456,6 +457,7 @@ async function handleInscriptionDetailsSubmit(env, interaction) {
       planning: v.planning,
       openedBy,
       imageUrl: '',
+      registrations: [],
       updatedAt: new Date().toISOString(),
     });
     return { message: `Ouverture des inscriptions : ${titre}` };
@@ -574,6 +576,14 @@ async function handleInscriptionResponse(request, env) {
   } catch (err) {
     return jsonResponse(500, { error: 'Inscription enregistrée mais échec de l\'envoi du MP au staff : ' + err.message });
   }
+
+  // Compteur affiché sur la page Inscription : on ne compte qu'une fois par joueur
+  // (un même joueur qui renvoie le formulaire met juste à jour sa place dans la liste).
+  await updateJsonFile(env, 'data/inscription.json', (data) => {
+    if (!data.open) return { skipWrite: true };
+    data.registrations = [...new Set([...(data.registrations || []), player.discordId])];
+    return { message: `Inscription de ${player.name} comptabilisée` };
+  });
 
   return jsonResponse(200, { ok: true });
 }
