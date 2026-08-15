@@ -107,7 +107,8 @@ const commands = [
   {
     name: 'inscription',
     description: 'Gérer les inscriptions à la saison en cours',
-    default_member_permissions: MANAGE_GUILD,
+    // Pas de default_member_permissions : visible par tout le monde, mais le Worker
+    // vérifie lui-même (permission "Gérer le serveur" OU rôle Monokuma) avant d'agir.
     dm_permission: false,
     options: [
       {

@@ -380,7 +380,21 @@ function getModalValues(interaction) {
   return values;
 }
 
+const MANAGE_GUILD_BIT = BigInt(0x20);
+
+function canManageInscription(env, interaction) {
+  const perms = BigInt(interaction.member.permissions || '0');
+  const hasManageGuild = (perms & MANAGE_GUILD_BIT) === MANAGE_GUILD_BIT;
+  const monokumaRoleId = env.DISCORD_ROLE_MONOKUMA || '1178889299350003803';
+  const hasMonokumaRole = (interaction.member.roles || []).includes(monokumaRoleId);
+  return hasManageGuild || hasMonokumaRole;
+}
+
 async function handleInscription(env, interaction) {
+  if (!canManageInscription(env, interaction)) {
+    return reply("Tu n'as pas la permission d'utiliser cette commande.");
+  }
+
   const sub = interaction.data.options?.[0];
 
   if (sub?.name === 'ouvrir') {
@@ -438,6 +452,10 @@ async function handleInscription(env, interaction) {
 }
 
 async function handleInscriptionDetailsSubmit(env, interaction) {
+  if (!canManageInscription(env, interaction)) {
+    return reply("Tu n'as pas la permission d'utiliser cette commande.");
+  }
+
   const [titre, type_saison, places, max_chapitres, min_perso] = interaction.data.custom_id
     .slice('insc_details:'.length)
     .split('|');

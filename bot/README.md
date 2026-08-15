@@ -18,11 +18,11 @@ GitHub, ce qui republie le site automatiquement.
 - `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
 - `/inscription ouvrir titre type places max_chapitres min_perso` : remplis ces 5 options
   directement dans Discord, puis un modal s'ouvre pour les 3 derniers champs (personnages
-  bannis, ton et attentes RP, planning) ; valide pour ouvrir les inscriptions ⚠️ staff
+  bannis, ton et attentes RP, planning) ; valide pour ouvrir les inscriptions ⚠️ staff ou Monokuma
 - `/inscription image url:<lien>` : ajoute une image en tête de la page Inscription (inscriptions
   déjà ouvertes ; colle un lien d'image déjà hébergé ailleurs, pas de pièce jointe Discord car
-  ces liens expirent au bout de 24-48h) ⚠️ staff
-- `/inscription fermer` : ferme les inscriptions, remet la page Inscription en état "fermé" ⚠️ staff
+  ces liens expirent au bout de 24-48h) ⚠️ staff ou Monokuma
+- `/inscription fermer` : ferme les inscriptions, remet la page Inscription en état "fermé" ⚠️ staff ou Monokuma
 
 Pour les deux paliers `/vip`, les personnages attribués individuellement via `/debloquer`
 restent acquis même après le retrait du rôle.
@@ -41,6 +41,9 @@ déployé (la même que ton "Interactions Endpoint URL" du Developer Portal) dan
 
 Les commandes marquées ⚠️ staff nécessitent la permission Discord **"Gérer le serveur"**
 (modifiable dans Discord : Paramètres du serveur → Intégrations → Danganronpa Rebirth RP Bot).
+Les commandes marquées ⚠️ staff ou Monokuma sont aussi accessibles aux membres qui ont le
+rôle **Monokuma**, même sans "Gérer le serveur" (l'ID du rôle est dans `bot/wrangler.toml`,
+`DISCORD_ROLE_MONOKUMA`).
 
 ---
 
