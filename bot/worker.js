@@ -1,9 +1,10 @@
 import { verifyKey } from 'discord-interactions';
 
-const InteractionType = { PING: 1, APPLICATION_COMMAND: 2, APPLICATION_COMMAND_AUTOCOMPLETE: 4, MODAL_SUBMIT: 5 };
+const InteractionType = { PING: 1, APPLICATION_COMMAND: 2, MESSAGE_COMPONENT: 3, APPLICATION_COMMAND_AUTOCOMPLETE: 4, MODAL_SUBMIT: 5 };
 const InteractionResponseType = {
   PONG: 1,
   CHANNEL_MESSAGE_WITH_SOURCE: 4,
+  UPDATE_MESSAGE: 7,
   APPLICATION_COMMAND_AUTOCOMPLETE_RESULT: 8,
   MODAL: 9,
 };
@@ -197,6 +198,7 @@ function handleHelp() {
     '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning) puis ouvre les inscriptions à une saison.',
     '`/inscription image url:<lien>` : ajoute une image à la page Inscription (inscriptions déjà ouvertes).',
     '`/inscription fermer` : ferme les inscriptions.',
+    '`/recompense perso joueur:@X` : envoie un MP au joueur pour qu\'il choisisse lui-même un personnage à débloquer.',
   ];
   return reply(lines.join('\n'));
 }
@@ -382,7 +384,7 @@ function getModalValues(interaction) {
 
 const MANAGE_GUILD_BIT = BigInt(0x20);
 
-function canManageInscription(env, interaction) {
+function isStaffOrMonokuma(env, interaction) {
   const perms = BigInt(interaction.member.permissions || '0');
   const hasManageGuild = (perms & MANAGE_GUILD_BIT) === MANAGE_GUILD_BIT;
   const monokumaRoleId = env.DISCORD_ROLE_MONOKUMA || '1178889299350003803';
@@ -391,7 +393,7 @@ function canManageInscription(env, interaction) {
 }
 
 async function handleInscription(env, interaction) {
-  if (!canManageInscription(env, interaction)) {
+  if (!isStaffOrMonokuma(env, interaction)) {
     return reply("Tu n'as pas la permission d'utiliser cette commande.");
   }
 
@@ -452,7 +454,7 @@ async function handleInscription(env, interaction) {
 }
 
 async function handleInscriptionDetailsSubmit(env, interaction) {
-  if (!canManageInscription(env, interaction)) {
+  if (!isStaffOrMonokuma(env, interaction)) {
     return reply("Tu n'as pas la permission d'utiliser cette commande.");
   }
 
@@ -490,6 +492,128 @@ async function handleModalSubmit(env, interaction) {
   return reply('Formulaire inconnu.');
 }
 
+async function handleRecompense(env, interaction) {
+  if (!isStaffOrMonokuma(env, interaction)) {
+    return reply("Tu n'as pas la permission d'utiliser cette commande.");
+  }
+
+  const sub = interaction.data.options?.[0];
+  if (sub?.name !== 'perso') return reply('Sous-commande inconnue.');
+
+  const targetId = sub.options?.find((o) => o.name === 'joueur')?.value;
+  const targetUser = interaction.data.resolved.users[targetId];
+
+  const { data: players } = await getPlayers(env);
+  const player = findPlayer(players, targetUser.id);
+  if (!player) {
+    return reply(`${targetUser.username} n'est pas encore inscrit (utilise /register sur Discord).`);
+  }
+
+  const characters = await getCharacters(env);
+  const lockedIds = new Set(player.locked || []);
+  const lockedByFaction = {};
+  characters.forEach((c) => {
+    if (lockedIds.has(c.id)) {
+      lockedByFaction[c.faction] = lockedByFaction[c.faction] || [];
+      lockedByFaction[c.faction].push(c);
+    }
+  });
+  const factions = Object.keys(lockedByFaction);
+
+  if (factions.length === 0) {
+    return reply(`${targetUser.username} a déjà débloqué tous les personnages.`);
+  }
+
+  const staffName = interaction.member.user.username;
+  const options = factions.slice(0, 25).map((f) => ({ label: f, value: f }));
+
+  try {
+    await sendDirectMessage(
+      env,
+      targetUser.id,
+      `🎁 **${staffName}** vous offre un personnage au choix ! Choisissez d'abord une collection :`,
+      [{ type: 1, components: [{ type: 3, custom_id: 'recomp_faction', placeholder: 'Choisir une collection...', options }] }]
+    );
+  } catch (err) {
+    return reply(`Échec de l'envoi du MP à ${targetUser.username} (MP probablement désactivés).`);
+  }
+
+  return reply(`✅ Récompense envoyée en MP à ${targetUser.username}.`, false);
+}
+
+async function handleRecompenseFactionSelect(env, interaction) {
+  const faction = interaction.data.values?.[0];
+  const userId = interaction.user.id;
+
+  const { data: players } = await getPlayers(env);
+  const player = findPlayer(players, userId);
+  if (!player) return reply('Erreur : joueur introuvable.');
+
+  const characters = await getCharacters(env);
+  const lockedIds = new Set(player.locked || []);
+  const options = characters
+    .filter((c) => c.faction === faction && lockedIds.has(c.id))
+    .slice(0, 25)
+    .map((c) => ({ label: c.name, value: c.id, description: c.ultimate?.slice(0, 100) }));
+
+  if (options.length === 0) {
+    return new Response(
+      JSON.stringify({
+        type: InteractionResponseType.UPDATE_MESSAGE,
+        data: { content: 'Tu as déjà tous les personnages de cette collection.', components: [] },
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  return selectMenuResponse(
+    InteractionResponseType.UPDATE_MESSAGE,
+    `Collection **${faction}** : choisis le personnage à débloquer.`,
+    'recomp_char',
+    'Choisir un personnage...',
+    options
+  );
+}
+
+async function handleRecompenseCharSelect(env, interaction) {
+  const charId = interaction.data.values?.[0];
+  const userId = interaction.user.id;
+
+  const characters = await getCharacters(env);
+  const character = characters.find((c) => c.id === charId);
+  if (!character) {
+    return new Response(
+      JSON.stringify({ type: InteractionResponseType.UPDATE_MESSAGE, data: { content: 'Personnage introuvable.', components: [] } }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  await updatePlayersFile(env, (players) => {
+    const player = findPlayer(players, userId);
+    if (!player) return { skipWrite: true };
+    player.owned = player.owned || [];
+    if (!player.owned.includes(charId)) player.owned.push(charId);
+    player.locked = (player.locked || []).filter((id) => id !== charId);
+    if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => id !== charId);
+    return { message: `Récompense : ${character.name} débloqué pour ${player.name}` };
+  });
+
+  return new Response(
+    JSON.stringify({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: { content: `✅ Tu as débloqué **${character.name}** ! C'est mis à jour sur le site.`, components: [] },
+    }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+}
+
+async function handleMessageComponent(env, interaction) {
+  const customId = interaction.data.custom_id;
+  if (customId === 'recomp_faction') return handleRecompenseFactionSelect(env, interaction);
+  if (customId === 'recomp_char') return handleRecompenseCharSelect(env, interaction);
+  return reply('Interaction inconnue.');
+}
+
 async function handleCommand(env, interaction) {
   switch (interaction.data.name) {
     case 'register': return handleRegister(env, interaction);
@@ -499,6 +623,7 @@ async function handleCommand(env, interaction) {
     case 'debloquer': return handleDebloquer(env, interaction);
     case 'retirer': return handleRetirer(env, interaction);
     case 'inscription': return handleInscription(env, interaction);
+    case 'recompense': return handleRecompense(env, interaction);
     default: return reply('Commande inconnue.');
   }
 }
@@ -516,24 +641,49 @@ function jsonResponse(status, body) {
   });
 }
 
-async function sendDirectMessage(env, userId, content) {
+async function sendDirectMessage(env, userId, content, components) {
   const channel = await discordRequest(env, '/users/@me/channels', {
     method: 'POST',
     body: JSON.stringify({ recipient_id: userId }),
   });
   await discordRequest(env, `/channels/${channel.id}/messages`, {
     method: 'POST',
-    body: JSON.stringify({ content }),
+    body: JSON.stringify(components ? { content, components } : { content }),
   });
 }
 
 // Best-effort : un joueur qui a désactivé ses MP ne doit pas faire échouer la commande staff.
-async function notifyPlayer(env, userId, content) {
+async function notifyPlayer(env, userId, content, components) {
   try {
-    await sendDirectMessage(env, userId, content);
+    await sendDirectMessage(env, userId, content, components);
   } catch (err) {
     // silencieux
   }
+}
+
+function selectMenuResponse(type, content, customId, placeholder, options) {
+  return new Response(
+    JSON.stringify({
+      type,
+      data: {
+        content,
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 3,
+                custom_id: customId,
+                placeholder,
+                options,
+              },
+            ],
+          },
+        ],
+      },
+    }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 }
 
 async function handleInscriptionResponse(request, env) {
@@ -639,6 +789,14 @@ export default {
     if (interaction.type === InteractionType.APPLICATION_COMMAND) {
       try {
         return await handleCommand(env, interaction);
+      } catch (err) {
+        return reply(`Erreur : ${err.message}`);
+      }
+    }
+
+    if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
+      try {
+        return await handleMessageComponent(env, interaction);
       } catch (err) {
         return reply(`Erreur : ${err.message}`);
       }

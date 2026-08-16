@@ -147,6 +147,21 @@ const commands = [
       },
     ],
   },
+  {
+    name: 'recompense',
+    description: 'Offrir une récompense à un joueur',
+    // Pas de default_member_permissions : visible par tout le monde, mais le Worker
+    // vérifie lui-même (permission "Gérer le serveur" OU rôle Monokuma) avant d'agir.
+    dm_permission: false,
+    options: [
+      {
+        type: 1,
+        name: 'perso',
+        description: "Laisser le joueur choisir un personnage à débloquer (en MP)",
+        options: [{ type: 6, name: 'joueur', description: 'Le joueur', required: true }],
+      },
+    ],
+  },
 ];
 
 const endpoint = guildId
