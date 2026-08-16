@@ -772,7 +772,8 @@
       "Leader",
       "Troublemaker",
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/monaka-towa-adolescente.png"
   },
   {
     "id": "kyoko-kirigiri-jeune",
@@ -909,7 +910,8 @@
     "roles": [
       "Support",
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/misaki-asano.png"
   },
   {
     "id": "licorne",
