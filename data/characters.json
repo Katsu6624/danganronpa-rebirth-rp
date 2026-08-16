@@ -897,7 +897,8 @@
     "paid": true,
     "roles": [
       "Leader"
-    ]
+    ],
+    "image": "assets/characters/soshun-murasame.png"
   },
   {
     "id": "misaki-asano",
