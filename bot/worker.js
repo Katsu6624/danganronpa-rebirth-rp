@@ -694,7 +694,7 @@ async function handleInscriptionResponse(request, env) {
     return jsonResponse(400, { error: 'JSON invalide.' });
   }
 
-  const { pseudo, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind } = payload;
+  const { pseudo, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc } = payload;
   if (!pseudo || !Array.isArray(personnages) || personnages.length === 0) {
     return jsonResponse(400, { error: 'Champs manquants.' });
   }
@@ -737,6 +737,7 @@ async function handleInscriptionResponse(request, env) {
     `Intention de tuer : ${intentionTuer === 'oui' ? 'Oui' : 'Non'}${intentionTuer === 'oui' && intentionTuerDetails ? ` — ${intentionTuerDetails}` : ''}`,
     `Place réservée : ${placeReservee || 'Pas de place réservée'}`,
     `Souhaite être mastermind : ${mastermind === 'oui' ? 'Oui' : 'Non'}`,
+    `OC souhaité : ${oc ? oc : 'Aucun'}`,
   ];
 
   try {

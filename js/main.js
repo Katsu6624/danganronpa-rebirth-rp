@@ -119,6 +119,11 @@ async function renderInscriptionPage(state) {
         </div>
       </div>
 
+      <div class="rule-item">
+        <h4>As-tu un OC que tu voudrais jouer ? (facultatif)</h4>
+        <input type="text" id="insc-oc" class="insc-input" placeholder="Nom de ton OC (laisser vide sinon)">
+      </div>
+
       <button type="submit" class="btn btn-primary">Envoyer mon inscription</button>
       <p id="insc-result" style="margin-top:0.8rem;"></p>
     </form>
@@ -140,6 +145,7 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
   const remplacantBox = document.getElementById('insc-remplacant');
   const intentionTuerRadios = form.querySelectorAll('input[name="intentionTuer"]');
   const tuerDetailsBox = document.getElementById('insc-tuer-details');
+  const ocInput = document.getElementById('insc-oc');
   const resultEl = document.getElementById('insc-result');
 
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
@@ -258,6 +264,7 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
       intentionTuerDetails: tuerDetailsBox.value.trim(),
       placeReservee: form.placeReservee.value,
       mastermind: form.mastermind.value,
+      oc: ocInput.value.trim(),
     };
 
     const submitBtn = form.querySelector('button[type="submit"]');
