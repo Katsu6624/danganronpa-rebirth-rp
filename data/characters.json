@@ -514,7 +514,8 @@
     "roles": [
       "Support",
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/komaru-naegi.png"
   },
   {
     "id": "jataro-kemuri",
@@ -524,7 +525,8 @@
     "paid": true,
     "roles": [
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/jataro-kemuri.png"
   },
   {
     "id": "masaru-daimon",
@@ -535,7 +537,8 @@
     "roles": [
       "Leader",
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/masaru-daimon.png"
   },
   {
     "id": "kotoko-uetsugi",
@@ -545,7 +548,8 @@
     "paid": true,
     "roles": [
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/kotoko-uetsugi.png"
   },
   {
     "id": "monaka-towa-jeune",
@@ -557,7 +561,8 @@
       "Leader",
       "Troublemaker",
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/monaka-towa-jeune.png"
   },
   {
     "id": "nagisa-shingetsu",
@@ -567,7 +572,8 @@
     "paid": true,
     "roles": [
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/nagisa-shingetsu.png"
   },
   {
     "id": "le-serviteur",
@@ -578,7 +584,8 @@
     "roles": [
       "Troublemaker",
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/le-serviteur.png"
   },
   {
     "id": "haiji-towa",
@@ -589,7 +596,8 @@
     "roles": [
       "Leader",
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/haiji-towa.png"
   },
   {
     "id": "yuta-asahina",
@@ -599,7 +607,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/yuta-asahina.png"
   },
   {
     "id": "taichi-fujisaki",
@@ -609,7 +618,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/taichi-fujisaki.png"
   },
   {
     "id": "chisa-yukisome",
@@ -772,7 +782,8 @@
     "paid": true,
     "roles": [
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/kyoko-kirigiri-jeune.png"
   },
   {
     "id": "yui-samidare",
@@ -784,7 +795,8 @@
       "Leader",
       "Support",
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/yui-samidare.png"
   },
   {
     "id": "suisei-nanamura",
@@ -795,7 +807,8 @@
     "roles": [
       "Analyste",
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/suisei-nanamura.png"
   },
   {
     "id": "polaris-p-polanski",
@@ -805,7 +818,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/polaris-p-polanski.png"
   },
   {
     "id": "ao-ink",
@@ -848,7 +862,8 @@
       "Fighter",
       "Analyste",
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/takumi-hijirihara.png"
   },
   {
     "id": "yuto-kamishiro",
@@ -858,7 +873,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/yuto-kamishiro.png"
   },
   {
     "id": "shuji-fujigawa",
@@ -868,7 +884,8 @@
     "paid": true,
     "roles": [
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/shuji-fujigawa.png"
   },
   {
     "id": "soshun-murasame",
@@ -900,7 +917,8 @@
     "roles": [
       "Analyste",
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/licorne.png"
   },
   {
     "id": "natsumi-kuzuryu",
@@ -911,7 +929,8 @@
     "roles": [
       "Troublemaker",
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/natsumi-kuzuryu.png"
   },
   {
     "id": "kinji-uehara",
@@ -921,7 +940,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/kinji-uehara.png"
   },
   {
     "id": "kizuna-tomori",
@@ -931,7 +951,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/kizuna-tomori.png"
   },
   {
     "id": "tsurugi-kinjo",
@@ -942,7 +963,8 @@
     "roles": [
       "Analyste",
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/tsurugi-kinjo.png"
   },
   {
     "id": "mitsuhiro-higa",
@@ -952,7 +974,8 @@
     "paid": true,
     "roles": [
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/mitsuhiro-higa.png"
   },
   {
     "id": "mikako-kurokawa",
@@ -962,7 +985,8 @@
     "paid": true,
     "roles": [
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/mikako-kurokawa.png"
   },
   {
     "id": "rei-mekaru",
@@ -972,7 +996,8 @@
     "paid": true,
     "roles": [
       "Leader"
-    ]
+    ],
+    "image": "assets/characters/rei-mekaru.png"
   },
   {
     "id": "haruhiko-kobashikawa",
@@ -982,7 +1007,8 @@
     "paid": true,
     "roles": [
       "Leader"
-    ]
+    ],
+    "image": "assets/characters/haruhiko-kobashikawa.png"
   },
   {
     "id": "kakeru-yamaguchi",
@@ -992,7 +1018,8 @@
     "paid": true,
     "roles": [
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/kakeru-yamaguchi.png"
   },
   {
     "id": "kanata-inori",
@@ -1002,7 +1029,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/kanata-inori.png"
   },
   {
     "id": "akane-taira",
@@ -1012,7 +1040,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/akane-taira.png"
   },
   {
     "id": "ayame-hatano",
@@ -1022,7 +1051,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/ayame-hatano.png"
   },
   {
     "id": "kiyoka-maki",
@@ -1032,7 +1062,8 @@
     "paid": true,
     "roles": [
       "Fighter"
-    ]
+    ],
+    "image": "assets/characters/kiyoka-maki.png"
   },
   {
     "id": "satsuki-iranami",
@@ -1043,7 +1074,8 @@
     "roles": [
       "Support",
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/satsuki-iranami.png"
   },
   {
     "id": "yamato-kisaragi",
@@ -1053,7 +1085,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/yamato-kisaragi.png"
   },
   {
     "id": "teruya-otori",
@@ -1075,7 +1108,8 @@
     "roles": [
       "Support",
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/sora.png"
   },
   {
     "id": "shobai-hashimoto",
@@ -1085,7 +1119,8 @@
     "paid": true,
     "roles": [
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/shobai-hashimoto.png"
   },
   {
     "id": "iroha-nijiue",
@@ -1173,7 +1208,8 @@
     "paid": true,
     "roles": [
       "Leader"
-    ]
+    ],
+    "image": "assets/characters/yuri-kagarin.png"
   },
   {
     "id": "yuki-maeda",
@@ -1183,7 +1219,8 @@
     "paid": true,
     "roles": [
       "Troublemaker"
-    ]
+    ],
+    "image": "assets/characters/yuki-maeda.png"
   },
   {
     "id": "setsuka-chiebukuro",
@@ -1215,7 +1252,8 @@
     "paid": true,
     "roles": [
       "Support"
-    ]
+    ],
+    "image": "assets/characters/yoruko-kabuya.png"
   },
   {
     "id": "wolfgang-akire",
