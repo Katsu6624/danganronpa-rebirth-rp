@@ -148,13 +148,6 @@ a {
   }
 }
 
-.hero-logo {
-  max-width: 340px;
-  width: 100%;
-  height: auto;
-  margin-bottom: 1.5rem;
-}
-
 .hero .tag {
   display: inline-block;
   color: var(--red);
@@ -197,11 +190,6 @@ a {
   padding: 1rem;
   background-size: cover;
   background-position: center;
-}
-
-.hero-media {
-  aspect-ratio: 21 / 9;
-  margin-top: 2.5rem;
 }
 
 .hero-video {
@@ -598,16 +586,6 @@ a {
   transform: translateX(3px);
 }
 
-.rule-item.espoir { border-left-color: var(--purple); }
-.rule-item.neutralite { border-left-color: var(--purple); }
-.rule-item.desespoir { border-left-color: var(--red); }
-
-.role-examples {
-  margin-top: 0.6rem;
-  color: var(--text-dim);
-  font-size: 0.85rem;
-}
-
 .rule-item h4 {
   margin: 0 0 0.3rem;
   color: var(--text);
@@ -765,25 +743,6 @@ html.js .player-block.in-view {
     height: 38px;
     font-size: 1.5rem;
   }
-}
-
-.rule-item-media {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.rule-item-media img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.rule-item-media > div {
-  flex: 1 1 260px;
 }
 
 .insc-input {

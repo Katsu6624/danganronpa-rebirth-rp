@@ -351,7 +351,6 @@ function renderCharacters(characters, players) {
   const search = document.getElementById('char-search');
   const factionFilter = document.getElementById('char-faction');
   const playerInput = document.getElementById('char-player');
-  const statusFilter = document.getElementById('char-status');
   const roleFilter = document.getElementById('char-role');
 
   const factions = [...new Set(characters.map(c => c.faction))].sort();
@@ -493,11 +492,6 @@ function renderCharacters(characters, players) {
       card.className = 'card char-card';
       const portraitStyle = c.image ? ` style="background-image:url('${c.image}')"` : '';
       const portraitText = c.image ? '' : 'Portrait';
-      let statusLine = '';
-      if (player) {
-        if (ownedSet.has(c.id)) statusLine = '<div class="status-line owned"><span class="dot"></span>Débloqué</div>';
-        else if (lockedSet.has(c.id)) statusLine = '<div class="status-line available"><span class="dot"></span>À débloquer</div>';
-      }
       const roleTags = (c.roles || []).map(r => `<span class="role-tag">${r}</span>`).join('');
       card.innerHTML = `
         <div class="media-slot char-portrait"${portraitStyle}>${portraitText}</div>
@@ -505,13 +499,12 @@ function renderCharacters(characters, players) {
         <h3>${c.name}</h3>
         <p class="ultimate">${c.ultimate}</p>
         ${roleTags ? `<div class="role-tags">${roleTags}</div>` : ''}
-        ${statusLine}
       `;
       grid.appendChild(card);
     });
   }
 
-  [search, factionFilter, playerInput, statusFilter, roleFilter].filter(Boolean).forEach(el => el.addEventListener('input', draw));
+  [search, factionFilter, playerInput, roleFilter].filter(Boolean).forEach(el => el.addEventListener('input', draw));
   setupPlayerDropdown(draw);
   draw();
 }
@@ -554,7 +547,7 @@ function setupInfoModal(btnId, modalId, closeBtnId) {
   const btn = document.getElementById(btnId);
   const modal = document.getElementById(modalId);
   const closeBtn = document.getElementById(closeBtnId);
-  if (!btn || !modal) return;
+  if (!btn || !modal || !closeBtn) return;
   btn.addEventListener('click', () => modal.showModal());
   closeBtn.addEventListener('click', () => modal.close());
   modal.addEventListener('click', (e) => {
