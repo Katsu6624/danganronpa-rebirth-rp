@@ -839,7 +839,8 @@
     "paid": true,
     "roles": [
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/ryoko-otonashi.png"
   },
   {
     "id": "yasuke-matsuda",
@@ -850,7 +851,8 @@
     "roles": [
       "Troublemaker",
       "Analyste"
-    ]
+    ],
+    "image": "assets/characters/yasuke-matsuda.png"
   },
   {
     "id": "takumi-hijirihara",
