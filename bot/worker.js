@@ -4,6 +4,7 @@ const InteractionType = { PING: 1, APPLICATION_COMMAND: 2, MESSAGE_COMPONENT: 3,
 const InteractionResponseType = {
   PONG: 1,
   CHANNEL_MESSAGE_WITH_SOURCE: 4,
+  DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE: 5,
   UPDATE_MESSAGE: 7,
   APPLICATION_COMMAND_AUTOCOMPLETE_RESULT: 8,
   MODAL: 9,
@@ -162,7 +163,10 @@ function getFlatOptions(interaction) {
 
 const FREE_FACTIONS = ['Trigger Happy Havoc', 'Goodbye Despair', 'Killing Harmony'];
 
-async function handleRegister(env, interaction) {
+// Séparé de handleRegister pour pouvoir être exécuté après une réponse différée (voir fetch()) :
+// avec beaucoup d'inscriptions simultanées, les conflits d'écriture sur players.json et leurs
+// réessais peuvent facilement dépasser les 3s que Discord accorde pour répondre à l'interaction.
+async function handleRegisterAsync(env, interaction) {
   const user = interaction.member.user;
   const characters = await getCharacters(env);
   const owned = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
@@ -176,9 +180,13 @@ async function handleRegister(env, interaction) {
   });
 
   if (ctx.existingName) {
-    return reply(`Tu es déjà enregistré en tant que ${ctx.existingName}. Retrouve-toi sur la page Personnages du site (recherche ton pseudo).`);
+    return `Tu es déjà enregistré en tant que ${ctx.existingName}. Retrouve-toi sur la page Personnages du site (recherche ton pseudo).`;
   }
-  return reply(`✅ Tu es enregistré, ${user.username} ! Tous les personnages de Trigger Happy Havoc, Goodbye Despair et Killing Harmony sont débloqués pour toi. Le reste est à débloquer. Retrouve-toi sur la page Personnages du site.`);
+  return `✅ Tu es enregistré, ${user.username} ! Tous les personnages de Trigger Happy Havoc, Goodbye Despair et Killing Harmony sont débloqués pour toi. Le reste est à débloquer. Retrouve-toi sur la page Personnages du site.`;
+}
+
+async function handleRegister(env, interaction) {
+  return reply(await handleRegisterAsync(env, interaction));
 }
 
 function handleHelp() {
@@ -641,6 +649,16 @@ function jsonResponse(status, body) {
   });
 }
 
+// Édite la réponse d'une interaction différée (DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE).
+// N'a pas besoin du token du bot : le token de l'interaction s'authentifie lui-même.
+async function editDeferredReply(interaction, content) {
+  await fetch(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
+}
+
 async function sendDirectMessage(env, userId, content, components) {
   const channel = await discordRequest(env, '/users/@me/channels', {
     method: 'POST',
@@ -758,7 +776,7 @@ async function handleInscriptionResponse(request, env) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
     if (url.pathname === '/submit-inscription') {
@@ -788,6 +806,21 @@ export default {
     }
 
     if (interaction.type === InteractionType.APPLICATION_COMMAND) {
+      // /register peut être appelé en rafale (beaucoup de monde en même temps) : les conflits
+      // d'écriture sur players.json et leurs réessais peuvent dépasser les 3s accordées par
+      // Discord. On accuse réception tout de suite, puis on finalise en tâche de fond.
+      if (interaction.data.name === 'register') {
+        ctx.waitUntil(
+          handleRegisterAsync(env, interaction)
+            .then((content) => editDeferredReply(interaction, content))
+            .catch((err) => editDeferredReply(interaction, `Erreur : ${err.message}`))
+        );
+        return new Response(
+          JSON.stringify({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, data: { flags: 64 } }),
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
       try {
         return await handleCommand(env, interaction);
       } catch (err) {
