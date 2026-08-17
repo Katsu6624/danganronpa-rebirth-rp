@@ -216,10 +216,10 @@ const VIP_TIERS = {
   prepa: { roleEnvVar: 'DISCORD_ROLE_PREPA', label: 'Lycéen en Cours Préparatoire' },
 };
 
-async function handleVip(env, interaction) {
+async function handleVipAsync(env, interaction) {
   const group = interaction.data.options?.[0];
   const tier = VIP_TIERS[group?.name];
-  if (!tier) return reply('Palier VIP inconnu.');
+  if (!tier) return 'Palier VIP inconnu.';
 
   const sub = group.options?.[0];
   const targetId = sub?.options?.find((o) => o.name === 'joueur')?.value;
@@ -268,7 +268,7 @@ async function handleVip(env, interaction) {
     return { skipWrite: true, unknownSub: true };
   });
 
-  if (ctx.unknownSub) return reply('Sous-commande VIP inconnue.');
+  if (ctx.unknownSub) return 'Sous-commande VIP inconnue.';
 
   if (ctx.action === 'donner') {
     if (ctx.previousTier && ctx.previousTier !== group.name) {
@@ -277,12 +277,16 @@ async function handleVip(env, interaction) {
     }
     await setDiscordRole(env, targetUser.id, roleId, true);
     await notifyPlayer(env, targetUser.id, `✨ Le rôle **${tier.label}** vous a été donné par ${interaction.member.user.username} : tous les personnages sont débloqués.`);
-    return reply(`✅ ${targetUser.username} a maintenant le rôle ${tier.label} : tous les personnages sont débloqués.`);
+    return `✅ ${targetUser.username} a maintenant le rôle ${tier.label} : tous les personnages sont débloqués.`;
   }
 
   await setDiscordRole(env, targetUser.id, roleId, false);
   await notifyPlayer(env, targetUser.id, `Le rôle **${tier.label}** vous a été retiré par ${interaction.member.user.username}. Les personnages attribués individuellement sont conservés.`);
-  return reply(`✅ Le rôle ${tier.label} de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`);
+  return `✅ Le rôle ${tier.label} de ${targetUser.username} a été retiré. Les personnages attribués individuellement sont conservés.`;
+}
+
+async function handleVip(env, interaction) {
+  return reply(await handleVipAsync(env, interaction));
 }
 
 async function handleListe(env, interaction) {
@@ -298,13 +302,13 @@ async function handleListe(env, interaction) {
   return reply(`**${targetUser.username}**\nDébloqués : ${owned}\nÀ débloquer : ${locked}`);
 }
 
-async function handleDebloquer(env, interaction) {
+async function handleDebloquerAsync(env, interaction) {
   const opts = getFlatOptions(interaction);
   const characters = await getCharacters(env);
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
   const charId = opts.personnage;
   const character = charById[charId];
-  if (!character) return reply(`Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`);
+  if (!character) return `Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`;
 
   const targetUser = interaction.data.resolved.users[opts.joueur];
 
@@ -327,16 +331,20 @@ async function handleDebloquer(env, interaction) {
 
   await notifyPlayer(env, targetUser.id, `🔓 **${character.name}** vous a été débloqué par ${interaction.member.user.username}.`);
 
-  return reply(`✅ ${character.name} attribué à ${targetUser.username}.`);
+  return `✅ ${character.name} attribué à ${targetUser.username}.`;
 }
 
-async function handleRetirer(env, interaction) {
+async function handleDebloquer(env, interaction) {
+  return reply(await handleDebloquerAsync(env, interaction));
+}
+
+async function handleRetirerAsync(env, interaction) {
   const opts = getFlatOptions(interaction);
   const characters = await getCharacters(env);
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
   const charId = opts.personnage;
   const character = charById[charId];
-  if (!character) return reply(`Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`);
+  if (!character) return `Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`;
 
   const targetUser = interaction.data.resolved.users[opts.joueur];
 
@@ -347,11 +355,15 @@ async function handleRetirer(env, interaction) {
     return { message: `Retrait de ${character.name} à ${targetUser.username}` };
   });
 
-  if (ctx.notFound) return reply(`${targetUser.username} n'a aucun personnage enregistré.`);
+  if (ctx.notFound) return `${targetUser.username} n'a aucun personnage enregistré.`;
 
   await notifyPlayer(env, targetUser.id, `🔒 **${character.name}** vous a été retiré par ${interaction.member.user.username}.`);
 
-  return reply(`✅ ${character.name} retiré à ${targetUser.username}.`);
+  return `✅ ${character.name} retiré à ${targetUser.username}.`;
+}
+
+async function handleRetirer(env, interaction) {
+  return reply(await handleRetirerAsync(env, interaction));
 }
 
 function modalResponse(customId, title, fields) {
@@ -500,13 +512,13 @@ async function handleModalSubmit(env, interaction) {
   return reply('Formulaire inconnu.');
 }
 
-async function handleRecompense(env, interaction) {
+async function handleRecompenseAsync(env, interaction) {
   if (!isStaffOrMonokuma(env, interaction)) {
-    return reply("Tu n'as pas la permission d'utiliser cette commande.");
+    return "Tu n'as pas la permission d'utiliser cette commande.";
   }
 
   const sub = interaction.data.options?.[0];
-  if (sub?.name !== 'perso') return reply('Sous-commande inconnue.');
+  if (sub?.name !== 'perso') return 'Sous-commande inconnue.';
 
   const targetId = sub.options?.find((o) => o.name === 'joueur')?.value;
   const targetUser = interaction.data.resolved.users[targetId];
@@ -514,7 +526,7 @@ async function handleRecompense(env, interaction) {
   const { data: players } = await getPlayers(env);
   const player = findPlayer(players, targetUser.id);
   if (!player) {
-    return reply(`${targetUser.username} n'est pas encore inscrit (utilise /register sur Discord).`);
+    return `${targetUser.username} n'est pas encore inscrit (utilise /register sur Discord).`;
   }
 
   const characters = await getCharacters(env);
@@ -529,7 +541,7 @@ async function handleRecompense(env, interaction) {
   const factions = Object.keys(lockedByFaction);
 
   if (factions.length === 0) {
-    return reply(`${targetUser.username} a déjà débloqué tous les personnages.`);
+    return `${targetUser.username} a déjà débloqué tous les personnages.`;
   }
 
   const staffName = interaction.member.user.username;
@@ -543,10 +555,14 @@ async function handleRecompense(env, interaction) {
       [{ type: 1, components: [{ type: 3, custom_id: 'recomp_faction', placeholder: 'Choisir une collection...', options }] }]
     );
   } catch (err) {
-    return reply(`Échec de l'envoi du MP à ${targetUser.username} (MP probablement désactivés).`);
+    return `Échec de l'envoi du MP à ${targetUser.username} (MP probablement désactivés).`;
   }
 
-  return reply(`✅ Récompense envoyée en MP à ${targetUser.username}.`, false);
+  return `✅ Récompense envoyée en MP à ${targetUser.username}.`;
+}
+
+async function handleRecompense(env, interaction) {
+  return reply(await handleRecompenseAsync(env, interaction));
 }
 
 async function handleRecompenseFactionSelect(env, interaction) {
@@ -775,6 +791,17 @@ async function handleInscriptionResponse(request, env) {
   return jsonResponse(200, { ok: true });
 }
 
+// Commandes qui écrivent sur GitHub (donc sujettes aux conflits/réessais) et/ou envoient des MP :
+// on accuse réception tout de suite pour ne jamais dépasser les 3s accordées par Discord, puis
+// on édite la réponse une fois le traitement terminé (voir fetch()).
+const DEFERRED_COMMANDS = {
+  register: handleRegisterAsync,
+  vip: handleVipAsync,
+  debloquer: handleDebloquerAsync,
+  retirer: handleRetirerAsync,
+  recompense: handleRecompenseAsync,
+};
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -809,9 +836,10 @@ export default {
       // /register peut être appelé en rafale (beaucoup de monde en même temps) : les conflits
       // d'écriture sur players.json et leurs réessais peuvent dépasser les 3s accordées par
       // Discord. On accuse réception tout de suite, puis on finalise en tâche de fond.
-      if (interaction.data.name === 'register') {
+      const deferredHandler = DEFERRED_COMMANDS[interaction.data.name];
+      if (deferredHandler) {
         ctx.waitUntil(
-          handleRegisterAsync(env, interaction)
+          deferredHandler(env, interaction)
             .then((content) => editDeferredReply(interaction, content))
             .catch((err) => editDeferredReply(interaction, `Erreur : ${err.message}`))
         );
