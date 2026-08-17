@@ -1,5 +1,56 @@
 // Remplace par l'URL de ton Worker Cloudflare (la même que ton "Interactions Endpoint URL" sur le Developer Portal).
 const INSCRIPTION_WORKER_URL = 'https://danganronpa-rebirth-rp-bot.shiney273.workers.dev';
+// Application ID Discord (onglet "General Information" du Developer Portal, public, pas un secret).
+const DISCORD_CLIENT_ID = '1537099548458098758';
+const AUTH_STORAGE_KEY = 'dr_auth_token';
+
+function discordLoginUrl() {
+  const redirectUri = `${INSCRIPTION_WORKER_URL}/oauth/callback`;
+  const params = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'identify',
+  });
+  return `https://discord.com/oauth2/authorize?${params.toString()}`;
+}
+
+function decodeAuthToken(token) {
+  if (!token || !token.includes('.')) return null;
+  try {
+    const [payloadB64] = token.split('.');
+    let b64 = payloadB64.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const payload = JSON.parse(decodeURIComponent(escape(atob(b64))));
+    if (!payload.exp || Date.now() > payload.exp) return null;
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+function captureAuthFromUrl() {
+  const hash = window.location.hash;
+  if (hash.startsWith('#auth=')) {
+    const token = hash.slice('#auth='.length);
+    if (decodeAuthToken(token)) {
+      localStorage.setItem(AUTH_STORAGE_KEY, token);
+    }
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  } else if (hash.startsWith('#auth_error')) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+}
+
+function getCurrentAuth() {
+  const token = localStorage.getItem(AUTH_STORAGE_KEY);
+  const payload = decodeAuthToken(token);
+  if (!payload) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    return null;
+  }
+  return { token, ...payload };
+}
 
 const PLACE_RESERVEE_OPTIONS = [
   'Pas de place réservée',
@@ -46,7 +97,10 @@ async function renderInscriptionPage(state) {
   const { characters, players } = await loadData();
   const minCharacters = Number(state.minCharacters) || 1;
 
-  container.innerHTML = `
+  captureAuthFromUrl();
+  const auth = getCurrentAuth();
+
+  const infoBlock = `
     ${state.imageUrl ? `<img src="${state.imageUrl}" alt="${state.title}" style="display:block;width:100%;max-height:420px;object-fit:cover;border:1px solid var(--border);margin-bottom:1.2rem;">` : ''}
     <div class="rules-list">
       <div class="rule-item">
@@ -65,15 +119,30 @@ async function renderInscriptionPage(state) {
         <p id="insc-count" style="margin-top:0.6rem;color:var(--gold);font-weight:600;">${inscriptionCountText(state)}</p>
       </div>
     </div>
+  `;
+
+  if (!auth) {
+    container.innerHTML = `
+      ${infoBlock}
+      <div class="rules-list" style="margin-top:1.5rem;">
+        <div class="rule-item">
+          <h4>Connexion requise</h4>
+          <p>Pour éviter que quelqu'un s'inscrive à la place d'un autre joueur, l'inscription nécessite de se connecter avec ton vrai compte Discord.</p>
+          <a class="btn btn-primary" href="${discordLoginUrl()}" style="margin-top:0.8rem;">Se connecter avec Discord →</a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    ${infoBlock}
 
     <form id="insc-form" class="rules-list" style="margin-top:1.5rem;">
       <div class="rule-item">
-        <h4>Quel est ton pseudo Discord ?</h4>
-        <div class="player-search" style="max-width:420px;">
-          <input type="text" id="insc-pseudo" class="insc-input" placeholder="Ton pseudo" required autocomplete="off">
-          <div class="player-dropdown" id="insc-pseudo-dropdown"></div>
-        </div>
-        <button type="button" class="btn btn-outline" id="insc-load-chars" style="margin-top:0.6rem;">Charger mes personnages</button>
+        <h4>Connecté en tant que</h4>
+        <p style="color:var(--gold);font-weight:600;">${auth.username}</p>
+        <button type="button" class="btn btn-outline" id="insc-logout" style="margin-top:0.6rem;">Se déconnecter</button>
         <p id="insc-pseudo-status" style="margin-top:0.5rem;font-size:0.85rem;"></p>
       </div>
 
@@ -129,14 +198,12 @@ async function renderInscriptionPage(state) {
     </form>
   `;
 
-  setupInscriptionForm(state, characters, players, minCharacters);
+  setupInscriptionForm(state, characters, players, minCharacters, auth);
 }
 
-function setupInscriptionForm(state, characters, players, minCharacters) {
+function setupInscriptionForm(state, characters, players, minCharacters, auth) {
   const form = document.getElementById('insc-form');
-  const pseudoInput = document.getElementById('insc-pseudo');
-  const pseudoDropdown = document.getElementById('insc-pseudo-dropdown');
-  const loadBtn = document.getElementById('insc-load-chars');
+  const logoutBtn = document.getElementById('insc-logout');
   const status = document.getElementById('insc-pseudo-status');
   const charHint = document.getElementById('insc-char-hint');
   const charSearch = document.getElementById('insc-char-search');
@@ -149,7 +216,11 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
   const resultEl = document.getElementById('insc-result');
 
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
-  let currentPlayer = null;
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    setupInscription();
+  });
 
   presenceRadios.forEach((r) => r.addEventListener('change', () => {
     remplacantBox.style.display = form.presence.value === 'non' ? 'block' : 'none';
@@ -159,37 +230,31 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
     tuerDetailsBox.style.display = form.intentionTuer.value === 'oui' ? 'block' : 'none';
   }));
 
-  function loadCharacters() {
-    const q = pseudoInput.value.trim().toLowerCase();
-    currentPlayer = players.find((p) => p.name.toLowerCase() === q) || null;
-    if (!currentPlayer) {
-      status.textContent = 'Pseudo non reconnu. Utilise /register sur Discord avant de t\'inscrire.';
-      status.style.color = 'var(--red)';
-      charList.innerHTML = '';
-      charSearch.style.display = 'none';
-      return;
-    }
+  // Le joueur est identifié par son compte Discord authentifié (auth.id), pas par un pseudo tapé
+  // à la main : impossible d'inscrire quelqu'un d'autre en tapant son nom.
+  const currentPlayer = players.find((p) => p.discordId === auth.id) || null;
+
+  if (!currentPlayer) {
+    status.textContent = 'Compte non reconnu. Utilise /register sur Discord avant de t\'inscrire.';
+    status.style.color = 'var(--red)';
+    charHint.style.display = 'none';
+  } else {
     const owned = (currentPlayer.owned || []).map((id) => charById[id]).filter(Boolean);
     if (owned.length === 0) {
       status.textContent = 'Tu n\'as encore aucun personnage débloqué.';
       status.style.color = 'var(--red)';
-      charList.innerHTML = '';
-      charSearch.style.display = 'none';
-      return;
+    } else {
+      status.textContent = `${owned.length} personnage(s) chargé(s).`;
+      status.style.color = 'var(--gold)';
+      charHint.style.display = 'none';
+      charSearch.style.display = owned.length > 8 ? 'block' : 'none';
+      charList.innerHTML = owned.map((c) => `
+        <label class="pill" data-name="${c.name.toLowerCase()}" style="cursor:pointer;">
+          <input type="checkbox" name="personnage" value="${c.id}" style="margin-right:0.4rem;">${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}
+        </label>
+      `).join('');
     }
-    status.textContent = `${owned.length} personnage(s) chargé(s).`;
-    status.style.color = 'var(--gold)';
-    charHint.style.display = 'none';
-    charSearch.style.display = owned.length > 8 ? 'block' : 'none';
-    charSearch.value = '';
-    charList.innerHTML = owned.map((c) => `
-      <label class="pill" data-name="${c.name.toLowerCase()}" style="cursor:pointer;">
-        <input type="checkbox" name="personnage" value="${c.id}" style="margin-right:0.4rem;">${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}
-      </label>
-    `).join('');
   }
-
-  loadBtn.addEventListener('click', loadCharacters);
 
   charSearch.addEventListener('input', () => {
     const q = charSearch.value.trim().toLowerCase();
@@ -198,52 +263,12 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
     });
   });
 
-  // Autocomplete du pseudo (mêmes principes que sur la page Personnages).
-  function renderPseudoOptions() {
-    const q = pseudoInput.value.trim().toLowerCase();
-    if (!q) {
-      pseudoDropdown.classList.remove('open');
-      pseudoDropdown.innerHTML = '';
-      return;
-    }
-    const matches = players
-      .map((p) => p.name)
-      .filter((n) => n.toLowerCase().includes(q))
-      .slice(0, 8);
-    pseudoDropdown.innerHTML = '';
-    if (matches.length === 0) {
-      pseudoDropdown.innerHTML = '<div class="option empty">Aucun joueur trouvé</div>';
-    } else {
-      matches.forEach((name) => {
-        const opt = document.createElement('div');
-        opt.className = 'option';
-        opt.textContent = name;
-        opt.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          pseudoInput.value = name;
-          pseudoDropdown.classList.remove('open');
-          loadCharacters();
-        });
-        pseudoDropdown.appendChild(opt);
-      });
-    }
-    pseudoDropdown.classList.add('open');
-  }
-
-  pseudoInput.addEventListener('focus', renderPseudoOptions);
-  pseudoInput.addEventListener('input', renderPseudoOptions);
-  document.addEventListener('click', (e) => {
-    if (e.target !== pseudoInput && !pseudoDropdown.contains(e.target)) {
-      pseudoDropdown.classList.remove('open');
-    }
-  });
-
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     resultEl.textContent = '';
 
     if (!currentPlayer) {
-      resultEl.textContent = 'Charge d\'abord tes personnages avec ton pseudo Discord.';
+      resultEl.textContent = 'Utilise /register sur Discord avant de t\'inscrire.';
       resultEl.style.color = 'var(--red)';
       return;
     }
@@ -256,7 +281,7 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
     }
 
     const payload = {
-      pseudo: currentPlayer.name,
+      authToken: auth.token,
       presence: form.presence.value,
       remplacant: remplacantBox.value.trim(),
       personnages: chosen,
@@ -283,10 +308,6 @@ function setupInscriptionForm(state, characters, players, minCharacters) {
       resultEl.textContent = '✅ Inscription envoyée ! Tu recevras une réponse du Monokuma.';
       resultEl.style.color = 'var(--gold)';
       form.reset();
-      charList.innerHTML = '';
-      charSearch.style.display = 'none';
-      charHint.style.display = 'block';
-      status.textContent = '';
       const freshState = await fetchInscriptionState();
       const countEl = document.getElementById('insc-count');
       if (countEl) countEl.textContent = inscriptionCountText(freshState);

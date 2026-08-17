@@ -695,6 +695,95 @@ async function notifyPlayer(env, userId, content, components) {
   }
 }
 
+// --- Connexion Discord (OAuth2) pour la page Inscription ---------------------------------
+// But : empêcher qu'un joueur inscrive quelqu'un d'autre en tapant simplement son pseudo dans
+// le formulaire. On authentifie via le vrai compte Discord (OAuth2) et on signe un jeton court
+// (HMAC) que le site garde en localStorage et renvoie au Worker à la soumission.
+
+function base64url(bytes) {
+  let str = '';
+  bytes.forEach((b) => { str += String.fromCharCode(b); });
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64urlDecode(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  const bin = atob(str);
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+}
+
+async function hmacKey(env) {
+  return crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(env.SESSION_SECRET),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign', 'verify']
+  );
+}
+
+async function signAuthToken(env, payload) {
+  const payloadB64 = base64url(new TextEncoder().encode(JSON.stringify(payload)));
+  const key = await hmacKey(env);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payloadB64));
+  return `${payloadB64}.${base64url(new Uint8Array(sig))}`;
+}
+
+async function verifyAuthToken(env, token) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  const [payloadB64, sigB64] = token.split('.');
+  try {
+    const key = await hmacKey(env);
+    const valid = await crypto.subtle.verify('HMAC', key, base64urlDecode(sigB64), new TextEncoder().encode(payloadB64));
+    if (!valid) return null;
+    const payload = JSON.parse(new TextDecoder().decode(base64urlDecode(payloadB64)));
+    if (!payload.exp || Date.now() > payload.exp) return null;
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+const SESSION_DURATION_MS = 12 * 60 * 60 * 1000; // 12h
+
+async function handleOAuthCallback(request, env) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get('code');
+  const siteUrl = env.SITE_URL || 'https://katsu6624.github.io/danganronpa-rebirth-rp';
+  if (!code) return Response.redirect(`${siteUrl}/inscription.html#auth_error=1`, 302);
+
+  const redirectUri = `${url.origin}/oauth/callback`;
+
+  const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: env.DISCORD_APP_ID,
+      client_secret: env.DISCORD_CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: redirectUri,
+    }),
+  });
+  if (!tokenRes.ok) return Response.redirect(`${siteUrl}/inscription.html#auth_error=1`, 302);
+  const tokenData = await tokenRes.json();
+
+  const userRes = await fetch('https://discord.com/api/users/@me', {
+    headers: { Authorization: `Bearer ${tokenData.access_token}` },
+  });
+  if (!userRes.ok) return Response.redirect(`${siteUrl}/inscription.html#auth_error=1`, 302);
+  const user = await userRes.json();
+
+  const authToken = await signAuthToken(env, {
+    id: user.id,
+    username: user.username,
+    exp: Date.now() + SESSION_DURATION_MS,
+  });
+
+  return Response.redirect(`${siteUrl}/inscription.html#auth=${authToken}`, 302);
+}
+
 function selectMenuResponse(type, content, customId, placeholder, options) {
   return new Response(
     JSON.stringify({
@@ -728,9 +817,14 @@ async function handleInscriptionResponse(request, env) {
     return jsonResponse(400, { error: 'JSON invalide.' });
   }
 
-  const { pseudo, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc } = payload;
-  if (!pseudo || !Array.isArray(personnages) || personnages.length === 0) {
+  const { authToken, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc } = payload;
+  if (!Array.isArray(personnages) || personnages.length === 0) {
     return jsonResponse(400, { error: 'Champs manquants.' });
+  }
+
+  const auth = await verifyAuthToken(env, authToken);
+  if (!auth) {
+    return jsonResponse(401, { error: 'Connecte-toi avec Discord avant de t\'inscrire (session expirée ou absente).' });
   }
 
   const { data: inscription } = await readJsonFile(env, 'data/inscription.json');
@@ -739,9 +833,9 @@ async function handleInscriptionResponse(request, env) {
   }
 
   const { data: players } = await getPlayers(env);
-  const player = players.find((p) => p.name.toLowerCase() === String(pseudo).toLowerCase());
+  const player = findPlayer(players, auth.id);
   if (!player) {
-    return jsonResponse(400, { error: 'Pseudo non reconnu. Utilise /register sur Discord avant de t\'inscrire.' });
+    return jsonResponse(400, { error: 'Compte non reconnu. Utilise /register sur Discord avant de t\'inscrire.' });
   }
 
   const owned = new Set(player.owned || []);
@@ -810,6 +904,10 @@ export default {
       if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
       if (request.method !== 'POST') return jsonResponse(405, { error: 'Méthode non autorisée.' });
       return handleInscriptionResponse(request, env);
+    }
+
+    if (url.pathname === '/oauth/callback') {
+      return handleOAuthCallback(request, env);
     }
 
     if (request.method !== 'POST') return new Response('Bot Danganronpa Rebirth RP en ligne.', { status: 200 });

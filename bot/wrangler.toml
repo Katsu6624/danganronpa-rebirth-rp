@@ -10,8 +10,12 @@ DISCORD_GUILD_ID = "1178733678080294963"
 DISCORD_ROLE_ESPOIR = "1185366817359790080"
 DISCORD_ROLE_PREPA = "1178869069823344672"
 DISCORD_ROLE_MONOKUMA = "1178889299350003803"
+DISCORD_APP_ID = "1537099548458098758"
+SITE_URL = "https://katsu6624.github.io/danganronpa-rebirth-rp"
 
 # Secrets (ne jamais mettre en clair ici) : à définir avec :
 #   wrangler secret put DISCORD_PUBLIC_KEY
 #   wrangler secret put GITHUB_TOKEN
 #   wrangler secret put DISCORD_BOT_TOKEN
+#   wrangler secret put DISCORD_CLIENT_SECRET   (onglet OAuth2 du Developer Portal, "Client Secret")
+#   wrangler secret put SESSION_SECRET          (une chaîne aléatoire quelconque, sert à signer les sessions)
