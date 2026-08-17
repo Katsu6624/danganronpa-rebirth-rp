@@ -778,6 +778,7 @@ async function handleOAuthCallback(request, env) {
   const authToken = await signAuthToken(env, {
     id: user.id,
     username: user.username,
+    avatar: user.avatar || null,
     exp: Date.now() + SESSION_DURATION_MS,
   });
 

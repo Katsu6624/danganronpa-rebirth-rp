@@ -52,6 +52,44 @@ function getCurrentAuth() {
   return { token, ...payload };
 }
 
+function discordAvatarUrl(auth) {
+  if (auth.avatar) {
+    return `https://cdn.discordapp.com/avatars/${auth.id}/${auth.avatar}.png?size=64`;
+  }
+  const defaultIndex = Number((BigInt(auth.id) >> 22n) % 6n);
+  return `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`;
+}
+
+function renderGlobalAuthWidget() {
+  captureAuthFromUrl();
+  let widget = document.getElementById('global-auth-widget');
+  if (!widget) {
+    widget = document.createElement('div');
+    widget.id = 'global-auth-widget';
+    document.body.appendChild(widget);
+  }
+
+  const auth = getCurrentAuth();
+  if (!auth) {
+    widget.innerHTML = `<a href="${discordLoginUrl()}" class="global-auth-link">Se connecter avec Discord</a>`;
+    return;
+  }
+
+  widget.innerHTML = `
+    <button type="button" class="global-auth-link global-auth-logged" title="Cliquer pour se déconnecter">
+      <img src="${discordAvatarUrl(auth)}" alt="" class="global-auth-avatar">
+      <span>${auth.username}</span>
+    </button>
+  `;
+  widget.querySelector('.global-auth-logged').addEventListener('click', () => {
+    if (confirm('Se déconnecter de Discord ?')) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      renderGlobalAuthWidget();
+      if (document.getElementById('inscription-content')) setupInscription();
+    }
+  });
+}
+
 const PLACE_RESERVEE_OPTIONS = [
   'Pas de place réservée',
   "C'est ma première saison, je suis donc prioritaire",
@@ -716,6 +754,7 @@ function setupAproposTabs() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  renderGlobalAuthWidget();
   setupIpCopy();
   setupUnlockInfoModal();
   setupSeasonGallery();
