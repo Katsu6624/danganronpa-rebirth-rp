@@ -772,4 +772,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { characters, players } = await loadData();
   renderCharacters(characters, players);
+  setupMyCharsButton(players);
 });
+
+function setupMyCharsButton(players) {
+  const btn = document.getElementById('my-chars-btn');
+  const playerInput = document.getElementById('char-player');
+  if (!btn || !playerInput) return;
+
+  const auth = getCurrentAuth();
+  if (!auth) return;
+
+  const me = players.find((p) => p.discordId === auth.id);
+  if (!me) return;
+
+  btn.style.display = '';
+  btn.addEventListener('click', () => {
+    playerInput.value = me.name;
+    playerInput.dispatchEvent(new Event('input'));
+    playerInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
