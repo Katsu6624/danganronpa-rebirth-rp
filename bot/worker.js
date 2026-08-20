@@ -248,10 +248,18 @@ async function expireVips(env) {
 
   if (ctx.skipWrite || !ctx.toNotify) return;
 
+  const { data: playersAfter } = await getPlayers(env);
+  const nameById = Object.fromEntries(playersAfter.map((p) => [p.discordId, p.name]));
+
   for (const { discordId, tierName } of ctx.toNotify) {
     const tier = VIP_TIERS[tierName];
     if (tier) await setDiscordRole(env, discordId, env[tier.roleEnvVar], false).catch(() => {});
     await notifyPlayer(env, discordId, "Votre abonnement s'est terminé. Merci de le renouveler !");
+  }
+
+  if (env.DISCORD_OWNER_ID) {
+    const lines = ctx.toNotify.map(({ discordId, tierName }) => `• **${nameById[discordId] || discordId}** — ${VIP_TIERS[tierName]?.label || tierName}`);
+    await notifyPlayer(env, env.DISCORD_OWNER_ID, `⏳ **Abonnement(s) VIP expiré(s)** (30 jours écoulés, rôle retiré automatiquement) :\n${lines.join('\n')}`);
   }
 }
 
