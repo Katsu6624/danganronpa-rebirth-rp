@@ -216,6 +216,45 @@ const VIP_TIERS = {
   prepa: { roleEnvVar: 'DISCORD_ROLE_PREPA', label: 'Lycéen en Cours Préparatoire' },
 };
 
+const VIP_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
+
+// Reverrouille ce qui venait du VIP (utilisé par /vip retirer ET par l'expiration automatique).
+function applyVipRevoke(player, allIds, freeIds) {
+  const grantedByVip = new Set(player.vipGrantedIds || []);
+  player.owned = (player.owned || []).filter((id) => !grantedByVip.has(id));
+  const stillMissing = allIds.filter((id) => !player.owned.includes(id) && !freeIds.includes(id));
+  player.locked = [...new Set([...(player.locked || []), ...stillMissing])];
+  player.vip = false;
+  player.vipTier = null;
+  player.vipGrantedIds = [];
+  player.vipExpiresAt = null;
+}
+
+// Tourne via le cron Worker (voir wrangler.toml [triggers]) : reverrouille automatiquement les
+// VIP dont les 30 jours sont écoulés, retire le rôle Discord et prévient le joueur en MP.
+async function expireVips(env) {
+  const characters = await getCharacters(env);
+  const allIds = characters.map((c) => c.id);
+  const freeIds = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
+  const now = Date.now();
+
+  const ctx = await updatePlayersFile(env, (players) => {
+    const expired = players.filter((p) => p.vip && p.vipExpiresAt && now > p.vipExpiresAt);
+    if (expired.length === 0) return { skipWrite: true };
+    const toNotify = expired.map((p) => ({ discordId: p.discordId, tierName: p.vipTier }));
+    expired.forEach((p) => applyVipRevoke(p, allIds, freeIds));
+    return { message: `Expiration VIP automatique (${expired.length} joueur(s))`, toNotify };
+  });
+
+  if (ctx.skipWrite || !ctx.toNotify) return;
+
+  for (const { discordId, tierName } of ctx.toNotify) {
+    const tier = VIP_TIERS[tierName];
+    if (tier) await setDiscordRole(env, discordId, env[tier.roleEnvVar], false).catch(() => {});
+    await notifyPlayer(env, discordId, "Votre abonnement s'est terminé. Merci de le renouveler !");
+  }
+}
+
 async function handleVipAsync(env, interaction) {
   const group = interaction.data.options?.[0];
   const tier = VIP_TIERS[group?.name];
@@ -251,17 +290,12 @@ async function handleVipAsync(env, interaction) {
       player.locked = [];
       player.vip = true;
       player.vipTier = group.name;
+      player.vipExpiresAt = Date.now() + VIP_DURATION_MS;
       return { message: `VIP (${tier.label}) accordé à ${targetUser.username}`, action: 'donner', previousTier };
     }
 
     if (sub.name === 'retirer') {
-      const grantedByVip = new Set(player.vipGrantedIds || []);
-      player.owned = player.owned.filter((id) => !grantedByVip.has(id));
-      const stillMissing = allIds.filter((id) => !player.owned.includes(id) && !freeIds.includes(id));
-      player.locked = [...new Set([...(player.locked || []), ...stillMissing])];
-      player.vip = false;
-      player.vipTier = null;
-      player.vipGrantedIds = [];
+      applyVipRevoke(player, allIds, freeIds);
       return { message: `VIP (${tier.label}) retiré à ${targetUser.username}`, action: 'retirer' };
     }
 
@@ -276,8 +310,8 @@ async function handleVipAsync(env, interaction) {
       await setDiscordRole(env, targetUser.id, previousRoleId, false);
     }
     await setDiscordRole(env, targetUser.id, roleId, true);
-    await notifyPlayer(env, targetUser.id, `✨ Le rôle **${tier.label}** vous a été donné par ${interaction.member.user.username} : tous les personnages sont débloqués.`);
-    return `✅ ${targetUser.username} a maintenant le rôle ${tier.label} : tous les personnages sont débloqués.`;
+    await notifyPlayer(env, targetUser.id, `✨ Le rôle **${tier.label}** vous a été donné par ${interaction.member.user.username} pour 30 jours : tous les personnages sont débloqués.`);
+    return `✅ ${targetUser.username} a maintenant le rôle ${tier.label} pour 30 jours : tous les personnages sont débloqués.`;
   }
 
   await setDiscordRole(env, targetUser.id, roleId, false);
@@ -898,6 +932,12 @@ const DEFERRED_COMMANDS = {
 };
 
 export default {
+  // Cron déclaré dans wrangler.toml ([triggers] crons) : vérifie toutes les heures si des VIP
+  // ont dépassé leurs 30 jours, et les reverrouille automatiquement (voir expireVips).
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(expireVips(env));
+  },
+
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 

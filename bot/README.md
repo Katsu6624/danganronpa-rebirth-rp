@@ -12,9 +12,9 @@ GitHub, ce qui republie le site automatiquement.
 - `/liste joueur:@X` : affiche le roster d'un joueur (accessible à tout le monde)
 - `/debloquer joueur:@X personnage:<nom>` : attribue un personnage à un joueur ⚠️ staff
 - `/retirer joueur:@X personnage:<nom>` : retire un personnage ⚠️ staff
-- `/vip espoir donner joueur:@X` : donne le rôle Lycéen de l'Espoir et débloque tous les personnages ⚠️ staff
+- `/vip espoir donner joueur:@X` : donne le rôle Lycéen de l'Espoir pour 30 jours et débloque tous les personnages ⚠️ staff
 - `/vip espoir retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
-- `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages ⚠️ staff
+- `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire pour 30 jours et débloque tous les personnages ⚠️ staff
 - `/vip prepa retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
 - `/inscription ouvrir titre type places max_chapitres min_perso` : remplis ces 5 options
   directement dans Discord, puis un modal s'ouvre pour les 3 derniers champs (personnages
@@ -29,6 +29,12 @@ GitHub, ce qui republie le site automatiquement.
 
 Pour les deux paliers `/vip`, les personnages attribués individuellement via `/debloquer`
 restent acquis même après le retrait du rôle.
+
+Le VIP donné via `/vip ... donner` expire automatiquement au bout de **30 jours** : un cron
+(déclenché toutes les heures, voir `[triggers]` dans `wrangler.toml`) retire le rôle Discord,
+reverrouille les personnages débloqués par le VIP, et envoie un MP au joueur ("Votre abonnement
+s'est terminé. Merci de le renouveler !"). Relancer `/vip ... donner` sur un joueur déjà VIP
+repart pour 30 jours à partir de ce moment-là.
 
 ### Inscriptions à une saison
 

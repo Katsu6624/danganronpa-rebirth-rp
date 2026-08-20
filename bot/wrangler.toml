@@ -2,6 +2,11 @@ name = "danganronpa-rebirth-rp-bot"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
+# Vérifie toutes les heures si des VIP (Lycéen de l'Espoir / Cours Préparatoire) ont dépassé
+# leurs 30 jours, et les reverrouille automatiquement (voir expireVips dans worker.js).
+[triggers]
+crons = ["0 * * * *"]
+
 [vars]
 GITHUB_OWNER = "Katsu6624"
 GITHUB_REPO = "danganronpa-rebirth-rp"
