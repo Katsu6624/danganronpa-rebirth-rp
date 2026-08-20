@@ -2092,7 +2092,8 @@
       "nikei"
     ],
     "vip": true,
-    "vipTier": "espoir"
+    "vipTier": "espoir",
+    "vipExpiresAt": 1789841209058
   },
   {
     "name": "valoche",
@@ -3390,7 +3391,8 @@
       "nikei"
     ],
     "vip": true,
-    "vipTier": "prepa"
+    "vipTier": "prepa",
+    "vipExpiresAt": 1789841209058
   },
   {
     "name": "aurelien06",
