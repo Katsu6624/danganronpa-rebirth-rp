@@ -162,6 +162,38 @@ const commands = [
       },
     ],
   },
+  {
+    name: 'collection',
+    description: 'Gérer ce qui est envoyé aux joueurs depuis la collection Workshop (playermodels, maps...)',
+    // Pas de default_member_permissions : visible par tout le monde, mais le Worker
+    // vérifie lui-même (permission "Gérer le serveur" OU rôle Monokuma) avant d'agir.
+    dm_permission: false,
+    options: [
+      {
+        type: 1,
+        name: 'exclure',
+        description: 'Ne plus envoyer cet addon aux joueurs (liste noire)',
+        options: [{ type: 3, name: 'lien', description: 'Lien Steam Workshop de l\'addon', required: true }],
+      },
+      {
+        type: 1,
+        name: 'inclure',
+        description: 'Toujours envoyer cet addon aux joueurs (liste blanche)',
+        options: [{ type: 3, name: 'lien', description: 'Lien Steam Workshop de l\'addon', required: true }],
+      },
+      {
+        type: 1,
+        name: 'reset',
+        description: 'Retirer la surcharge manuelle d\'un addon (retour au comportement automatique)',
+        options: [{ type: 3, name: 'lien', description: 'Lien Steam Workshop de l\'addon', required: true }],
+      },
+      {
+        type: 1,
+        name: 'liste',
+        description: 'Voir les listes noire/blanche actuelles',
+      },
+    ],
+  },
 ];
 
 const endpoint = guildId
