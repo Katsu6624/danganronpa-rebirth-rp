@@ -207,11 +207,6 @@ function handleHelp() {
     '`/inscription image url:<lien>` : ajoute une image à la page Inscription (inscriptions déjà ouvertes).',
     '`/inscription fermer` : ferme les inscriptions.',
     '`/recompense perso joueur:@X` : envoie un MP au joueur pour qu\'il choisisse lui-même un personnage à débloquer.',
-    '`/collection exclure lien:<url>` : retire un addon de la collection Workshop poussée aux joueurs (liste noire), à partir du lien Steam Workshop de l\'addon.',
-    '`/collection inclure lien:<url>` : force un addon à toujours être poussé aux joueurs (liste blanche).',
-    '`/collection reset lien:<url>` : retire la surcharge manuelle d\'un addon (retour au comportement automatique).',
-    '`/collection liste` : voir les listes noire/blanche actuelles.',
-    '⚠️ Les changements de `/collection` ne prennent effet qu\'au prochain redémarrage du serveur de jeu (toujours manuel).',
   ];
   return reply(lines.join('\n'));
 }
@@ -612,76 +607,6 @@ async function handleRecompense(env, interaction) {
   return reply(await handleRecompenseAsync(env, interaction));
 }
 
-// --- Gestion de la collection Workshop saisonnière -----------------------------------------
-// But : éviter d'avoir à retirer/rajouter des addons à la main dans la collection Steam à
-// chaque saison (packs de playermodels, maps). Le serveur de jeu (ultimate_workshop_downloader,
-// module dr_season_manifest.lua) lit ce fichier au démarrage via http.Fetch et applique les
-// surcharges : false = ne jamais pousser aux clients (liste noire), true = toujours pousser
-// (liste blanche), absent = comportement automatique par défaut. Effectif au redémarrage
-// serveur suivant seulement (voir dr_season_manifest.lua côté GMod pour le mécanisme de cache).
-const WORKSHOP_OVERRIDES_PATH = 'data/workshop_overrides.json';
-
-function extractWorkshopId(url) {
-  const match = /[?&]id=(\d+)/.exec(url || '');
-  return match ? match[1] : null;
-}
-
-async function handleCollectionAsync(env, interaction) {
-  if (!isStaffOrMonokuma(env, interaction)) {
-    return "Tu n'as pas la permission d'utiliser cette commande.";
-  }
-
-  const sub = interaction.data.options?.[0];
-  if (!sub) return 'Sous-commande inconnue.';
-
-  if (sub.name === 'liste') {
-    const { data } = await readJsonFile(env, WORKSHOP_OVERRIDES_PATH);
-    const excluded = Object.entries(data).filter(([, v]) => v === false).map(([id]) => id);
-    const included = Object.entries(data).filter(([, v]) => v === true).map(([id]) => id);
-    return [
-      `**Liste noire (jamais envoyés) :** ${excluded.length ? excluded.join(', ') : 'aucun'}`,
-      `**Liste blanche (toujours envoyés) :** ${included.length ? included.join(', ') : 'aucun'}`,
-    ].join('\n');
-  }
-
-  const link = sub.options?.find((o) => o.name === 'lien')?.value || '';
-  const wsid = extractWorkshopId(link);
-  if (!wsid) {
-    return 'Lien Workshop invalide. Attendu : un lien du type https://steamcommunity.com/sharedfiles/filedetails/?id=XXXXXXX';
-  }
-
-  if (sub.name === 'exclure') {
-    await updateJsonFile(env, WORKSHOP_OVERRIDES_PATH, (data) => {
-      data[wsid] = false;
-      return { message: `Exclusion de l'item Workshop ${wsid} de la collection saisonnière` };
-    });
-    return `✅ Item Workshop \`${wsid}\` ajouté à la liste noire. Prend effet au prochain redémarrage du serveur de jeu.`;
-  }
-
-  if (sub.name === 'inclure') {
-    await updateJsonFile(env, WORKSHOP_OVERRIDES_PATH, (data) => {
-      data[wsid] = true;
-      return { message: `Inclusion forcée de l'item Workshop ${wsid} dans la collection saisonnière` };
-    });
-    return `✅ Item Workshop \`${wsid}\` ajouté à la liste blanche. Prend effet au prochain redémarrage du serveur de jeu.`;
-  }
-
-  if (sub.name === 'reset') {
-    const ctx = await updateJsonFile(env, WORKSHOP_OVERRIDES_PATH, (data) => {
-      if (!(wsid in data)) return { skipWrite: true, notFound: true };
-      delete data[wsid];
-      return { message: `Retrait de la surcharge manuelle pour l'item Workshop ${wsid}` };
-    });
-    if (ctx.notFound) return `Item Workshop \`${wsid}\` n'avait aucune surcharge active.`;
-    return `✅ Item Workshop \`${wsid}\` retiré des listes (retour au comportement automatique). Prend effet au prochain redémarrage du serveur de jeu.`;
-  }
-
-  return 'Sous-commande inconnue.';
-}
-
-async function handleCollection(env, interaction) {
-  return reply(await handleCollectionAsync(env, interaction));
-}
 
 async function handleRecompenseFactionSelect(env, interaction) {
   const faction = interaction.data.values?.[0];
@@ -766,7 +691,6 @@ async function handleCommand(env, interaction) {
     case 'retirer': return handleRetirer(env, interaction);
     case 'inscription': return handleInscription(env, interaction);
     case 'recompense': return handleRecompense(env, interaction);
-    case 'collection': return handleCollection(env, interaction);
     default: return reply('Commande inconnue.');
   }
 }
@@ -1014,7 +938,6 @@ const DEFERRED_COMMANDS = {
   debloquer: handleDebloquerAsync,
   retirer: handleRetirerAsync,
   recompense: handleRecompenseAsync,
-  collection: handleCollectionAsync,
 };
 
 export default {
