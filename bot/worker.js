@@ -560,9 +560,11 @@ async function handleInscription(env, interaction) {
   return reply('Sous-commande inconnue.');
 }
 
-async function handleInscriptionDetailsSubmit(env, interaction, ctx) {
+// Exécuté après une réponse différée (voir handleModalSubmit) : lire puis écrire inscription.json sur
+// GitHub peut dépasser les 3s que Discord accorde pour répondre à la soumission du formulaire.
+async function handleInscriptionDetailsSubmitAsync(env, interaction, ctx) {
   if (!isStaffOrMonokuma(env, interaction)) {
-    return reply("Tu n'as pas la permission d'utiliser cette commande.");
+    return "Tu n'as pas la permission d'utiliser cette commande.";
   }
 
   const [titre, type_saison, places, max_chapitres, min_perso] = interaction.data.custom_id
@@ -597,7 +599,7 @@ async function handleInscriptionDetailsSubmit(env, interaction, ctx) {
     return { message: `Ouverture des inscriptions : ${titre}` };
   });
   if (opened.duplicate) {
-    return reply(`Des inscriptions « ${titre} » sont déjà ouvertes. Choisis un autre titre, ou ferme-les avec /inscription fermer.`);
+    return `Des inscriptions « ${titre} » sont déjà ouvertes. Choisis un autre titre, ou ferme-les avec /inscription fermer.`;
   }
 
   // Partage automatique du Google Sheet avec l'adresse Gmail saisie (en tâche de fond, sans bloquer la réponse).
@@ -612,12 +614,25 @@ async function handleInscriptionDetailsSubmit(env, interaction, ctx) {
   }
   const partage = gmailValide && env.SHEETS_WEBHOOK_URL ? ` Le tableau des inscriptions est partagé avec ${gmail}.` : '';
 
-  return reply(`✅ Inscriptions ouvertes pour **${titre}**. Le formulaire est en ligne sur la page Inscription du site.${partage}`, false);
+  return `✅ Inscriptions ouvertes pour **${titre}**. Le formulaire est en ligne sur la page Inscription du site.${partage}`;
 }
 
 async function handleModalSubmit(env, interaction, ctx) {
   const customId = interaction.data.custom_id;
-  if (customId.startsWith('insc_details:')) return handleInscriptionDetailsSubmit(env, interaction, ctx);
+  if (customId.startsWith('insc_details:')) {
+    if (!isStaffOrMonokuma(env, interaction)) {
+      return reply("Tu n'as pas la permission d'utiliser cette commande.");
+    }
+    ctx.waitUntil(
+      handleInscriptionDetailsSubmitAsync(env, interaction, ctx)
+        .then((content) => editDeferredReply(interaction, content))
+        .catch((err) => editDeferredReply(interaction, `Erreur : ${err.message}`))
+    );
+    return new Response(
+      JSON.stringify({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
   return reply('Formulaire inconnu.');
 }
 
