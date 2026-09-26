@@ -283,6 +283,8 @@ async function renderInscriptionPage(data) {
       selectedId = btn.dataset.seasonTab;
       draw();
     }));
+    // Les blocs recréés doivent être pris en charge par l'animation d'apparition, sinon ils restent invisibles.
+    setupScrollReveal();
   }
   draw();
 }
