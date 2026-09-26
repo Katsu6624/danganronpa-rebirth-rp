@@ -153,10 +153,10 @@ const commands = [
       },
       {
         type: 1,
-        name: 'supprimer-feuille',
-        description: "Supprimer l'onglet d'une saison dans le Google Sheet",
+        name: 'saison-finie',
+        description: "Terminer une saison : ferme les inscriptions, supprime l'onglet du Sheet, retire les accès",
         options: [
-          { type: 3, name: 'titre', description: 'Titre de la saison (exactement le même que celui de l\'onglet)', required: true, autocomplete: true },
+          { type: 3, name: 'saison', description: 'La saison terminée', required: true, autocomplete: true },
         ],
       },
     ],

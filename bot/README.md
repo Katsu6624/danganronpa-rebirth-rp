@@ -23,6 +23,7 @@ GitHub, ce qui republie le site automatiquement.
   déjà ouvertes ; colle un lien d'image déjà hébergé ailleurs, pas de pièce jointe Discord car
   ces liens expirent au bout de 24-48h) ⚠️ staff ou Monokuma
 - `/inscription fermer [saison]` : ferme des inscriptions (l'option saison, avec autocomplétion, est obligatoire seulement si plusieurs inscriptions sont ouvertes en même temps), remet la page Inscription en état "fermé" ⚠️ staff ou Monokuma
+- `/inscription saison-finie saison:<saison>` : termine une saison : ferme les inscriptions si elles sont encore ouvertes, supprime l'onglet de la saison dans le Google Sheet et retire l'accès donné (via le champ Gmail de `/inscription ouvrir`) pour cette saison, sauf aux personnes encore concernées par une autre saison ⚠️ staff ou Monokuma
 - `/recompense perso joueur:@X` : envoie un MP au joueur avec un menu déroulant pour qu'il
   choisisse lui-même le personnage qu'il veut débloquer parmi ceux qu'il n'a pas encore
   (d'abord une collection, puis un personnage dans cette collection) ⚠️ staff ou Monokuma

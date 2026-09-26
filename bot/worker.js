@@ -141,7 +141,7 @@ async function handleAutocomplete(env, interaction) {
     .find((o) => o.focused);
   const query = (focused?.value || '').toLowerCase();
 
-  if (focused?.name === 'saison') {
+  if (focused?.name === 'saison' && interaction.data.options?.[0]?.name !== 'saison-finie') {
     const { data } = await readJsonFile(env, 'data/inscription.json');
     const choices = toMultiSeason(data).seasons
       .filter((s) => s.title.toLowerCase().includes(query))
@@ -153,14 +153,17 @@ async function handleAutocomplete(env, interaction) {
     );
   }
 
-  if (focused?.name === 'titre' && interaction.data.options?.[0]?.name === 'supprimer-feuille' && env.SHEETS_WEBHOOK_URL) {
-    const res = await callSheet(env, { action: 'list' });
-    let titres = [];
-    try { titres = JSON.parse(res.text); } catch (e) { /* pas de suggestions */ }
-    const choices = titres
-      .filter((t) => String(t).toLowerCase().includes(query))
+  if (focused?.name === 'saison' && interaction.data.options?.[0]?.name === 'saison-finie') {
+    const [inscription, sheet] = await Promise.all([
+      readJsonFile(env, 'data/inscription.json'),
+      env.SHEETS_WEBHOOK_URL ? callSheet(env, { action: 'list' }) : Promise.resolve({ text: '[]' }),
+    ]);
+    const titres = new Set(toMultiSeason(inscription.data).seasons.map((s) => s.title));
+    try { JSON.parse(sheet.text).forEach((t) => titres.add(String(t))); } catch (e) { /* pas d'onglets connus */ }
+    const choices = [...titres]
+      .filter((t) => t.toLowerCase().includes(query))
       .slice(0, 25)
-      .map((t) => ({ name: String(t).slice(0, 100), value: String(t).slice(0, 100) }));
+      .map((t) => ({ name: t.slice(0, 100), value: t.slice(0, 100) }));
     return new Response(
       JSON.stringify({ type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data: { choices } }),
       { headers: { 'Content-Type': 'application/json' } }
@@ -233,7 +236,7 @@ function handleHelp() {
     '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning/questions personnelles) puis ouvre les inscriptions à une saison.',
     '`/inscription image url:<lien> [saison]` : ajoute une image à la page Inscription (saison à préciser si plusieurs sont ouvertes).',
     '`/inscription fermer [saison]` : ferme des inscriptions (saison à préciser si plusieurs sont ouvertes). Plusieurs inscriptions peuvent être ouvertes en même temps.',
-    '`/inscription supprimer-feuille titre:<saison>` : supprime l\'onglet d\'une saison fermée dans le Google Sheet.',
+    '`/inscription saison-finie saison:<saison>` : ferme les inscriptions si besoin, supprime l\'onglet de la saison dans le Google Sheet et retire les accès donnés pour cette saison.',
     '`/recompense perso joueur:@X` : envoie un MP au joueur pour qu\'il choisisse lui-même un personnage à débloquer.',
   ];
   return reply(lines.join('\n'));
@@ -517,29 +520,46 @@ function newSeasonId() {
   return 's' + Date.now().toString(36);
 }
 
-// /inscription supprimer-feuille : supprime l'onglet d'une saison dans le Google Sheet.
-// Exécutée après une réponse différée (la lecture GitHub + l'appel Google peuvent dépasser 3s).
-async function handleSupprimerFeuilleAsync(env, interaction) {
+// /inscription saison-finie : ferme les inscriptions si elles sont encore ouvertes, supprime l'onglet
+// de la saison dans le Google Sheet et retire l'accès de ceux à qui il avait été donné pour cette saison.
+// Exécutée après une réponse différée (lecture/écriture GitHub + appel Google peuvent dépasser 3s).
+async function handleSaisonFinieAsync(env, interaction) {
   if (!isStaffOrMonokuma(env, interaction)) {
     return "Tu n'as pas la permission d'utiliser cette commande.";
   }
-  if (!env.SHEETS_WEBHOOK_URL) return "Aucun Google Sheet n'est configuré.";
 
   const sub = interaction.data.options[0];
-  const titre = String(sub.options?.find((o) => o.name === 'titre')?.value || '').trim();
-  if (!titre) return 'Indique le titre de la saison.';
+  const titre = String(sub.options?.find((o) => o.name === 'saison')?.value || '').trim();
+  if (!titre) return 'Indique la saison.';
 
-  const { data } = await readJsonFile(env, 'data/inscription.json');
-  toMultiSeason(data);
-  if (data.seasons.some((s) => s.title.toLowerCase() === titre.toLowerCase())) {
-    return `Les inscriptions « ${titre} » sont encore ouvertes : ferme-les d'abord avec /inscription fermer.`;
+  const lignes = [];
+
+  const closing = await updateJsonFile(env, 'data/inscription.json', (data) => {
+    toMultiSeason(data);
+    const season = data.seasons.find((s) => s.title.toLowerCase() === titre.toLowerCase() || s.id === titre);
+    if (!season) return { skipWrite: true };
+    data.seasons = data.seasons.filter((s) => s !== season);
+    data.updatedAt = new Date().toISOString();
+    return { message: `Saison finie : ${season.title}`, closed: true };
+  });
+  if (closing.closed) lignes.push(`✅ Inscriptions **${titre}** fermées.`);
+
+  if (env.SHEETS_WEBHOOK_URL) {
+    const res = await callSheet(env, { action: 'finish', saison: titre });
+    let info = null;
+    try { info = JSON.parse(res.text); } catch (e) { /* réponse non JSON */ }
+    if (info) {
+      if (info.supprime) lignes.push(`🗑️ L'onglet **${titre}** a été supprimé du Google Sheet.`);
+      else if (closing.closed) lignes.push(`ℹ️ Aucun onglet « ${titre} » dans le Google Sheet.`);
+      if (info.retires && info.retires.length) lignes.push(`🔒 Accès au Google Sheet retiré à : ${info.retires.join(', ')}.`);
+    } else {
+      const detail = res.text.startsWith('<') ? 'erreur du script Google' : res.text.slice(0, 80);
+      lignes.push(`⚠️ Le Google Sheet n'a pas pu être nettoyé (${detail}). Vérifie que le script Apps Script est à jour.`);
+    }
   }
 
-  const res = await callSheet(env, { action: 'delete', saison: titre });
-  if (res.text === 'deleted') return `🗑️ L'onglet **${titre}** a été supprimé du Google Sheet.`;
-  if (res.text === 'notfound') return `Aucun onglet « ${titre} » dans le Google Sheet (le titre doit être exactement le même).`;
-  if (res.text === 'last') return "Impossible : c'est le dernier onglet du Google Sheet, Google exige d'en garder au moins un.";
-  return `⚠️ La suppression a échoué (${res.text.startsWith('<') ? 'erreur du script Google' : res.text.slice(0, 80)}). Vérifie que le script Apps Script est à jour.`;
+  if (lignes.length === 0) return `Aucune saison « ${titre} » : ni inscriptions ouvertes, ni onglet dans le Google Sheet.`;
+  return lignes.join('\n');
 }
 
 async function handleInscription(env, interaction) {
@@ -629,7 +649,7 @@ async function prepareSheet(env, titre, gmail) {
   }
 
   if (gmail) {
-    const share = await callSheet(env, { action: 'share', email: gmail });
+    const share = await callSheet(env, { action: 'share', email: gmail, saison: titre });
     lignes.push(share.text === 'shared'
       ? `✅ Le tableau est partagé avec ${gmail}.`
       : `⚠️ Le partage du tableau avec ${gmail} a échoué : vérifie que c'est bien une adresse Google.`);
@@ -1198,9 +1218,9 @@ export default {
       // /register peut être appelé en rafale (beaucoup de monde en même temps) : les conflits
       // d'écriture sur players.json et leurs réessais peuvent dépasser les 3s accordées par
       // Discord. On accuse réception tout de suite, puis on finalise en tâche de fond.
-      if (interaction.data.name === 'inscription' && interaction.data.options?.[0]?.name === 'supprimer-feuille') {
+      if (interaction.data.name === 'inscription' && interaction.data.options?.[0]?.name === 'saison-finie') {
         ctx.waitUntil(
-          handleSupprimerFeuilleAsync(env, interaction)
+          handleSaisonFinieAsync(env, interaction)
             .then((content) => editDeferredReply(interaction, content))
             .catch((err) => editDeferredReply(interaction, `Erreur : ${err.message}`))
         );

@@ -93,6 +93,13 @@ function doPost(e) {
   const d = JSON.parse(e.postData.contents);
   if (d.action === 'share') {
     SpreadsheetApp.getActiveSpreadsheet().addEditor(d.email);
+    if (d.saison) {
+      const props = PropertiesService.getScriptProperties();
+      const cle = 'editeurs:' + d.saison;
+      const emails = props.getProperty(cle) ? JSON.parse(props.getProperty(cle)) : [];
+      if (emails.indexOf(d.email) === -1) emails.push(d.email);
+      props.setProperty(cle, JSON.stringify(emails));
+    }
     return ContentService.createTextOutput('shared');
   }
 
@@ -101,13 +108,33 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify(titres));
   }
 
-  if (d.action === 'delete') {
+  if (d.action === 'finish') {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const cible = ss.getSheets().find((s) => saisonDeLOnglet(s) === d.saison) || ss.getSheetByName(nomOnglet(d.saison));
-    if (!cible) return ContentService.createTextOutput('notfound');
-    if (ss.getSheets().length === 1) return ContentService.createTextOutput('last');
-    ss.deleteSheet(cible);
-    return ContentService.createTextOutput('deleted');
+    const cible = ss.getSheets().find((f) => saisonDeLOnglet(f) === d.saison) || ss.getSheetByName(nomOnglet(d.saison));
+    let supprime = false;
+    if (cible) {
+      if (ss.getSheets().length === 1) ss.insertSheet(); // Google exige au moins un onglet
+      ss.deleteSheet(cible);
+      supprime = true;
+    }
+
+    // Retire l'accès donné pour cette saison, sauf aux personnes encore concernées par une autre saison.
+    const props = PropertiesService.getScriptProperties();
+    const toutes = props.getProperties();
+    const cle = 'editeurs:' + d.saison;
+    const retires = [];
+    if (toutes[cle]) {
+      const emails = JSON.parse(toutes[cle]);
+      props.deleteProperty(cle);
+      const restants = {};
+      Object.keys(toutes).filter((k) => k.indexOf('editeurs:') === 0 && k !== cle)
+        .forEach((k) => JSON.parse(toutes[k]).forEach((m) => { restants[m.toLowerCase()] = true; }));
+      emails.forEach((m) => {
+        if (restants[m.toLowerCase()]) return;
+        try { ss.removeEditor(m); retires.push(m); } catch (err) { /* propriétaire ou déjà retiré */ }
+      });
+    }
+    return ContentService.createTextOutput(JSON.stringify({ supprime: supprime, retires: retires }));
   }
 
   if (d.action === 'open') {
