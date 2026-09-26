@@ -953,7 +953,9 @@ async function handleInscriptionResponse(request, env, ctx) {
           mastermind: mastermind === 'oui' ? 'Oui' : 'Non',
           oc: oc || '',
         }),
-      }).catch(() => {})
+      })
+        .then(async (r) => console.log('Sheet:', r.status, (await r.text()).slice(0, 200)))
+        .catch((err) => console.log('Sheet erreur:', err.message))
     );
   }
 
