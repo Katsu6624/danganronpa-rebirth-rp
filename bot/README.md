@@ -150,6 +150,10 @@ $env:DISCORD_APP_ID="..."; $env:DISCORD_BOT_TOKEN="..."; $env:DISCORD_GUILD_ID="
 
 ---
 
+> ⚠️ Enregistre toujours les commandes **avec** `DISCORD_GUILD_ID` (ID du serveur : 1178733678080294963). Une copie globale
+> en plus d'une copie serveur donne des commandes en double dans Discord (dont une ancienne version).
+> Si des doublons réapparaissent, supprime la copie globale : `PUT /applications/<APP_ID>/commands` avec le corps `[]`.
+
 ## Mettre à jour le bot plus tard
 Après une modif de `bot/worker.js` :
 
