@@ -861,7 +861,7 @@ function selectMenuResponse(type, content, customId, placeholder, options) {
   );
 }
 
-async function handleInscriptionResponse(request, env) {
+async function handleInscriptionResponse(request, env, ctx) {
   let payload;
   try {
     payload = await request.json();
@@ -934,6 +934,29 @@ async function handleInscriptionResponse(request, env) {
     return { message: `Inscription de ${player.name} comptabilisée` };
   });
 
+  // Copie dans le Google Sheet du staff (facultatif : seulement si SHEETS_WEBHOOK_URL est défini).
+  // En tâche de fond : une lenteur ou une panne de Google ne doit jamais faire échouer l'inscription.
+  if (env.SHEETS_WEBHOOK_URL) {
+    ctx.waitUntil(
+      fetch(env.SHEETS_WEBHOOK_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          saison: inscription.title || '',
+          pseudo: player.name,
+          discordId: player.discordId,
+          presence: presence === 'non' ? 'Non' : 'Oui',
+          remplacant: presence === 'non' ? remplacant || '' : '',
+          personnages: persoNames,
+          intentionTuer: intentionTuer === 'oui' ? 'Oui' : 'Non',
+          intentionTuerDetails: intentionTuer === 'oui' ? intentionTuerDetails || '' : '',
+          placeReservee: placeReservee || 'Pas de place réservée',
+          mastermind: mastermind === 'oui' ? 'Oui' : 'Non',
+          oc: oc || '',
+        }),
+      }).catch(() => {})
+    );
+  }
+
   return jsonResponse(200, { ok: true });
 }
 
@@ -961,7 +984,7 @@ export default {
     if (url.pathname === '/submit-inscription') {
       if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
       if (request.method !== 'POST') return jsonResponse(405, { error: 'Méthode non autorisée.' });
-      return handleInscriptionResponse(request, env);
+      return handleInscriptionResponse(request, env, ctx);
     }
 
     if (url.pathname === '/oauth/callback') {

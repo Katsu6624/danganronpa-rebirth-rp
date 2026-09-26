@@ -44,6 +44,17 @@ possède réellement (vérifié aussi côté serveur, impossible de tricher en m
 formulaire). Les réponses des joueurs sont envoyées en MP Discord à la personne qui a
 ouvert les inscriptions.
 
+### Google Sheet des inscriptions (facultatif)
+
+Chaque inscription peut aussi être copiée dans un Google Sheet (une ligne par joueur et par saison,
+mise à jour s'il renvoie le formulaire). Sans cette config, seuls les MP sont envoyés.
+
+1. Crée un Google Sheet vide, puis Extensions > Apps Script.
+2. Colle le contenu de `bot/google-sheet-script.gs` et remplace `CLE_SECRETE` par une chaîne de ton choix.
+3. Déployer > Nouveau déploiement > Application Web : exécuter en tant que **toi**, accès **Tout le monde**. Copie l'URL.
+4. Dans `bot/` : `npx wrangler secret put SHEETS_WEBHOOK_URL` et colle `<URL>?key=<ta clé>`.
+5. `npm run deploy`.
+
 Pour que la page du site puisse envoyer les réponses au bot, renseigne l'URL de ton Worker
 déployé (la même que ton "Interactions Endpoint URL" du Developer Portal) dans
 `js/main.js`, constante `INSCRIPTION_WORKER_URL`, en haut du fichier.
