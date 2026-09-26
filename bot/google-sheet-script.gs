@@ -100,7 +100,7 @@ function doPost(e) {
     const nouvelle = getFeuilleSaison(d.saison);
     if (nouvelle.getLastRow() === 0) nouvelle.appendRow(HEADERS);
     formaterFeuille(nouvelle);
-    return ContentService.createTextOutput('opened');
+    return ContentService.createTextOutput('opened:' + nouvelle.getSheetId());
   }
 
   const sheet = getFeuilleSaison(d.saison);

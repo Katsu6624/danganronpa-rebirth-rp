@@ -560,6 +560,44 @@ async function handleInscription(env, interaction) {
   return reply('Sous-commande inconnue.');
 }
 
+// Appelle le script Google Apps Script du Sheet ; renvoie toujours { ok, text } sans jamais lever d'erreur.
+async function callSheet(env, body) {
+  try {
+    const r = await fetch(env.SHEETS_WEBHOOK_URL, { method: 'POST', body: JSON.stringify(body) });
+    const text = (await r.text()).trim();
+    console.log('Sheet', body.action, r.status, text.slice(0, 100));
+    return { ok: r.ok, text };
+  } catch (err) {
+    console.log('Sheet erreur', body.action, err.message);
+    return { ok: false, text: err.message };
+  }
+}
+
+// Crée l'onglet de la saison dans le Google Sheet, le partage si un Gmail est donné, et renvoie
+// le texte du MP de confirmation pour la personne qui ouvre les inscriptions.
+async function prepareSheet(env, titre, gmail) {
+  const lignes = [];
+
+  const open = await callSheet(env, { action: 'open', saison: titre });
+  const m = /^opened(?::(\d+))?$/.exec(open.text);
+  if (m) {
+    const lien = env.SHEET_URL ? ` : ${env.SHEET_URL}${m[1] ? `#gid=${m[1]}` : ''}` : '.';
+    lignes.push(`📊 L'onglet **${titre}** est prêt dans le Google Sheet${lien}`);
+  } else {
+    const detail = open.text.startsWith('<') ? 'erreur du script Google' : open.text.slice(0, 80);
+    lignes.push(`⚠️ Impossible de préparer l'onglet **${titre}** dans le Google Sheet (${detail}). Les inscriptions fonctionnent, mais vérifie le script Apps Script.`);
+  }
+
+  if (gmail) {
+    const share = await callSheet(env, { action: 'share', email: gmail });
+    lignes.push(share.text === 'shared'
+      ? `✅ Le tableau est partagé avec ${gmail}.`
+      : `⚠️ Le partage du tableau avec ${gmail} a échoué : vérifie que c'est bien une adresse Google.`);
+  }
+
+  return lignes.join('\n');
+}
+
 // Exécuté après une réponse différée (voir handleModalSubmit) : lire puis écrire inscription.json sur
 // GitHub peut dépasser les 3s que Discord accorde pour répondre à la soumission du formulaire.
 async function handleInscriptionDetailsSubmitAsync(env, interaction, ctx) {
@@ -602,28 +640,18 @@ async function handleInscriptionDetailsSubmitAsync(env, interaction, ctx) {
     return `Des inscriptions « ${titre} » sont déjà ouvertes. Choisis un autre titre, ou ferme-les avec /inscription fermer.`;
   }
 
-  // Crée tout de suite l'onglet de la saison dans le Google Sheet (en tâche de fond).
-  if (env.SHEETS_WEBHOOK_URL) {
-    ctx.waitUntil(
-      fetch(env.SHEETS_WEBHOOK_URL, { method: 'POST', body: JSON.stringify({ action: 'open', saison: titre }) })
-        .then(async (r) => console.log('Onglet Sheet:', r.status, (await r.text()).slice(0, 100)))
-        .catch((err) => console.log('Onglet Sheet erreur:', err.message))
-    );
-  }
-
-  // Partage automatique du Google Sheet avec l'adresse Gmail saisie (en tâche de fond, sans bloquer la réponse).
+  // Prépare le Google Sheet en tâche de fond (onglet de la saison + partage), puis envoie un MP
+  // à la personne qui ouvre pour lui confirmer que le tableau existe vraiment (ou lui dire ce qui a échoué).
   const gmail = (v.gmail || '').trim();
   const gmailValide = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(gmail);
-  if (gmailValide && env.SHEETS_WEBHOOK_URL) {
+  if (env.SHEETS_WEBHOOK_URL) {
     ctx.waitUntil(
-      fetch(env.SHEETS_WEBHOOK_URL, { method: 'POST', body: JSON.stringify({ action: 'share', email: gmail }) })
-        .then(async (r) => console.log('Partage Sheet:', r.status, (await r.text()).slice(0, 100)))
-        .catch((err) => console.log('Partage Sheet erreur:', err.message))
+      prepareSheet(env, titre, gmailValide ? gmail : '').then((message) => notifyPlayer(env, openedBy, message))
     );
   }
-  const partage = gmailValide && env.SHEETS_WEBHOOK_URL ? ` Le tableau des inscriptions est partagé avec ${gmail}.` : '';
+  const suite = env.SHEETS_WEBHOOK_URL ? ' Tu vas recevoir un MP dès que le Google Sheet est prêt.' : '';
 
-  return `✅ Inscriptions ouvertes pour **${titre}**. Le formulaire est en ligne sur la page Inscription du site.${partage}`;
+  return `✅ Inscriptions ouvertes pour **${titre}**. Le formulaire est en ligne sur la page Inscription du site.${suite}`;
 }
 
 async function handleModalSubmit(env, interaction, ctx) {
