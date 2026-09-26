@@ -96,6 +96,20 @@ function doPost(e) {
     return ContentService.createTextOutput('shared');
   }
 
+  if (d.action === 'list') {
+    const titres = SpreadsheetApp.getActiveSpreadsheet().getSheets().map((s) => saisonDeLOnglet(s) || s.getName());
+    return ContentService.createTextOutput(JSON.stringify(titres));
+  }
+
+  if (d.action === 'delete') {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const cible = ss.getSheets().find((s) => saisonDeLOnglet(s) === d.saison) || ss.getSheetByName(nomOnglet(d.saison));
+    if (!cible) return ContentService.createTextOutput('notfound');
+    if (ss.getSheets().length === 1) return ContentService.createTextOutput('last');
+    ss.deleteSheet(cible);
+    return ContentService.createTextOutput('deleted');
+  }
+
   if (d.action === 'open') {
     const nouvelle = getFeuilleSaison(d.saison);
     if (nouvelle.getLastRow() === 0) nouvelle.appendRow(HEADERS);

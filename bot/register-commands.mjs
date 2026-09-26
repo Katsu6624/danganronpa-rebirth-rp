@@ -151,6 +151,14 @@ const commands = [
           { type: 3, name: 'saison', description: 'Quelle saison (obligatoire seulement si plusieurs sont ouvertes)', required: false, autocomplete: true },
         ],
       },
+      {
+        type: 1,
+        name: 'supprimer-feuille',
+        description: "Supprimer l'onglet d'une saison dans le Google Sheet",
+        options: [
+          { type: 3, name: 'titre', description: 'Titre de la saison (exactement le même que celui de l\'onglet)', required: true, autocomplete: true },
+        ],
+      },
     ],
   },
   {

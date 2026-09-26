@@ -153,6 +153,20 @@ async function handleAutocomplete(env, interaction) {
     );
   }
 
+  if (focused?.name === 'titre' && interaction.data.options?.[0]?.name === 'supprimer-feuille' && env.SHEETS_WEBHOOK_URL) {
+    const res = await callSheet(env, { action: 'list' });
+    let titres = [];
+    try { titres = JSON.parse(res.text); } catch (e) { /* pas de suggestions */ }
+    const choices = titres
+      .filter((t) => String(t).toLowerCase().includes(query))
+      .slice(0, 25)
+      .map((t) => ({ name: String(t).slice(0, 100), value: String(t).slice(0, 100) }));
+    return new Response(
+      JSON.stringify({ type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data: { choices } }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   const characters = await getCharacters(env);
   const matches = characters
     .filter((c) => c.name.toLowerCase().includes(query) || c.id.includes(query))
@@ -219,6 +233,7 @@ function handleHelp() {
     '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning/questions personnelles) puis ouvre les inscriptions à une saison.',
     '`/inscription image url:<lien> [saison]` : ajoute une image à la page Inscription (saison à préciser si plusieurs sont ouvertes).',
     '`/inscription fermer [saison]` : ferme des inscriptions (saison à préciser si plusieurs sont ouvertes). Plusieurs inscriptions peuvent être ouvertes en même temps.',
+    '`/inscription supprimer-feuille titre:<saison>` : supprime l\'onglet d\'une saison fermée dans le Google Sheet.',
     '`/recompense perso joueur:@X` : envoie un MP au joueur pour qu\'il choisisse lui-même un personnage à débloquer.',
   ];
   return reply(lines.join('\n'));
@@ -500,6 +515,31 @@ function findSeason(data, ref) {
 
 function newSeasonId() {
   return 's' + Date.now().toString(36);
+}
+
+// /inscription supprimer-feuille : supprime l'onglet d'une saison dans le Google Sheet.
+// Exécutée après une réponse différée (la lecture GitHub + l'appel Google peuvent dépasser 3s).
+async function handleSupprimerFeuilleAsync(env, interaction) {
+  if (!isStaffOrMonokuma(env, interaction)) {
+    return "Tu n'as pas la permission d'utiliser cette commande.";
+  }
+  if (!env.SHEETS_WEBHOOK_URL) return "Aucun Google Sheet n'est configuré.";
+
+  const sub = interaction.data.options[0];
+  const titre = String(sub.options?.find((o) => o.name === 'titre')?.value || '').trim();
+  if (!titre) return 'Indique le titre de la saison.';
+
+  const { data } = await readJsonFile(env, 'data/inscription.json');
+  toMultiSeason(data);
+  if (data.seasons.some((s) => s.title.toLowerCase() === titre.toLowerCase())) {
+    return `Les inscriptions « ${titre} » sont encore ouvertes : ferme-les d'abord avec /inscription fermer.`;
+  }
+
+  const res = await callSheet(env, { action: 'delete', saison: titre });
+  if (res.text === 'deleted') return `🗑️ L'onglet **${titre}** a été supprimé du Google Sheet.`;
+  if (res.text === 'notfound') return `Aucun onglet « ${titre} » dans le Google Sheet (le titre doit être exactement le même).`;
+  if (res.text === 'last') return "Impossible : c'est le dernier onglet du Google Sheet, Google exige d'en garder au moins un.";
+  return `⚠️ La suppression a échoué (${res.text.startsWith('<') ? 'erreur du script Google' : res.text.slice(0, 80)}). Vérifie que le script Apps Script est à jour.`;
 }
 
 async function handleInscription(env, interaction) {
@@ -1158,6 +1198,18 @@ export default {
       // /register peut être appelé en rafale (beaucoup de monde en même temps) : les conflits
       // d'écriture sur players.json et leurs réessais peuvent dépasser les 3s accordées par
       // Discord. On accuse réception tout de suite, puis on finalise en tâche de fond.
+      if (interaction.data.name === 'inscription' && interaction.data.options?.[0]?.name === 'supprimer-feuille') {
+        ctx.waitUntil(
+          handleSupprimerFeuilleAsync(env, interaction)
+            .then((content) => editDeferredReply(interaction, content))
+            .catch((err) => editDeferredReply(interaction, `Erreur : ${err.message}`))
+        );
+        return new Response(
+          JSON.stringify({ type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, data: { flags: 64 } }),
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
       const deferredHandler = DEFERRED_COMMANDS[interaction.data.name];
       if (deferredHandler) {
         ctx.waitUntil(
