@@ -3,11 +3,11 @@
 const CLE_SECRETE = 'CLE_SECRETE';
 
 const HEADERS = [
-  'Date', 'Saison', 'Pseudo', 'Discord ID', 'Présent tous les jours', 'Remplaçant',
+  'Date', 'Pseudo', 'Présent tous les jours', 'Remplaçant',
   'Personnages', 'Intention de tuer', 'Détails intention', 'Place réservée', 'Mastermind', 'OC', 'Questions perso',
 ];
 
-const LARGEURS = [60, 150, 110, 150, 70, 150, 300, 95, 180, 200, 100, 180, 350];
+const LARGEURS = [60, 110, 70, 150, 300, 95, 180, 200, 100, 180, 350];
 
 // Nom d'onglet valide pour Google Sheets (pas de [ ] * ? : / \ , 100 caractères max).
 function nomOnglet(saison) {
@@ -15,22 +15,31 @@ function nomOnglet(saison) {
   return nom || 'Inscriptions';
 }
 
-// Un onglet par saison : réutilise celui de la saison, sinon recycle le premier onglet s'il est vide
-// (ou ne contient que cette saison), sinon en crée un nouveau.
+// Chaque onglet mémorise sa saison (métadonnée cachée), puisque la colonne Saison n'existe plus.
+function saisonDeLOnglet(sheet) {
+  const trouves = sheet.createDeveloperMetadataFinder().withKey('saison').find();
+  return trouves.length ? trouves[0].getValue() : null;
+}
+
+// Un onglet par saison : réutilise celui de la saison ; sinon récupère le premier onglet s'il n'est
+// encore associé à aucune saison (cas de l'onglet existant) ; sinon en crée un nouveau.
 function getFeuilleSaison(saison) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const nom = nomOnglet(saison);
-  const existante = ss.getSheetByName(nom);
-  if (existante) return existante;
+  const feuilles = ss.getSheets();
+  const deja = feuilles.find((s) => saisonDeLOnglet(s) === saison);
+  if (deja) return deja;
 
-  const premiere = ss.getSheets()[0];
-  const nb = premiere.getLastRow();
-  const saisons = nb > 1 ? premiere.getRange(2, 2, nb - 1, 1).getValues().map((r) => r[0]) : [];
-  if (saisons.every((s) => s === saison)) {
-    premiere.setName(nom);
-    return premiere;
+  const cible = saisonDeLOnglet(feuilles[0]) === null ? feuilles[0] : ss.insertSheet();
+  cible.addDeveloperMetadata('saison', saison);
+
+  const base = nomOnglet(saison);
+  let nom = base;
+  let n = 2;
+  while (ss.getSheetByName(nom) && ss.getSheetByName(nom).getSheetId() !== cible.getSheetId()) {
+    nom = base.slice(0, 85) + ' (' + n++ + ')';
   }
-  return ss.insertSheet(nom);
+  cible.setName(nom);
+  return cible;
 }
 
 function formaterFeuille(sheet) {
@@ -48,7 +57,6 @@ function formaterFeuille(sheet) {
   const corps = sheet.getRange(2, 1, lignes - 1, HEADERS.length);
   corps.setVerticalAlignment('top').setWrap(true).setFontSize(10);
   sheet.getRange(2, 1, lignes - 1, 1).setNumberFormat('dd/MM');
-  sheet.getRange(2, 4, lignes - 1, 1).setNumberFormat('@');
 
   if (sheet.getBandings().length === 0) {
     corps.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, false, false);
@@ -58,6 +66,24 @@ function formaterFeuille(sheet) {
 // À lancer à la main pour remettre en forme tous les onglets.
 function mettreEnForme() {
   SpreadsheetApp.getActiveSpreadsheet().getSheets().forEach(formaterFeuille);
+}
+
+// À lancer UNE SEULE FOIS à la main : supprime les colonnes "Discord ID" et "Saison" des onglets
+// existants (l'ancien format à 13 colonnes). Sans danger si relancée : ne touche que l'ancien format.
+function migrerColonnes() {
+  SpreadsheetApp.getActiveSpreadsheet().getSheets().forEach((sheet) => {
+    if (sheet.getLastColumn() < 4) return;
+    const entetes = sheet.getRange(1, 1, 1, 4).getValues()[0];
+    if (entetes[1] === 'Saison' && entetes[3] === 'Discord ID') {
+      // Avant de supprimer la colonne Saison, mémorise la saison de l'onglet pour ne pas la perdre.
+      if (sheet.getLastRow() > 1 && saisonDeLOnglet(sheet) === null) {
+        sheet.addDeveloperMetadata('saison', sheet.getRange(2, 2).getValue());
+      }
+      sheet.deleteColumn(4);
+      sheet.deleteColumn(2);
+      formaterFeuille(sheet);
+    }
+  });
 }
 
 function doPost(e) {
@@ -73,16 +99,15 @@ function doPost(e) {
   const sheet = getFeuilleSaison(d.saison);
   if (sheet.getLastRow() === 0) sheet.appendRow(HEADERS);
   const row = [
-    new Date(), d.saison, d.pseudo, "'" + d.discordId, d.presence, d.remplacant,
+    new Date(), d.pseudo, d.presence, d.remplacant,
     d.personnages, d.intentionTuer, d.intentionTuerDetails, d.placeReservee, d.mastermind, d.oc, d.questionsPerso || '',
   ];
-  // Un joueur qui renvoie le formulaire pour la même saison met sa ligne à jour au lieu de la dupliquer.
+  // Un joueur qui renvoie le formulaire met sa ligne à jour au lieu de la dupliquer (retrouvé par son pseudo Discord).
   const nb = sheet.getLastRow();
   if (nb > 1) {
-    const ids = sheet.getRange(2, 4, nb - 1, 1).getValues();
-    const saisons = sheet.getRange(2, 2, nb - 1, 1).getValues();
-    for (let i = 0; i < ids.length; i++) {
-      if (String(ids[i][0]).replace("'", '') === d.discordId && saisons[i][0] === d.saison) {
+    const pseudos = sheet.getRange(2, 2, nb - 1, 1).getValues();
+    for (let i = 0; i < pseudos.length; i++) {
+      if (pseudos[i][0] === d.pseudo) {
         sheet.getRange(i + 2, 1, 1, row.length).setValues([row]);
         formaterFeuille(sheet);
         return ContentService.createTextOutput('updated');
