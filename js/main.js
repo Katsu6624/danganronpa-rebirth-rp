@@ -110,7 +110,7 @@ function inscriptionCountText(state) {
 
 async function fetchInscriptionState() {
   try {
-    const res = await fetch('data/inscription.json');
+    const res = await fetch('data/inscription.json', { cache: 'no-cache' });
     return await res.json();
   } catch (e) {
     return { open: false };
@@ -402,8 +402,8 @@ async function setupInscription() {
 
 async function loadData() {
   const [charactersRes, playersRes] = await Promise.all([
-    fetch('data/characters.json'),
-    fetch('data/players.json')
+    fetch('data/characters.json', { cache: 'no-cache' }),
+    fetch('data/players.json', { cache: 'no-cache' })
   ]);
   const characters = await charactersRes.json();
   const players = await playersRes.json();

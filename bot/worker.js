@@ -216,12 +216,18 @@ const VIP_TIERS = {
   prepa: { roleEnvVar: 'DISCORD_ROLE_PREPA', label: 'Lycéen en Cours Préparatoire' },
 };
 
+// Joueur créé sans passer par /register (ex: /vip ou /debloquer sur quelqu'un d'inscrit nulle part) :
+// il doit quand même avoir les collections gratuites, sinon il perd tout au retrait du VIP.
+function newPlayer(user, allIds, freeIds) {
+  return { name: user.username, discordId: user.id, owned: freeIds.slice(), locked: allIds.filter((id) => !freeIds.includes(id)) };
+}
+
 const VIP_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 // Reverrouille ce qui venait du VIP (utilisé par /vip retirer ET par l'expiration automatique).
 function applyVipRevoke(player, allIds, freeIds) {
   const grantedByVip = new Set(player.vipGrantedIds || []);
-  player.owned = (player.owned || []).filter((id) => !grantedByVip.has(id));
+  player.owned = [...new Set([...(player.owned || []).filter((id) => !grantedByVip.has(id)), ...freeIds])];
   const stillMissing = allIds.filter((id) => !player.owned.includes(id) && !freeIds.includes(id));
   player.locked = [...new Set([...(player.locked || []), ...stillMissing])];
   player.vip = false;
@@ -280,7 +286,7 @@ async function handleVipAsync(env, interaction) {
   const ctx = await updatePlayersFile(env, (players) => {
     let player = findPlayer(players, targetUser.id);
     if (!player) {
-      player = { name: targetUser.username, discordId: targetUser.id, owned: [], locked: [] };
+      player = newPlayer(targetUser, allIds, freeIds);
       players.push(player);
     }
     player.name = targetUser.username;
@@ -352,12 +358,14 @@ async function handleDebloquerAsync(env, interaction) {
   const character = charById[charId];
   if (!character) return `Personnage inconnu : \`${charId}\`. Utilise l'autocomplétion pour choisir un personnage valide.`;
 
+  const allIds = characters.map((c) => c.id);
+  const freeIds = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
   const targetUser = interaction.data.resolved.users[opts.joueur];
 
   await updatePlayersFile(env, (players) => {
     let player = findPlayer(players, targetUser.id);
     if (!player) {
-      player = { name: targetUser.username, discordId: targetUser.id, owned: [], locked: [] };
+      player = newPlayer(targetUser, allIds, freeIds);
       players.push(player);
     } else {
       player.name = targetUser.username;
