@@ -273,7 +273,7 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
   const currentPlayer = players.find((p) => p.discordId === auth.id) || null;
 
   if (!currentPlayer) {
-    status.textContent = 'Compte non reconnu. Utilise /register sur Discord avant de t\'inscrire.';
+    status.textContent = 'Compte non reconnu. Utilise /register sur Discord avant de t\'inscrire. Après avoir fait la commande, attends 2 minutes puis fais CTRL + F5 pour actualiser les données.';
     status.style.color = 'var(--red)';
     charHint.style.display = 'none';
   } else {
