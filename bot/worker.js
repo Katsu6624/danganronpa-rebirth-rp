@@ -140,6 +140,19 @@ async function handleAutocomplete(env, interaction) {
     ?.flatMap((o) => o.options || [o])
     .find((o) => o.focused);
   const query = (focused?.value || '').toLowerCase();
+
+  if (focused?.name === 'saison') {
+    const { data } = await readJsonFile(env, 'data/inscription.json');
+    const choices = toMultiSeason(data).seasons
+      .filter((s) => s.title.toLowerCase().includes(query))
+      .slice(0, 25)
+      .map((s) => ({ name: s.title.slice(0, 100), value: s.id }));
+    return new Response(
+      JSON.stringify({ type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data: { choices } }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   const characters = await getCharacters(env);
   const matches = characters
     .filter((c) => c.name.toLowerCase().includes(query) || c.id.includes(query))
@@ -204,8 +217,8 @@ function handleHelp() {
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
     '`/vip prepa retirer <joueur>` : retire le rôle Lycéen en Cours Préparatoire (les attributions individuelles sont conservées).',
     '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning/questions personnelles) puis ouvre les inscriptions à une saison.',
-    '`/inscription image url:<lien>` : ajoute une image à la page Inscription (inscriptions déjà ouvertes).',
-    '`/inscription fermer` : ferme les inscriptions.',
+    '`/inscription image url:<lien> [saison]` : ajoute une image à la page Inscription (saison à préciser si plusieurs sont ouvertes).',
+    '`/inscription fermer [saison]` : ferme des inscriptions (saison à préciser si plusieurs sont ouvertes). Plusieurs inscriptions peuvent être ouvertes en même temps.',
     '`/recompense perso joueur:@X` : envoie un MP au joueur pour qu\'il choisisse lui-même un personnage à débloquer.',
   ];
   return reply(lines.join('\n'));
@@ -462,6 +475,33 @@ function isStaffOrMonokuma(env, interaction) {
   return hasManageGuild || hasMonokumaRole;
 }
 
+// data/inscription.json contient désormais { seasons: [ ...saisons ouvertes ] } pour pouvoir ouvrir
+// plusieurs inscriptions en même temps. L'ancien format (une seule saison à plat) est converti à la volée.
+function toMultiSeason(data) {
+  if (Array.isArray(data.seasons)) return data;
+  const legacy = data.open ? [{ ...data, id: 'legacy' }] : [];
+  Object.keys(data).forEach((k) => delete data[k]);
+  data.seasons = legacy;
+  return data;
+}
+
+// Retrouve une saison ouverte par son id ou son titre ; sans référence, accepte seulement s'il n'y en a qu'une.
+function findSeason(data, ref) {
+  const seasons = data.seasons;
+  if (ref) {
+    const wanted = String(ref).toLowerCase();
+    const season = seasons.find((s) => s.id === ref || s.title.toLowerCase() === wanted);
+    return season ? { season } : { error: `Aucune inscription ouverte ne s'appelle « ${ref} ».` };
+  }
+  if (seasons.length === 0) return { error: "Aucune inscription n'est ouverte actuellement." };
+  if (seasons.length === 1) return { season: seasons[0] };
+  return { error: `Plusieurs inscriptions sont ouvertes (${seasons.map((s) => s.title).join(', ')}) : précise laquelle avec l'option saison.` };
+}
+
+function newSeasonId() {
+  return 's' + Date.now().toString(36);
+}
+
 async function handleInscription(env, interaction) {
   if (!isStaffOrMonokuma(env, interaction)) {
     return reply("Tu n'as pas la permission d'utiliser cette commande.");
@@ -489,38 +529,32 @@ async function handleInscription(env, interaction) {
     if (!/^https?:\/\//.test(url)) {
       return reply("L'image doit être une URL valide (http:// ou https://).");
     }
+    const saisonRef = sub.options?.find((o) => o.name === 'saison')?.value;
     const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
-      if (!data.open) return { skipWrite: true, notOpen: true };
-      data.imageUrl = url;
+      toMultiSeason(data);
+      const { season, error } = findSeason(data, saisonRef);
+      if (error) return { skipWrite: true, error };
+      season.imageUrl = url;
       data.updatedAt = new Date().toISOString();
-      return { message: 'Ajout d\'une image aux inscriptions' };
+      return { message: `Ajout d'une image aux inscriptions : ${season.title}`, title: season.title };
     });
-    if (ctx.notOpen) return reply('Aucune inscription n\'est ouverte actuellement.');
-    return reply('✅ Image ajoutée à la page Inscription.', false);
+    if (ctx.error) return reply(ctx.error);
+    return reply(`✅ Image ajoutée à la page Inscription de **${ctx.title}**.`, false);
   }
 
   if (sub?.name === 'fermer') {
-    await updateJsonFile(env, 'data/inscription.json', (data) => {
-      Object.assign(data, {
-        open: false,
-        title: '',
-        seasonType: '',
-        slots: null,
-        maxChapters: null,
-        minCharacters: null,
-        bannedCharacters: '',
-        tone: '',
-        planning: '',
-        customQuestions: [],
-        openedBy: null,
-        imageUrl: '',
-        registrations: [],
-        updatedAt: new Date().toISOString(),
-      });
-      return { message: 'Fermeture des inscriptions' };
+    const saisonRef = sub.options?.find((o) => o.name === 'saison')?.value;
+    const ctx = await updateJsonFile(env, 'data/inscription.json', (data) => {
+      toMultiSeason(data);
+      const { season, error } = findSeason(data, saisonRef);
+      if (error) return { skipWrite: true, error };
+      data.seasons = data.seasons.filter((s) => s !== season);
+      data.updatedAt = new Date().toISOString();
+      return { message: `Fermeture des inscriptions : ${season.title}`, title: season.title };
     });
+    if (ctx.error) return reply(ctx.error);
 
-    return reply('✅ Inscriptions fermées.', false);
+    return reply(`✅ Inscriptions fermées pour **${ctx.title}**.`, false);
   }
 
   return reply('Sous-commande inconnue.');
@@ -537,8 +571,13 @@ async function handleInscriptionDetailsSubmit(env, interaction, ctx) {
   const v = getModalValues(interaction);
   const openedBy = interaction.member.user.id;
 
-  await updateJsonFile(env, 'data/inscription.json', (data) => {
-    Object.assign(data, {
+  const opened = await updateJsonFile(env, 'data/inscription.json', (data) => {
+    toMultiSeason(data);
+    if (data.seasons.some((s) => s.title.toLowerCase() === titre.toLowerCase())) {
+      return { skipWrite: true, duplicate: true };
+    }
+    const season = {
+      id: newSeasonId(),
       open: true,
       title: titre,
       seasonType: type_saison,
@@ -552,10 +591,14 @@ async function handleInscriptionDetailsSubmit(env, interaction, ctx) {
       openedBy,
       imageUrl: '',
       registrations: [],
-      updatedAt: new Date().toISOString(),
-    });
+    };
+    data.seasons.push(season);
+    data.updatedAt = new Date().toISOString();
     return { message: `Ouverture des inscriptions : ${titre}` };
   });
+  if (opened.duplicate) {
+    return reply(`Des inscriptions « ${titre} » sont déjà ouvertes. Choisis un autre titre, ou ferme-les avec /inscription fermer.`);
+  }
 
   // Partage automatique du Google Sheet avec l'adresse Gmail saisie (en tâche de fond, sans bloquer la réponse).
   const gmail = (v.gmail || '').trim();
@@ -885,7 +928,7 @@ async function handleInscriptionResponse(request, env, ctx) {
     return jsonResponse(400, { error: 'JSON invalide.' });
   }
 
-  const { authToken, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc, reponsesPerso } = payload;
+  const { authToken, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc, reponsesPerso, saisonId } = payload;
   if (!Array.isArray(personnages) || personnages.length === 0) {
     return jsonResponse(400, { error: 'Champs manquants.' });
   }
@@ -895,10 +938,16 @@ async function handleInscriptionResponse(request, env, ctx) {
     return jsonResponse(401, { error: 'Connecte-toi avec Discord avant de t\'inscrire (session expirée ou absente).' });
   }
 
-  const { data: inscription } = await readJsonFile(env, 'data/inscription.json');
-  if (!inscription.open) {
+  const { data: inscriptionData } = await readJsonFile(env, 'data/inscription.json');
+  toMultiSeason(inscriptionData);
+  if (inscriptionData.seasons.length === 0) {
     return jsonResponse(400, { error: 'Les inscriptions sont fermées.' });
   }
+  const found = findSeason(inscriptionData, saisonId);
+  if (found.error) {
+    return jsonResponse(400, { error: saisonId ? 'Ces inscriptions sont fermées ou introuvables, recharge la page.' : 'Choisis pour quelle saison tu t\'inscris.' });
+  }
+  const inscription = found.season;
 
   const { data: players } = await getPlayers(env);
   const player = findPlayer(players, auth.id);
@@ -966,9 +1015,11 @@ async function handleInscriptionResponse(request, env, ctx) {
   // Compteur affiché sur la page Inscription : on ne compte qu'une fois par joueur
   // (un même joueur qui renvoie le formulaire met juste à jour sa place dans la liste).
   await updateJsonFile(env, 'data/inscription.json', (data) => {
-    if (!data.open) return { skipWrite: true };
-    data.registrations = [...new Set([...(data.registrations || []), player.discordId])];
-    return { message: `Inscription de ${player.name} comptabilisée` };
+    toMultiSeason(data);
+    const season = data.seasons.find((s) => s.id === inscription.id);
+    if (!season) return { skipWrite: true };
+    season.registrations = [...new Set([...(season.registrations || []), player.discordId])];
+    return { message: `Inscription de ${player.name} comptabilisée (${season.title})` };
   });
 
   // Copie dans le Google Sheet du staff (facultatif : seulement si SHEETS_WEBHOOK_URL est défini).

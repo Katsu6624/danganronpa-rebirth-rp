@@ -19,10 +19,10 @@ GitHub, ce qui republie le site automatiquement.
 - `/inscription ouvrir titre type places max_chapitres min_perso` : remplis ces 5 options
   directement dans Discord, puis un modal s'ouvre pour les 3 derniers champs (personnages
   bannis, ton et attentes RP, planning) ; valide pour ouvrir les inscriptions ⚠️ staff ou Monokuma
-- `/inscription image url:<lien>` : ajoute une image en tête de la page Inscription (inscriptions
+- `/inscription image url:<lien> [saison]` : ajoute une image en tête de la page Inscription (inscriptions
   déjà ouvertes ; colle un lien d'image déjà hébergé ailleurs, pas de pièce jointe Discord car
   ces liens expirent au bout de 24-48h) ⚠️ staff ou Monokuma
-- `/inscription fermer` : ferme les inscriptions, remet la page Inscription en état "fermé" ⚠️ staff ou Monokuma
+- `/inscription fermer [saison]` : ferme des inscriptions (l'option saison, avec autocomplétion, est obligatoire seulement si plusieurs inscriptions sont ouvertes en même temps), remet la page Inscription en état "fermé" ⚠️ staff ou Monokuma
 - `/recompense perso joueur:@X` : envoie un MP au joueur avec un menu déroulant pour qu'il
   choisisse lui-même le personnage qu'il veut débloquer parmi ceux qu'il n'a pas encore
   (d'abord une collection, puis un personnage dans cette collection) ⚠️ staff ou Monokuma
@@ -37,6 +37,8 @@ s'est terminé. Merci de le renouveler !"). Relancer `/vip ... donner` sur un jo
 repart pour 30 jours à partir de ce moment-là.
 
 ### Inscriptions à une saison
+
+Plusieurs inscriptions peuvent être ouvertes en même temps (chacune a son formulaire, son compteur, son responsable qui reçoit les MP et son onglet dans le Google Sheet). Deux saisons ouvertes ne peuvent pas avoir le même titre.
 
 `/inscription ouvrir` remplace l'ancien lien Google Form par un vrai formulaire construit
 sur le site (page Inscription), qui ne propose à chaque joueur que les personnages qu'il

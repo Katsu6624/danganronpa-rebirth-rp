@@ -117,15 +117,30 @@ async function fetchInscriptionState() {
     const res = await fetch('data/inscription.json', { cache: 'no-cache' });
     return await res.json();
   } catch (e) {
-    return { open: false };
+    return { seasons: [] };
   }
 }
 
-async function renderInscriptionPage(state) {
+// Plusieurs inscriptions peuvent être ouvertes en même temps (data.seasons). L'ancien format,
+// une seule saison à plat avec open: true, reste lu correctement.
+function inscriptionSeasons(data) {
+  if (data && Array.isArray(data.seasons)) return data.seasons;
+  if (data && data.open) return [{ ...data, id: data.id || 'legacy' }];
+  return [];
+}
+
+function joinTitles(seasons) {
+  const titles = seasons.map((s) => escapeHtml(s.title));
+  if (titles.length <= 1) return titles[0] || '';
+  return titles.slice(0, -1).join(', ') + ' et ' + titles[titles.length - 1];
+}
+
+async function renderInscriptionPage(data) {
   const container = document.getElementById('inscription-content');
   if (!container) return;
 
-  if (!state.open) {
+  const seasons = inscriptionSeasons(data);
+  if (seasons.length === 0) {
     container.innerHTML = `
       <div class="rules-list">
         <div class="rule-item">
@@ -137,12 +152,24 @@ async function renderInscriptionPage(state) {
   }
 
   const { characters, players } = await loadData();
-  const minCharacters = Number(state.minCharacters) || 1;
 
   captureAuthFromUrl();
   const auth = getCurrentAuth();
+  let selectedId = seasons[0].id;
+
+  function drawSeason() {
+  const state = seasons.find((s) => s.id === selectedId) || seasons[0];
+  const minCharacters = Number(state.minCharacters) || 1;
+
+  const tabsHtml = seasons.length > 1 ? `
+    <p style="margin-bottom:0.6rem;color:var(--text-dim);">Plusieurs inscriptions sont ouvertes, choisis la saison qui t'intéresse :</p>
+    <div class="btn-row" style="margin-bottom:1.2rem;">
+      ${seasons.map((s) => `<button type="button" class="btn ${s.id === state.id ? 'btn-primary' : 'btn-outline'}" data-season-tab="${escapeHtml(s.id)}">${escapeHtml(s.title)}</button>`).join('')}
+    </div>
+  ` : '';
 
   const infoBlock = `
+    ${tabsHtml}
     ${state.imageUrl ? `<img src="${state.imageUrl}" alt="${state.title}" style="display:block;width:100%;max-height:420px;object-fit:cover;border:1px solid var(--border);margin-bottom:1.2rem;">` : ''}
     <div class="rules-list">
       <div class="rule-item">
@@ -248,6 +275,16 @@ async function renderInscriptionPage(state) {
   `;
 
   setupInscriptionForm(state, characters, players, minCharacters, auth);
+  }
+
+  function draw() {
+    drawSeason();
+    container.querySelectorAll('[data-season-tab]').forEach((btn) => btn.addEventListener('click', () => {
+      selectedId = btn.dataset.seasonTab;
+      draw();
+    }));
+  }
+  draw();
 }
 
 function setupInscriptionForm(state, characters, players, minCharacters, auth) {
@@ -331,6 +368,7 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
 
     const payload = {
       authToken: auth.token,
+      saisonId: state.id,
       presence: form.presence.value,
       remplacant: remplacantBox.value.trim(),
       personnages: chosen,
@@ -358,9 +396,9 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       resultEl.textContent = '✅ Inscription envoyée ! Tu recevras une réponse du Monokuma.';
       resultEl.style.color = 'var(--gold)';
       form.reset();
-      const freshState = await fetchInscriptionState();
+      const freshSeason = inscriptionSeasons(await fetchInscriptionState()).find((s) => s.id === state.id);
       const countEl = document.getElementById('insc-count');
-      if (countEl) countEl.textContent = inscriptionCountText(freshState);
+      if (countEl && freshSeason) countEl.textContent = inscriptionCountText(freshSeason);
     } catch (err) {
       resultEl.textContent = `Erreur : ${err.message}`;
       resultEl.style.color = 'var(--red)';
@@ -370,11 +408,11 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
   });
 }
 
-function renderInscriptionNavBadge(state) {
+function renderInscriptionNavBadge(data) {
   const link = document.getElementById('nav-inscription');
   if (!link) return;
   const existing = link.querySelector('.nav-badge');
-  if (state.open) {
+  if (inscriptionSeasons(data).length > 0) {
     if (!existing) {
       const badge = document.createElement('span');
       badge.className = 'nav-badge';
@@ -386,15 +424,16 @@ function renderInscriptionNavBadge(state) {
   }
 }
 
-function renderInscriptionBanner(state) {
+function renderInscriptionBanner(data) {
   const banner = document.getElementById('inscription-banner');
   if (!banner) return;
-  if (state.open) {
+  const seasons = inscriptionSeasons(data);
+  if (seasons.length > 0) {
     banner.innerHTML = `
       <div class="card" style="border-left:3px solid var(--red);">
         <span class="card-icon">!</span>
         <h3>Les inscriptions sont ouvertes !</h3>
-        <p>Inscris-toi dès maintenant pour participer à ${state.title || 'la prochaine saison'}.</p>
+        <p>Inscris-toi dès maintenant pour participer à ${joinTitles(seasons) || 'la prochaine saison'}.</p>
         <a class="btn btn-primary" href="inscription.html" style="margin-top:0.8rem;">S'inscrire →</a>
       </div>
     `;

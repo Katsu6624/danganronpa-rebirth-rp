@@ -138,12 +138,18 @@ const commands = [
         type: 1,
         name: 'image',
         description: 'Ajouter une image à la page Inscription (inscriptions déjà ouvertes)',
-        options: [{ type: 3, name: 'url', description: "Lien de l'image", required: true }],
+        options: [
+          { type: 3, name: 'url', description: "Lien de l'image", required: true },
+          { type: 3, name: 'saison', description: 'Quelle saison (obligatoire seulement si plusieurs sont ouvertes)', required: false, autocomplete: true },
+        ],
       },
       {
         type: 1,
         name: 'fermer',
-        description: 'Fermer les inscriptions',
+        description: 'Fermer des inscriptions',
+        options: [
+          { type: 3, name: 'saison', description: 'Quelle saison (obligatoire seulement si plusieurs sont ouvertes)', required: false, autocomplete: true },
+        ],
       },
     ],
   },
