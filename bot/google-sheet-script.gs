@@ -39,6 +39,10 @@ function doPost(e) {
     return ContentService.createTextOutput('forbidden');
   }
   const d = JSON.parse(e.postData.contents);
+  if (d.action === 'share') {
+    SpreadsheetApp.getActiveSpreadsheet().addEditor(d.email);
+    return ContentService.createTextOutput('shared');
+  }
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);

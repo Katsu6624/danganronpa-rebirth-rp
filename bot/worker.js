@@ -480,6 +480,7 @@ async function handleInscription(env, interaction) {
       { id: 'ton', label: 'Ton et attentes RP', style: 2 },
       { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
       { id: 'questions', label: 'Questions personnelles (1 par ligne, 5 max)', style: 2, required: false, placeholder: 'Quel est le passé de ton personnage ?\nPourquoi veux-tu participer ?' },
+      { id: 'gmail', label: 'Ton Gmail, pour accéder au tableau (facultatif)', style: 1, required: false, placeholder: 'exemple@gmail.com', maxLength: 100 },
     ]);
   }
 
@@ -525,7 +526,7 @@ async function handleInscription(env, interaction) {
   return reply('Sous-commande inconnue.');
 }
 
-async function handleInscriptionDetailsSubmit(env, interaction) {
+async function handleInscriptionDetailsSubmit(env, interaction, ctx) {
   if (!isStaffOrMonokuma(env, interaction)) {
     return reply("Tu n'as pas la permission d'utiliser cette commande.");
   }
@@ -556,12 +557,24 @@ async function handleInscriptionDetailsSubmit(env, interaction) {
     return { message: `Ouverture des inscriptions : ${titre}` };
   });
 
-  return reply(`✅ Inscriptions ouvertes pour **${titre}**. Le formulaire est en ligne sur la page Inscription du site.`, false);
+  // Partage automatique du Google Sheet avec l'adresse Gmail saisie (en tâche de fond, sans bloquer la réponse).
+  const gmail = (v.gmail || '').trim();
+  const gmailValide = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(gmail);
+  if (gmailValide && env.SHEETS_WEBHOOK_URL) {
+    ctx.waitUntil(
+      fetch(env.SHEETS_WEBHOOK_URL, { method: 'POST', body: JSON.stringify({ action: 'share', email: gmail }) })
+        .then(async (r) => console.log('Partage Sheet:', r.status, (await r.text()).slice(0, 100)))
+        .catch((err) => console.log('Partage Sheet erreur:', err.message))
+    );
+  }
+  const partage = gmailValide && env.SHEETS_WEBHOOK_URL ? ` Le tableau des inscriptions est partagé avec ${gmail}.` : '';
+
+  return reply(`✅ Inscriptions ouvertes pour **${titre}**. Le formulaire est en ligne sur la page Inscription du site.${partage}`, false);
 }
 
-async function handleModalSubmit(env, interaction) {
+async function handleModalSubmit(env, interaction, ctx) {
   const customId = interaction.data.custom_id;
-  if (customId.startsWith('insc_details:')) return handleInscriptionDetailsSubmit(env, interaction);
+  if (customId.startsWith('insc_details:')) return handleInscriptionDetailsSubmit(env, interaction, ctx);
   return reply('Formulaire inconnu.');
 }
 
@@ -1072,7 +1085,7 @@ export default {
 
     if (interaction.type === InteractionType.MODAL_SUBMIT) {
       try {
-        return await handleModalSubmit(env, interaction);
+        return await handleModalSubmit(env, interaction, ctx);
       } catch (err) {
         return reply(`Erreur : ${err.message}`);
       }
