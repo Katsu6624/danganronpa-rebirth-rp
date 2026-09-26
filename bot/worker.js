@@ -930,6 +930,7 @@ async function handleInscriptionResponse(request, env, ctx) {
     `Place réservée : ${placeReservee || 'Pas de place réservée'}`,
     `Souhaite être mastermind : ${mastermind === 'oui' ? 'Oui' : 'Non'}`,
     `OC souhaité : ${oc ? oc : 'Aucun'}`,
+    ...(env.SHEET_URL ? [`📊 Tableau des inscriptions : ${env.SHEET_URL}`] : []),
   ];
 
   try {
