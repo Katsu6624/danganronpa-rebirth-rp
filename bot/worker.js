@@ -520,7 +520,7 @@ async function handleInscription(env, interaction) {
       { id: 'ton', label: 'Ton et attentes RP', style: 2 },
       { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
       { id: 'questions', label: 'Questions personnelles (1 par ligne, 5 max)', style: 2, required: false, placeholder: 'Quel est le passé de ton personnage ?\nPourquoi veux-tu participer ?' },
-      { id: 'gmail', label: 'Ton Gmail, pour accéder au tableau (facultatif)', style: 1, required: false, placeholder: 'exemple@gmail.com', maxLength: 100 },
+      { id: 'gmail', label: 'Ton Gmail pour le tableau (facultatif)', style: 1, required: false, placeholder: 'exemple@gmail.com', maxLength: 100 },
     ]);
   }
 
