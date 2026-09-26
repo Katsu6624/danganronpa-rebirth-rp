@@ -7,6 +7,32 @@ const HEADERS = [
   'Personnages', 'Intention de tuer', 'Détails', 'Place réservée', 'Mastermind', 'OC',
 ];
 
+const LARGEURS = [130, 190, 130, 170, 95, 200, 380, 95, 250, 260, 95, 250];
+
+// Mise en forme lisible : en-tête coloré, colonnes larges, retours à la ligne, lignes alternées.
+// Appelée à chaque inscription (sans effet visible si déjà faite) ; tu peux aussi la lancer à la main.
+function mettreEnForme() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  const lignes = Math.max(sheet.getLastRow(), 2);
+  LARGEURS.forEach((l, i) => sheet.setColumnWidth(i + 1, l));
+
+  const entete = sheet.getRange(1, 1, 1, HEADERS.length);
+  entete.setBackground('#8b1a3a').setFontColor('#ffffff').setFontWeight('bold')
+    .setHorizontalAlignment('center').setVerticalAlignment('middle').setWrap(true);
+  sheet.setRowHeight(1, 42);
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(3);
+
+  const corps = sheet.getRange(2, 1, lignes - 1, HEADERS.length);
+  corps.setVerticalAlignment('top').setWrap(true).setFontSize(10);
+  sheet.getRange(2, 1, lignes - 1, 1).setNumberFormat('dd/MM/yyyy HH:mm');
+  sheet.getRange(2, 4, lignes - 1, 1).setNumberFormat('@');
+
+  if (sheet.getBandings().length === 0) {
+    corps.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, false, false);
+  }
+}
+
 function doPost(e) {
   if (e.parameter.key !== CLE_SECRETE) {
     return ContentService.createTextOutput('forbidden');
@@ -27,9 +53,11 @@ function doPost(e) {
   for (let i = 0; i < ids.length; i++) {
     if (String(ids[i][0]).replace("'", '') === d.discordId && saisons[i][0] === d.saison) {
       sheet.getRange(i + 2, 1, 1, row.length).setValues([row]);
+      mettreEnForme();
       return ContentService.createTextOutput('updated');
     }
   }
   sheet.appendRow(row);
+  mettreEnForme();
   return ContentService.createTextOutput('ok');
 }
