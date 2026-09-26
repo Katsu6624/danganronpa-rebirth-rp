@@ -602,6 +602,15 @@ async function handleInscriptionDetailsSubmitAsync(env, interaction, ctx) {
     return `Des inscriptions « ${titre} » sont déjà ouvertes. Choisis un autre titre, ou ferme-les avec /inscription fermer.`;
   }
 
+  // Crée tout de suite l'onglet de la saison dans le Google Sheet (en tâche de fond).
+  if (env.SHEETS_WEBHOOK_URL) {
+    ctx.waitUntil(
+      fetch(env.SHEETS_WEBHOOK_URL, { method: 'POST', body: JSON.stringify({ action: 'open', saison: titre }) })
+        .then(async (r) => console.log('Onglet Sheet:', r.status, (await r.text()).slice(0, 100)))
+        .catch((err) => console.log('Onglet Sheet erreur:', err.message))
+    );
+  }
+
   // Partage automatique du Google Sheet avec l'adresse Gmail saisie (en tâche de fond, sans bloquer la réponse).
   const gmail = (v.gmail || '').trim();
   const gmailValide = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(gmail);

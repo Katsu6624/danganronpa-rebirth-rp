@@ -96,6 +96,13 @@ function doPost(e) {
     return ContentService.createTextOutput('shared');
   }
 
+  if (d.action === 'open') {
+    const nouvelle = getFeuilleSaison(d.saison);
+    if (nouvelle.getLastRow() === 0) nouvelle.appendRow(HEADERS);
+    formaterFeuille(nouvelle);
+    return ContentService.createTextOutput('opened');
+  }
+
   const sheet = getFeuilleSaison(d.saison);
   if (sheet.getLastRow() === 0) sheet.appendRow(HEADERS);
   const row = [
