@@ -22,23 +22,25 @@
       "id": "legacy"
     },
     {
-      "id": "smuipirsd",
+      "id": "smuiq5huj",
       "open": true,
       "title": "Test",
       "seasonType": "Classique",
       "slots": "16",
       "maxChapters": "5",
       "minCharacters": "1",
-      "bannedCharacters": "JUNKO ENOSHIMA",
-      "tone": "Yeeeea",
-      "planning": "Chap 1 : Quand tu veux",
+      "bannedCharacters": "TFSDKGQSDKGJ",
+      "tone": "FSDFKLDHKLF",
+      "planning": "Chap :",
       "customQuestions": [
-        "Ouaiiiis"
+        "Ouuuuuuui"
       ],
       "openedBy": "388041172574011404",
       "imageUrl": "",
-      "registrations": []
+      "registrations": [
+        "388041172574011404"
+      ]
     }
   ],
-  "updatedAt": "2026-09-26T18:12:17.581Z"
+  "updatedAt": "2026-09-26T18:29:57.787Z"
 }
