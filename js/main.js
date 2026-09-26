@@ -98,6 +98,10 @@ const PLACE_RESERVEE_OPTIONS = [
   "J'ai le rôle Lycéen de l'Espoir",
 ];
 
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function inscriptionCountText(state) {
   const count = (state.registrations || []).length;
   const slots = state.slots ? ` / ${state.slots}` : '';
@@ -231,6 +235,13 @@ async function renderInscriptionPage(state) {
         <input type="text" id="insc-oc" class="insc-input" placeholder="Nom de ton OC (laisser vide sinon)">
       </div>
 
+      ${(state.customQuestions || []).map((q, i) => `
+        <div class="rule-item">
+          <h4>${escapeHtml(q)}</h4>
+          <textarea class="insc-input insc-perso" data-index="${i}" required maxlength="500" placeholder="Ta réponse (obligatoire)"></textarea>
+        </div>
+      `).join('')}
+
       <button type="submit" class="btn btn-primary">Envoyer mon inscription</button>
       <p id="insc-result" style="margin-top:0.8rem;"></p>
     </form>
@@ -328,6 +339,7 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       placeReservee: form.placeReservee.value,
       mastermind: form.mastermind.value,
       oc: ocInput.value.trim(),
+      reponsesPerso: [...form.querySelectorAll('.insc-perso')].map((t) => t.value.trim()),
     };
 
     const submitBtn = form.querySelector('button[type="submit"]');

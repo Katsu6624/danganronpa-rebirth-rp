@@ -203,7 +203,7 @@ function handleHelp() {
     '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
     '`/vip prepa retirer <joueur>` : retire le rôle Lycéen en Cours Préparatoire (les attributions individuelles sont conservées).',
-    '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning) puis ouvre les inscriptions à une saison.',
+    '`/inscription ouvrir titre type places max_chapitres min_perso` : ouvre un modal (bannis/ton/planning/questions personnelles) puis ouvre les inscriptions à une saison.',
     '`/inscription image url:<lien>` : ajoute une image à la page Inscription (inscriptions déjà ouvertes).',
     '`/inscription fermer` : ferme les inscriptions.',
     '`/recompense perso joueur:@X` : envoie un MP au joueur pour qu\'il choisisse lui-même un personnage à débloquer.',
@@ -479,6 +479,7 @@ async function handleInscription(env, interaction) {
       { id: 'bannis', label: 'Personnages bannis (laisser vide sinon)', style: 2, required: false, placeholder: 'Aucun' },
       { id: 'ton', label: 'Ton et attentes RP', style: 2 },
       { id: 'planning', label: 'Planning (horaires par chapitre)', style: 2, placeholder: 'Chap 1 : 18h-00h (pause 20h)\nChap 2 : ...' },
+      { id: 'questions', label: 'Questions personnelles (1 par ligne, 5 max)', style: 2, required: false, placeholder: 'Quel est le passé de ton personnage ?\nPourquoi veux-tu participer ?' },
     ]);
   }
 
@@ -509,6 +510,7 @@ async function handleInscription(env, interaction) {
         bannedCharacters: '',
         tone: '',
         planning: '',
+        customQuestions: [],
         openedBy: null,
         imageUrl: '',
         registrations: [],
@@ -545,6 +547,7 @@ async function handleInscriptionDetailsSubmit(env, interaction) {
       bannedCharacters: v.bannis || '',
       tone: v.ton,
       planning: v.planning,
+      customQuestions: (v.questions || '').split('\n').map((s) => s.trim().slice(0, 200)).filter(Boolean).slice(0, 5),
       openedBy,
       imageUrl: '',
       registrations: [],
@@ -869,7 +872,7 @@ async function handleInscriptionResponse(request, env, ctx) {
     return jsonResponse(400, { error: 'JSON invalide.' });
   }
 
-  const { authToken, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc } = payload;
+  const { authToken, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc, reponsesPerso } = payload;
   if (!Array.isArray(personnages) || personnages.length === 0) {
     return jsonResponse(400, { error: 'Champs manquants.' });
   }
@@ -901,6 +904,15 @@ async function handleInscriptionResponse(request, env, ctx) {
     return jsonResponse(400, { error: `Propose au moins ${minCharacters} personnage(s).` });
   }
 
+  const questions = inscription.customQuestions || [];
+  if (questions.length > 0) {
+    const valid = Array.isArray(reponsesPerso)
+      && reponsesPerso.length === questions.length
+      && reponsesPerso.every((r) => typeof r === 'string' && r.trim());
+    if (!valid) return jsonResponse(400, { error: 'Réponds à toutes les questions personnelles.' });
+  }
+  const answers = questions.map((q, i) => ({ q, a: reponsesPerso[i].trim().slice(0, 500) }));
+
   if (!inscription.openedBy) {
     return jsonResponse(500, { error: 'Aucun responsable d\'inscription enregistré, contacte le staff.' });
   }
@@ -922,6 +934,17 @@ async function handleInscriptionResponse(request, env, ctx) {
 
   try {
     await sendDirectMessage(env, inscription.openedBy, lines.join('\n'));
+    // Réponses aux questions personnelles : à part et découpées, car un MP Discord est limité à 2000 caractères.
+    let chunk = '';
+    for (const { q, a } of answers) {
+      const entry = `❓ **${q}**\n${a}\n\n`;
+      if (chunk.length + entry.length > 1900) {
+        await sendDirectMessage(env, inscription.openedBy, chunk);
+        chunk = '';
+      }
+      chunk += entry;
+    }
+    if (chunk) await sendDirectMessage(env, inscription.openedBy, `📝 **Questions personnelles de ${player.name}**\n\n${chunk}`);
   } catch (err) {
     return jsonResponse(500, { error: 'Inscription enregistrée mais échec de l\'envoi du MP au staff : ' + err.message });
   }
@@ -952,6 +975,7 @@ async function handleInscriptionResponse(request, env, ctx) {
           placeReservee: placeReservee || 'Pas de place réservée',
           mastermind: mastermind === 'oui' ? 'Oui' : 'Non',
           oc: oc || '',
+          questionsPerso: answers.map(({ q, a }) => `${q} : ${a}`).join('\n'),
         }),
       })
         .then(async (r) => console.log('Sheet:', r.status, (await r.text()).slice(0, 200)))

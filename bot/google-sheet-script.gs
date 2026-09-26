@@ -4,10 +4,10 @@ const CLE_SECRETE = 'CLE_SECRETE';
 
 const HEADERS = [
   'Date', 'Saison', 'Pseudo', 'Discord ID', 'Présent tous les jours', 'Remplaçant',
-  'Personnages', 'Intention de tuer', 'Détails', 'Place réservée', 'Mastermind', 'OC',
+  'Personnages', 'Intention de tuer', 'Détails intention', 'Place réservée', 'Mastermind', 'OC', 'Questions perso',
 ];
 
-const LARGEURS = [60, 150, 110, 150, 70, 150, 300, 70, 180, 200, 80, 180];
+const LARGEURS = [60, 150, 110, 150, 70, 150, 300, 95, 180, 200, 100, 180, 350];
 
 // Mise en forme lisible : en-tête coloré, colonnes larges, retours à la ligne, lignes alternées.
 // Appelée à chaque inscription (sans effet visible si déjà faite) ; tu peux aussi la lancer à la main.
@@ -43,9 +43,10 @@ function doPost(e) {
     sheet.appendRow(HEADERS);
     sheet.setFrozenRows(1);
   }
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   const row = [
     new Date(), d.saison, d.pseudo, "'" + d.discordId, d.presence, d.remplacant,
-    d.personnages, d.intentionTuer, d.intentionTuerDetails, d.placeReservee, d.mastermind, d.oc,
+    d.personnages, d.intentionTuer, d.intentionTuerDetails, d.placeReservee, d.mastermind, d.oc, d.questionsPerso || '',
   ];
   // Un joueur qui renvoie le formulaire pour la même saison met sa ligne à jour au lieu de la dupliquer.
   const ids = sheet.getRange(2, 4, Math.max(sheet.getLastRow() - 1, 1), 2).getValues();
