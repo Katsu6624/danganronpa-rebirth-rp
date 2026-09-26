@@ -7,7 +7,7 @@ const HEADERS = [
   'Personnages', 'Intention de tuer', 'Détails', 'Place réservée', 'Mastermind', 'OC',
 ];
 
-const LARGEURS = [130, 190, 130, 170, 95, 200, 380, 95, 250, 260, 95, 250];
+const LARGEURS = [60, 150, 110, 150, 70, 150, 300, 70, 180, 200, 80, 180];
 
 // Mise en forme lisible : en-tête coloré, colonnes larges, retours à la ligne, lignes alternées.
 // Appelée à chaque inscription (sans effet visible si déjà faite) ; tu peux aussi la lancer à la main.
@@ -21,11 +21,11 @@ function mettreEnForme() {
     .setHorizontalAlignment('center').setVerticalAlignment('middle').setWrap(true);
   sheet.setRowHeight(1, 42);
   sheet.setFrozenRows(1);
-  sheet.setFrozenColumns(3);
+  sheet.setFrozenColumns(0);
 
   const corps = sheet.getRange(2, 1, lignes - 1, HEADERS.length);
   corps.setVerticalAlignment('top').setWrap(true).setFontSize(10);
-  sheet.getRange(2, 1, lignes - 1, 1).setNumberFormat('dd/MM/yyyy HH:mm');
+  sheet.getRange(2, 1, lignes - 1, 1).setNumberFormat('dd/MM');
   sheet.getRange(2, 4, lignes - 1, 1).setNumberFormat('@');
 
   if (sheet.getBandings().length === 0) {
