@@ -14,6 +14,7 @@ const LARGEURS = [60, 150, 110, 150, 70, 150, 300, 95, 180, 200, 100, 180, 350];
 function mettreEnForme() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
   const lignes = Math.max(sheet.getLastRow(), 2);
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   LARGEURS.forEach((l, i) => sheet.setColumnWidth(i + 1, l));
 
   const entete = sheet.getRange(1, 1, 1, HEADERS.length);
