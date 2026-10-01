@@ -337,8 +337,8 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       charHint.style.display = 'none';
       charSearch.style.display = owned.length > 8 ? 'block' : 'none';
       charList.innerHTML = owned.map((c) => `
-        <label class="pill" data-name="${c.name.toLowerCase()}" style="cursor:pointer;">
-          <input type="checkbox" name="personnage" value="${c.id}" style="margin-right:0.4rem;">${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}
+        <label class="pill" data-name="${c.name.toLowerCase()}" data-id="${c.id}" style="cursor:pointer;">
+          <input type="checkbox" name="personnage" value="${c.id}" style="margin-right:0.4rem;"><span class="insc-char-rank"></span>${c.image ? `<img src="${c.image}" alt="">` : ''}${c.name}
         </label>
       `).join('');
     }
@@ -351,6 +351,27 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
     });
   });
 
+  // L'ordre choisi par le joueur (ordre de clic, pas l'ordre d'affichage des personnages) : important
+  // car on demande souvent de mettre le personnage le plus voulu en premier.
+  let ordreChoisi = [];
+  function rafraichirRangs() {
+    charList.querySelectorAll('.pill').forEach((pill) => {
+      const rang = ordreChoisi.indexOf(pill.dataset.id);
+      const span = pill.querySelector('.insc-char-rank');
+      span.textContent = rang === -1 ? '' : `${rang + 1}. `;
+    });
+  }
+  charList.addEventListener('change', (e) => {
+    if (e.target.name !== 'personnage') return;
+    const id = e.target.value;
+    if (e.target.checked) {
+      if (!ordreChoisi.includes(id)) ordreChoisi.push(id);
+    } else {
+      ordreChoisi = ordreChoisi.filter((i) => i !== id);
+    }
+    rafraichirRangs();
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     resultEl.textContent = '';
@@ -361,7 +382,7 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       return;
     }
 
-    const chosen = [...form.querySelectorAll('input[name="personnage"]:checked')].map((el) => el.value);
+    const chosen = ordreChoisi.slice();
     if (chosen.length < minCharacters) {
       resultEl.textContent = `Choisis au moins ${minCharacters} personnage(s).`;
       resultEl.style.color = 'var(--red)';
@@ -398,6 +419,8 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       resultEl.textContent = '✅ Inscription envoyée ! Tu recevras une réponse du Monokuma.';
       resultEl.style.color = 'var(--gold)';
       form.reset();
+      ordreChoisi = [];
+      rafraichirRangs();
       const freshSeason = inscriptionSeasons(await fetchInscriptionState()).find((s) => s.id === state.id);
       const countEl = document.getElementById('insc-count');
       if (countEl && freshSeason) countEl.textContent = inscriptionCountText(freshSeason);

@@ -968,3 +968,8 @@ textarea.insc-input {
     padding: 0.4rem 0.7rem;
   }
 }
+
+.insc-char-rank {
+  color: var(--gold);
+  font-weight: 700;
+}
