@@ -153,6 +153,19 @@ async function handleAutocomplete(env, interaction) {
     );
   }
 
+  if (focused?.name === 'jeu') {
+    const characters = await getCharacters(env);
+    const jeux = [...new Set(characters.map((c) => c.faction))].filter((f) => !FREE_FACTIONS.includes(f));
+    const choices = jeux
+      .filter((f) => f.toLowerCase().includes(query))
+      .slice(0, 25)
+      .map((f) => ({ name: `${f} (${characters.filter((c) => c.faction === f).length} personnages)`, value: f }));
+    return new Response(
+      JSON.stringify({ type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data: { choices } }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   if (focused?.name === 'saison' && interaction.data.options?.[0]?.name === 'saison-finie') {
     const [inscription, sheet] = await Promise.all([
       readJsonFile(env, 'data/inscription.json'),
@@ -227,7 +240,8 @@ function handleHelp() {
     '`/liste [joueur]` : voir les personnages d\'un joueur (toi par défaut). Accessible à tout le monde.',
     '',
     '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
-    '`/debloquer <joueur> <personnage>` : attribuer un personnage à un joueur.',
+    '`/debloquer perso <joueur> <personnage>` : attribuer un personnage à un joueur.',
+    '`/debloquer pack <joueur> <jeu>` : attribuer d\'un coup tous les personnages d\'un jeu (pack payant) à un joueur.',
     '`/retirer <joueur> <personnage>` : retirer un personnage à un joueur.',
     '`/vip espoir donner <joueur>` : donne le rôle Lycéen de l\'Espoir et débloque tous les personnages.',
     '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
@@ -382,7 +396,10 @@ async function handleListe(env, interaction) {
 }
 
 async function handleDebloquerAsync(env, interaction) {
-  const opts = getFlatOptions(interaction);
+  const sub = interaction.data.options?.[0];
+  if (sub?.name === 'pack') return handleDebloquerPackAsync(env, interaction, sub);
+
+  const opts = Object.fromEntries((sub?.options || []).map((o) => [o.name, o.value]));
   const characters = await getCharacters(env);
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
   const charId = opts.personnage;
@@ -413,6 +430,46 @@ async function handleDebloquerAsync(env, interaction) {
   await notifyPlayer(env, targetUser.id, `🔓 **${character.name}** vous a été débloqué par ${interaction.member.user.username}.`);
 
   return `✅ ${character.name} attribué à ${targetUser.username}.`;
+}
+
+// /debloquer pack : donne d'un coup tous les personnages d'un jeu (pack payant) à un joueur.
+async function handleDebloquerPackAsync(env, interaction, sub) {
+  const opts = Object.fromEntries((sub.options || []).map((o) => [o.name, o.value]));
+  const characters = await getCharacters(env);
+  const jeu = String(opts.jeu || '');
+  if (FREE_FACTIONS.includes(jeu)) return `**${jeu}** est déjà offert à tous les joueurs, pas besoin de pack.`;
+
+  const pack = characters.filter((c) => c.faction === jeu);
+  if (pack.length === 0) return `Jeu inconnu : \`${jeu}\`. Utilise l'autocomplétion pour choisir un jeu valide.`;
+
+  const allIds = characters.map((c) => c.id);
+  const freeIds = characters.filter((c) => FREE_FACTIONS.includes(c.faction)).map((c) => c.id);
+  const packIds = pack.map((c) => c.id);
+  const targetUser = interaction.data.resolved.users[opts.joueur];
+
+  const ctx = await updatePlayersFile(env, (players) => {
+    let player = findPlayer(players, targetUser.id);
+    if (!player) {
+      player = newPlayer(targetUser, allIds, freeIds);
+      players.push(player);
+    } else {
+      player.name = targetUser.username;
+      player.owned = player.owned || [];
+      player.locked = player.locked || [];
+    }
+
+    const nouveaux = packIds.filter((id) => !player.owned.includes(id));
+    player.owned = [...player.owned, ...nouveaux];
+    player.locked = player.locked.filter((id) => !packIds.includes(id));
+    // Un pack acheté reste acquis après la fin d'un éventuel VIP.
+    if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => !packIds.includes(id));
+    return { message: `Pack ${jeu} attribué à ${targetUser.username}`, nouveaux: nouveaux.length };
+  });
+
+  await notifyPlayer(env, targetUser.id, `🔓 Le pack **${jeu}** (${pack.length} personnages) vous a été débloqué par ${interaction.member.user.username}.`);
+
+  const dejaTous = ctx.nouveaux === 0 ? ' Il les avait déjà tous (ils sont maintenant acquis définitivement).' : '';
+  return `✅ Pack **${jeu}** attribué à ${targetUser.username} : ${ctx.nouveaux} nouveau${ctx.nouveaux > 1 ? 'x' : ''} personnage${ctx.nouveaux > 1 ? 's' : ''} sur ${pack.length}.${dejaTous}`;
 }
 
 async function handleDebloquer(env, interaction) {
