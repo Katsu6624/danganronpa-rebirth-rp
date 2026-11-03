@@ -967,8 +967,10 @@
     "faction": "Another Despair Academy",
     "paid": true,
     "roles": [
+      "Leader",
       "Analyste",
-      "Fighter"
+      "Fighter",
+      "Troublemaker"
     ],
     "image": "assets/characters/tsurugi-kinjo.png"
   },
@@ -990,7 +992,8 @@
     "faction": "Another Despair Academy",
     "paid": true,
     "roles": [
-      "Troublemaker"
+      "Analyste",
+      "Support"
     ],
     "image": "assets/characters/mikako-kurokawa.png"
   },
@@ -1001,7 +1004,9 @@
     "faction": "Another Despair Academy",
     "paid": true,
     "roles": [
-      "Leader"
+      "Leader",
+      "Analyste",
+      "Troublemaker"
     ],
     "image": "assets/characters/rei-mekaru.png"
   },
@@ -1012,7 +1017,8 @@
     "faction": "Another Despair Academy",
     "paid": true,
     "roles": [
-      "Leader"
+      "Leader",
+      "Support"
     ],
     "image": "assets/characters/haruhiko-kobashikawa.png"
   },
@@ -1023,7 +1029,9 @@
     "faction": "Another Despair Academy",
     "paid": true,
     "roles": [
-      "Analyste"
+      "Analyste",
+      "Support",
+      "Fighter"
     ],
     "image": "assets/characters/kakeru-yamaguchi.png"
   },
@@ -1090,6 +1098,8 @@
     "faction": "Another Despair Academy",
     "paid": true,
     "roles": [
+      "Leader",
+      "Analyste",
       "Support"
     ],
     "image": "assets/characters/yamato-kisaragi.png"
@@ -1102,7 +1112,8 @@
     "paid": true,
     "image": "assets/characters/teruya-otori.png",
     "roles": [
-      "Leader"
+      "Support",
+      "Troublemaker"
     ]
   },
   {
@@ -1124,7 +1135,9 @@
     "faction": "Another 2",
     "paid": true,
     "roles": [
-      "Troublemaker"
+      "Troublemaker",
+      "Analyste",
+      "Fighter"
     ],
     "image": "assets/characters/shobai-hashimoto.png"
   },
@@ -1180,6 +1193,8 @@
     "paid": true,
     "image": "assets/characters/kanade-otonokoji.png",
     "roles": [
+      "Troublemaker",
+      "Analyste",
       "Support"
     ]
   },
@@ -1213,7 +1228,8 @@
     "faction": "Another 2",
     "paid": true,
     "roles": [
-      "Leader"
+      "Troublemaker",
+      "Support"
     ],
     "image": "assets/characters/yuri-kagarin.png"
   },
@@ -1224,6 +1240,8 @@
     "faction": "Another 2",
     "paid": true,
     "roles": [
+      "Analyste",
+      "Support",
       "Troublemaker"
     ],
     "image": "assets/characters/yuki-maeda.png"
@@ -1236,7 +1254,8 @@
     "paid": true,
     "image": "assets/characters/setsuka-chiebukuro.png",
     "roles": [
-      "Analyste"
+      "Analyste",
+      "Support"
     ]
   },
   {
@@ -1490,7 +1509,9 @@
     "paid": true,
     "image": "assets/characters/nikei.png",
     "roles": [
-      "Analyste"
+      "Troublemaker",
+      "Analyste",
+      "Support"
     ]
   }
 ]
