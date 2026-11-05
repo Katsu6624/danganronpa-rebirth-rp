@@ -276,7 +276,7 @@ async function renderInscriptionPage(data) {
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.6rem;margin-top:0.6rem;">
             ${OC_STATS.map((s) => `
               <label style="display:flex;flex-direction:column;gap:0.25rem;font-size:0.85rem;">${s.label}
-                <input type="number" class="insc-input insc-oc-stat" data-stat="${s.key}" min="0" max="${OC_STAT_MAX}" step="1" inputmode="numeric" placeholder="0 à ${OC_STAT_MAX}">
+                <input type="number" class="insc-input insc-oc-stat" data-stat="${s.key}" min="0" max="${OC_STAT_MAX}" step="1" inputmode="numeric">
               </label>
             `).join('')}
           </div>
