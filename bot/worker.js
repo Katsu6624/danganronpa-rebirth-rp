@@ -1097,7 +1097,7 @@ async function handleInscriptionResponse(request, env, ctx) {
     return jsonResponse(400, { error: 'JSON invalide.' });
   }
 
-  const { authToken, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc, reponsesPerso, saisonId } = payload;
+  const { authToken, presence, remplacant, personnages, intentionTuer, intentionTuerDetails, placeReservee, mastermind, oc, ocPm, ocStats, reponsesPerso, saisonId } = payload;
   if (!Array.isArray(personnages) || personnages.length === 0) {
     return jsonResponse(400, { error: 'Champs manquants.' });
   }
@@ -1135,6 +1135,24 @@ async function handleInscriptionResponse(request, env, ctx) {
     return jsonResponse(400, { error: `Propose au moins ${minCharacters} personnage(s).` });
   }
 
+  // Un OC demande le lien Steam de son PM et ses 4 stats (même limite que OC_STAT_MAX sur le site).
+  const OC_STAT_MAX = 100;
+  const OC_STATS = [['resistance', 'Résistance'], ['investigation', 'Investigation'], ['force', 'Force'], ['sprint', 'Sprint']];
+  const ocNom = typeof oc === 'string' ? oc.trim().slice(0, 100) : '';
+  let ocPmLien = '';
+  let ocStatsTexte = '';
+  if (ocNom) {
+    ocPmLien = typeof ocPm === 'string' ? ocPm.trim().slice(0, 300) : '';
+    if (!/^https:\/\/(www\.)?steamcommunity\.com\//i.test(ocPmLien)) {
+      return jsonResponse(400, { error: 'Pour un OC, indique le lien Steam de son PM (https://steamcommunity.com/...).' });
+    }
+    const valeurs = OC_STATS.map(([cle]) => String(ocStats?.[cle] ?? '').trim());
+    if (valeurs.some((v) => !/^\d+$/.test(v) || Number(v) > OC_STAT_MAX)) {
+      return jsonResponse(400, { error: `Pour un OC, indique ses 4 stats (nombres entiers entre 0 et ${OC_STAT_MAX}).` });
+    }
+    ocStatsTexte = OC_STATS.map(([, label], i) => `${label} ${Number(valeurs[i])}`).join(' / ');
+  }
+
   const questions = inscription.customQuestions || [];
   if (questions.length > 0) {
     const valid = Array.isArray(reponsesPerso)
@@ -1160,7 +1178,8 @@ async function handleInscriptionResponse(request, env, ctx) {
     `Intention de tuer : ${intentionTuer === 'oui' ? 'Oui' : 'Non'}${intentionTuer === 'oui' && intentionTuerDetails ? ` — ${intentionTuerDetails}` : ''}`,
     `Place réservée : ${placeReservee || 'Pas de place réservée'}`,
     `Souhaite être mastermind : ${mastermind === 'oui' ? 'Oui' : 'Non'}`,
-    `OC souhaité : ${oc ? oc : 'Aucun'}`,
+    `OC souhaité : ${ocNom || 'Aucun'}`,
+    ...(ocNom ? [`PM Steam de l'OC : ${ocPmLien}`, `Stats de l'OC : ${ocStatsTexte}`] : []),
     ...(env.SHEET_URL ? [`📊 Tableau des inscriptions : ${env.SHEET_URL}`] : []),
   ];
 
@@ -1208,7 +1227,9 @@ async function handleInscriptionResponse(request, env, ctx) {
           intentionTuerDetails: intentionTuer === 'oui' ? intentionTuerDetails || '' : '',
           placeReservee: placeReservee || 'Pas de place réservée',
           mastermind: mastermind === 'oui' ? 'Oui' : 'Non',
-          oc: oc || '',
+          oc: ocNom,
+          ocPm: ocPmLien,
+          ocStats: ocStatsTexte,
           questionsPerso: answers.map(({ q, a }) => `${q} : ${a}`).join('\n'),
         }),
       })

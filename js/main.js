@@ -90,6 +90,16 @@ function renderGlobalAuthWidget() {
   });
 }
 
+// Stats demandées pour un OC (clé = nom envoyé au Worker). OC_STAT_MAX : valeur maximale acceptée par
+// le formulaire (et revérifiée côté Worker, qui a sa propre copie : garde les deux identiques).
+const OC_STATS = [
+  { key: 'resistance', label: 'Résistance' },
+  { key: 'investigation', label: 'Investigation' },
+  { key: 'force', label: 'Force' },
+  { key: 'sprint', label: 'Sprint' },
+];
+const OC_STAT_MAX = 100;
+
 const PLACE_RESERVEE_OPTIONS = [
   'Pas de place réservée',
   "C'est ma première saison, je suis donc prioritaire",
@@ -260,6 +270,17 @@ async function renderInscriptionPage(data) {
       <div class="rule-item">
         <h4>As-tu un OC que tu voudrais jouer ? (facultatif)</h4>
         <input type="text" id="insc-oc" class="insc-input" placeholder="Nom de ton OC (laisser vide sinon)">
+        <div id="insc-oc-details" style="display:none;margin-top:0.8rem;">
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.6rem;">Pour jouer un OC, indique le lien Steam de son PM (playermodel) et ses stats.</p>
+          <input type="url" id="insc-oc-pm" class="insc-input" placeholder="Lien Steam du PM (https://steamcommunity.com/sharedfiles/filedetails/?id=...)" maxlength="300">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.6rem;margin-top:0.6rem;">
+            ${OC_STATS.map((s) => `
+              <label style="display:flex;flex-direction:column;gap:0.25rem;font-size:0.85rem;">${s.label}
+                <input type="number" class="insc-input insc-oc-stat" data-stat="${s.key}" min="0" max="${OC_STAT_MAX}" step="1" inputmode="numeric" placeholder="0 à ${OC_STAT_MAX}">
+              </label>
+            `).join('')}
+          </div>
+        </div>
       </div>
 
       ${(state.customQuestions || []).map((q, i) => `
@@ -301,6 +322,18 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
   const intentionTuerRadios = form.querySelectorAll('input[name="intentionTuer"]');
   const tuerDetailsBox = document.getElementById('insc-tuer-details');
   const ocInput = document.getElementById('insc-oc');
+  const ocDetails = document.getElementById('insc-oc-details');
+  const ocPmInput = document.getElementById('insc-oc-pm');
+  const ocStatInputs = [...form.querySelectorAll('.insc-oc-stat')];
+
+  // Les champs PM et stats n'apparaissent (et ne sont obligatoires) que si un OC est indiqué.
+  function majOcDetails() {
+    const actif = ocInput.value.trim() !== '';
+    ocDetails.style.display = actif ? 'block' : 'none';
+    ocPmInput.required = actif;
+    ocStatInputs.forEach((i) => { i.required = actif; });
+  }
+  ocInput.addEventListener('input', majOcDetails);
   const resultEl = document.getElementById('insc-result');
 
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
@@ -400,8 +433,24 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       placeReservee: form.placeReservee.value,
       mastermind: form.mastermind.value,
       oc: ocInput.value.trim(),
+      ocPm: ocPmInput.value.trim(),
+      ocStats: Object.fromEntries(ocStatInputs.map((i) => [i.dataset.stat, i.value.trim()])),
       reponsesPerso: [...form.querySelectorAll('.insc-perso')].map((t) => t.value.trim()),
     };
+
+    if (ocInput.value.trim()) {
+      if (!/^https:\/\/(www\.)?steamcommunity\.com\//i.test(ocPmInput.value.trim())) {
+        resultEl.textContent = 'Le lien du PM doit être un lien Steam (https://steamcommunity.com/...).';
+        resultEl.style.color = 'var(--red)';
+        return;
+      }
+      const statsInvalides = ocStatInputs.some((i) => !/^\d+$/.test(i.value.trim()) || Number(i.value) > OC_STAT_MAX);
+      if (statsInvalides) {
+        resultEl.textContent = `Les stats de ton OC doivent être des nombres entiers entre 0 et ${OC_STAT_MAX}.`;
+        resultEl.style.color = 'var(--red)';
+        return;
+      }
+    }
 
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
@@ -419,6 +468,7 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       resultEl.textContent = '✅ Inscription envoyée ! Tu recevras une réponse du Monokuma.';
       resultEl.style.color = 'var(--gold)';
       form.reset();
+      majOcDetails();
       ordreChoisi = [];
       rafraichirRangs();
       const freshSeason = inscriptionSeasons(await fetchInscriptionState()).find((s) => s.id === state.id);

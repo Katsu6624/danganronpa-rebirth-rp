@@ -4,10 +4,10 @@ const CLE_SECRETE = 'CLE_SECRETE';
 
 const HEADERS = [
   'Date', 'Pseudo', 'Présent tous les jours', 'Remplaçant',
-  'Personnages', 'Intention de tuer', 'Détails intention', 'Place réservée', 'Mastermind', 'OC', 'Questions perso',
+  'Personnages', 'Intention de tuer', 'Détails intention', 'Place réservée', 'Mastermind', 'OC', 'Questions perso', 'PM Steam (OC)', 'Stats OC',
 ];
 
-const LARGEURS = [60, 110, 70, 150, 300, 95, 180, 200, 100, 180, 350];
+const LARGEURS = [60, 110, 70, 150, 300, 95, 180, 200, 100, 180, 350, 260, 260];
 
 // Nom d'onglet valide pour Google Sheets (pas de [ ] * ? : / \ , 100 caractères max).
 function nomOnglet(saison) {
@@ -148,7 +148,7 @@ function doPost(e) {
   if (sheet.getLastRow() === 0) sheet.appendRow(HEADERS);
   const row = [
     new Date(), d.pseudo, d.presence, d.remplacant,
-    d.personnages, d.intentionTuer, d.intentionTuerDetails, d.placeReservee, d.mastermind, d.oc, d.questionsPerso || '',
+    d.personnages, d.intentionTuer, d.intentionTuerDetails, d.placeReservee, d.mastermind, d.oc, d.questionsPerso || '', d.ocPm || '', d.ocStats || '',
   ];
   // Un joueur qui renvoie le formulaire met sa ligne à jour au lieu de la dupliquer (retrouvé par son pseudo Discord).
   const nb = sheet.getLastRow();
