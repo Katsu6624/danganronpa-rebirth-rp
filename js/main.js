@@ -271,7 +271,7 @@ async function renderInscriptionPage(data) {
         <h4>As-tu un OC que tu voudrais jouer ? (facultatif)</h4>
         <input type="text" id="insc-oc" class="insc-input" placeholder="Nom de ton OC (laisser vide sinon)">
         <div id="insc-oc-details" style="display:none;margin-top:0.8rem;">
-          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.6rem;">Pour jouer un OC, indique le lien Steam de son PM (playermodel) et ses stats.</p>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.6rem;">Pour jouer un OC, indique le lien Steam de son PM (playermodel) et ses stats. Les informations sur les stats de ton OC doivent normalement se trouver sur ton personnage.</p>
           <input type="url" id="insc-oc-pm" class="insc-input" placeholder="Lien Steam du PM (https://steamcommunity.com/sharedfiles/filedetails/?id=...)" maxlength="300">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.6rem;margin-top:0.6rem;">
             ${OC_STATS.map((s) => `
