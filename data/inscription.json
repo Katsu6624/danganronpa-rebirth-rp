@@ -1,4 +1,23 @@
 {
-  "seasons": [],
-  "updatedAt": "2026-11-13T10:51:14.455Z"
+  "seasons": [
+    {
+      "id": "smwev2qt7",
+      "open": true,
+      "title": "Saison 60 - Once Upon A Time",
+      "seasonType": "Jeu de la Mort Alternatif",
+      "slots": "20",
+      "maxChapters": "5",
+      "minCharacters": "5",
+      "bannedCharacters": "Aucun pour l'instant ! Si sa arrive, se sera modifier ou indiquer sur le discord",
+      "tone": "Une saison avec toujours ton plus calme et fun avec le serious qui va avec",
+      "planning": "Elle se déroulera surement la première semaine de décembre de 18h à 20h puis avec une pause 1h. \nPuis de 21h jusque à la fin du Class Trial !",
+      "customQuestions": [
+        "Si j'ai un potentielle Mastermind, tu veux me convaincre de l'être ?"
+      ],
+      "openedBy": "519163905369702402",
+      "imageUrl": "",
+      "registrations": []
+    }
+  ],
+  "updatedAt": "2026-11-13T10:56:07.483Z"
 }
