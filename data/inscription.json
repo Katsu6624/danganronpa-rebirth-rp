@@ -1,38 +1,4 @@
 {
-  "seasons": [
-    {
-      "id": "smv8eehgr",
-      "open": true,
-      "title": "Saison 59 - The Coven",
-      "seasonType": "Jeu de la Mort Alternatif",
-      "slots": "18",
-      "maxChapters": "5",
-      "minCharacters": "5",
-      "bannedCharacters": "Junko Enoshima \nHajime Hinata\nRyoko Otonashi\nYuki Maeda",
-      "tone": "Serious RP",
-      "planning": "1️⃣  Vendredi 23 Octobre\n18h (environ)—> 20h\n20h—> 21h Pause RP !\n21h —> 23-Minuit ou plus\n\n\n2️⃣   Samedi 24 Aout\n18h —> 20h\n20h—> 21h Pause RP !\n21h —> 23-Minuit ou plus\n\n\n3️⃣   Vendredi 30 Octobre\n18h —> 20h\n20h—> 21h Pause RP !\n21h —> 23-Minuit ou plus\n\n4️⃣   Samedi 31 Octobre\n18h —> 20h\n20h—> 21h Pause RP !\n21h —> 23-Minuit Max\n\n\n5️⃣  Dimanche 1 Novembre\n18h —> 20h\n20h—> 21h Pause RP !\n21h —> 23-Minuit ou +",
-      "customQuestions": [],
-      "openedBy": "841788271218130996",
-      "imageUrl": "",
-      "registrations": [
-        "519163905369702402",
-        "256084420337860608",
-        "403916146597953558",
-        "1038945379116384257",
-        "449619161870630924",
-        "271365967949463552",
-        "293458299473362944",
-        "852931187818889277",
-        "689519434162897084",
-        "384034679919214592",
-        "1108871061321289828",
-        "404735159682727946",
-        "1240315070945165383",
-        "223873667694723072",
-        "395599939239018497",
-        "906974434684993607"
-      ]
-    }
-  ],
-  "updatedAt": "2026-10-14T17:43:02.379Z"
+  "seasons": [],
+  "updatedAt": "2026-11-13T10:51:14.455Z"
 }
