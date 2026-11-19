@@ -1089,6 +1089,54 @@ function selectMenuResponse(type, content, customId, placeholder, options) {
   );
 }
 
+// Désinscription depuis le site : le joueur (authentifié par son jeton Discord) retire sa propre
+// inscription d'une saison. Retire son ID du compteur, supprime sa ligne du Google Sheet et prévient
+// le responsable de la saison par MP.
+async function handleUnsubscribe(request, env, ctx) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch (e) {
+    return jsonResponse(400, { error: 'JSON invalide.' });
+  }
+
+  const auth = await verifyAuthToken(env, payload.authToken);
+  if (!auth) {
+    return jsonResponse(401, { error: 'Connecte-toi avec Discord (session expirée ou absente).' });
+  }
+
+  const { data: inscriptionData } = await readJsonFile(env, 'data/inscription.json');
+  toMultiSeason(inscriptionData);
+  const found = findSeason(inscriptionData, payload.saisonId);
+  if (found.error) {
+    return jsonResponse(400, { error: 'Ces inscriptions sont fermées ou introuvables, recharge la page.' });
+  }
+  const season = found.season;
+  if (!(season.registrations || []).includes(auth.id)) {
+    return jsonResponse(400, { error: "Tu n'es pas inscrit à cette saison." });
+  }
+
+  await updateJsonFile(env, 'data/inscription.json', (data) => {
+    toMultiSeason(data);
+    const s = data.seasons.find((x) => x.id === season.id);
+    if (!s) return { skipWrite: true };
+    s.registrations = (s.registrations || []).filter((id) => id !== auth.id);
+    return { message: `Désinscription de ${auth.username} (${s.title})` };
+  });
+
+  const { data: players } = await getPlayers(env);
+  const nom = findPlayer(players, auth.id)?.name || auth.username;
+
+  if (env.SHEETS_WEBHOOK_URL) {
+    ctx.waitUntil(callSheet(env, { action: 'unsubscribe', saison: season.title, pseudo: nom }));
+  }
+  if (season.openedBy) {
+    ctx.waitUntil(notifyPlayer(env, season.openedBy, `↩️ **${nom}** (<@${auth.id}>) s'est désinscrit de **${season.title}**.`));
+  }
+
+  return jsonResponse(200, { ok: true });
+}
+
 async function handleInscriptionResponse(request, env, ctx) {
   let payload;
   try {
@@ -1261,6 +1309,12 @@ export default {
 
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (url.pathname === '/unsubscribe-inscription') {
+      if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
+      if (request.method !== 'POST') return jsonResponse(405, { error: 'Méthode non autorisée.' });
+      return handleUnsubscribe(request, env, ctx);
+    }
 
     if (url.pathname === '/submit-inscription') {
       if (request.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });

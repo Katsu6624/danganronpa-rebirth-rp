@@ -137,6 +137,23 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({ supprime: supprime, retires: retires }));
   }
 
+  if (d.action === 'unsubscribe') {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const cible = ss.getSheets().find((f) => saisonDeLOnglet(f) === d.saison) || ss.getSheetByName(nomOnglet(d.saison));
+    if (!cible) return ContentService.createTextOutput('notfound');
+    const nb = cible.getLastRow();
+    if (nb > 1) {
+      const pseudos = cible.getRange(2, 2, nb - 1, 1).getValues();
+      for (let i = pseudos.length - 1; i >= 0; i--) {
+        if (pseudos[i][0] === d.pseudo) {
+          cible.deleteRow(i + 2);
+          return ContentService.createTextOutput('removed');
+        }
+      }
+    }
+    return ContentService.createTextOutput('notfound');
+  }
+
   if (d.action === 'open') {
     const nouvelle = getFeuilleSaison(d.saison);
     if (nouvelle.getLastRow() === 0) nouvelle.appendRow(HEADERS);

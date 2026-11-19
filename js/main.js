@@ -222,6 +222,7 @@ async function renderInscriptionPage(data) {
         <h4>Connecté en tant que</h4>
         <p style="color:var(--gold);font-weight:600;">${auth.username}</p>
         <button type="button" class="btn btn-outline" id="insc-logout" style="margin-top:0.6rem;">Se déconnecter</button>
+        <button type="button" class="btn btn-outline" id="insc-unsub" style="margin-top:0.6rem;margin-left:0.4rem;display:none;border-color:var(--red);color:var(--red);">Me désinscrire de cette saison</button>
         <p id="insc-pseudo-status" style="margin-top:0.5rem;font-size:0.85rem;"></p>
       </div>
 
@@ -313,6 +314,7 @@ async function renderInscriptionPage(data) {
 function setupInscriptionForm(state, characters, players, minCharacters, auth) {
   const form = document.getElementById('insc-form');
   const logoutBtn = document.getElementById('insc-logout');
+  const unsubBtn = document.getElementById('insc-unsub');
   const status = document.getElementById('insc-pseudo-status');
   const charHint = document.getElementById('insc-char-hint');
   const charSearch = document.getElementById('insc-char-search');
@@ -337,6 +339,36 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
   const resultEl = document.getElementById('insc-result');
 
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
+
+  // Bouton de désinscription : visible seulement si le joueur est inscrit à cette saison.
+  unsubBtn.style.display = (state.registrations || []).includes(auth.id) ? '' : 'none';
+  unsubBtn.addEventListener('click', async () => {
+    if (!confirm(`Te désinscrire de « ${state.title} » ? Ton inscription sera supprimée.`)) return;
+    unsubBtn.disabled = true;
+    resultEl.textContent = 'Désinscription en cours…';
+    resultEl.style.color = 'var(--text-dim)';
+    try {
+      const res = await fetch(`${INSCRIPTION_WORKER_URL}/unsubscribe-inscription`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ authToken: auth.token, saisonId: state.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur inconnue.');
+      resultEl.textContent = '✅ Tu es désinscrit de cette saison. Tu peux t\'inscrire à nouveau quand tu veux.';
+      resultEl.style.color = 'var(--gold)';
+      unsubBtn.style.display = 'none';
+      // Le compteur se met à jour tout de suite (et la liste locale, pour que la page reste cohérente).
+      state.registrations = (state.registrations || []).filter((id) => id !== auth.id);
+      const countEl = document.getElementById('insc-count');
+      if (countEl) countEl.textContent = inscriptionCountText(state);
+    } catch (err) {
+      resultEl.textContent = `Erreur : ${err.message}`;
+      resultEl.style.color = 'var(--red)';
+    } finally {
+      unsubBtn.disabled = false;
+    }
+  });
 
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -467,6 +499,8 @@ function setupInscriptionForm(state, characters, players, minCharacters, auth) {
       if (!res.ok) throw new Error(data.error || 'Erreur inconnue.');
       resultEl.textContent = '✅ Inscription envoyée ! Tu recevras une réponse du Monokuma.';
       resultEl.style.color = 'var(--gold)';
+      unsubBtn.style.display = '';
+      if (!(state.registrations || []).includes(auth.id)) state.registrations = [...(state.registrations || []), auth.id];
       form.reset();
       majOcDetails();
       ordreChoisi = [];
