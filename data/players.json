@@ -5228,7 +5228,7 @@
     ]
   },
   {
-    "name": "shinu.solo",
+    "name": "shinuat",
     "discordId": "1240315070945165383",
     "owned": [
       "makoto-naegi",
@@ -5278,7 +5278,23 @@
       "ryoma-hoshi",
       "shuichi-saihara",
       "tenko-chabashira",
-      "tsumugi-shirogane"
+      "tsumugi-shirogane",
+      "teruya-otori",
+      "sora",
+      "shobai-hashimoto",
+      "iroha-nijiue",
+      "emma-magorobi",
+      "hajime-makunouchi",
+      "hibiki-otonokoji",
+      "kanade-otonokoji",
+      "kokoro-mitsume",
+      "mikado-sannoji",
+      "yuri-kagarin",
+      "yuki-maeda",
+      "setsuka-chiebukuro",
+      "shinji-kasai",
+      "yoruko-kabuya",
+      "nikei"
     ],
     "locked": [
       "komaru-naegi",
@@ -5332,21 +5348,6 @@
       "kiyoka-maki",
       "satsuki-iranami",
       "yamato-kisaragi",
-      "teruya-otori",
-      "sora",
-      "shobai-hashimoto",
-      "iroha-nijiue",
-      "emma-magorobi",
-      "hajime-makunouchi",
-      "hibiki-otonokoji",
-      "kanade-otonokoji",
-      "kokoro-mitsume",
-      "mikado-sannoji",
-      "yuri-kagarin",
-      "yuki-maeda",
-      "setsuka-chiebukuro",
-      "shinji-kasai",
-      "yoruko-kabuya",
       "wolfgang-akire",
       "damon-maitsu",
       "eva-tsunaka",
@@ -5366,8 +5367,7 @@
       "mitsunari-koga",
       "nico-himuro",
       "saiji-rokudo",
-      "seishi-yodogawa",
-      "nikei"
+      "seishi-yodogawa"
     ]
   },
   {
