@@ -871,17 +871,6 @@ function setupSeasonGallery() {
   });
 }
 
-function setupSeasonLoopGif() {
-  const footer = document.querySelector('footer');
-  if (!footer) return;
-  const img = document.createElement('img');
-  img.src = 'assets/seasons/saison-49-loop.gif';
-  img.alt = 'Extrait animé d\'une saison Danganronpa Rebirth RP';
-  img.className = 'season-loop-gif';
-  img.loading = 'lazy';
-  footer.prepend(img);
-}
-
 function setupBackToTop() {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -918,7 +907,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupIpCopy();
   setupUnlockInfoModal();
   setupSeasonGallery();
-  setupSeasonLoopGif();
   setupAproposTabs();
   await setupInscription();
   setupScrollReveal();
