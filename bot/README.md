@@ -12,7 +12,8 @@ GitHub, ce qui republie le site automatiquement.
 - `/liste joueur:@X` : affiche le roster d'un joueur (accessible à tout le monde)
 - `/debloquer perso joueur:@X personnage:<nom>` : attribue un personnage à un joueur ⚠️ staff
 - `/debloquer pack joueur:@X jeu:<jeu>` : attribue d'un coup tous les personnages d'un jeu (pack payant ; les 3 jeux gratuits ne sont pas proposés) ⚠️ staff
-- `/retirer joueur:@X personnage:<nom>` : retire un personnage ⚠️ staff
+- `/retirer perso joueur:@X personnage:<nom>` : retire un personnage (il redevient « à débloquer ») ⚠️ staff
+- `/retirer pack joueur:@X jeu:<jeu>` : retire d'un coup tous les personnages d'un jeu (ex : pack donné par erreur ; les jeux gratuits ne sont pas proposés) ⚠️ staff
 - `/vip espoir donner joueur:@X` : donne le rôle Lycéen de l'Espoir pour 30 jours et débloque tous les personnages ⚠️ staff
 - `/vip espoir retirer joueur:@X` : retire ce rôle et reverrouille ce qui a été débloqué par le VIP ⚠️ staff
 - `/vip prepa donner joueur:@X` : donne le rôle Lycéen en Cours Préparatoire pour 30 jours et débloque tous les personnages ⚠️ staff

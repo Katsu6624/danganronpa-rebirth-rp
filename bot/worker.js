@@ -242,7 +242,8 @@ function handleHelp() {
     '⚠️ **Commandes réservées au staff** (permission "Gérer le serveur") :',
     '`/debloquer perso <joueur> <personnage>` : attribuer un personnage à un joueur.',
     '`/debloquer pack <joueur> <jeu>` : attribuer d\'un coup tous les personnages d\'un jeu (pack payant) à un joueur.',
-    '`/retirer <joueur> <personnage>` : retirer un personnage à un joueur.',
+    '`/retirer perso <joueur> <personnage>` : retirer un personnage à un joueur.',
+    '`/retirer pack <joueur> <jeu>` : retirer d\'un coup tous les personnages d\'un jeu à un joueur.',
     '`/vip espoir donner <joueur>` : donne le rôle Lycéen de l\'Espoir et débloque tous les personnages.',
     '`/vip espoir retirer <joueur>` : retire le rôle Lycéen de l\'Espoir (les attributions individuelles sont conservées).',
     '`/vip prepa donner <joueur>` : donne le rôle Lycéen en Cours Préparatoire et débloque tous les personnages.',
@@ -477,7 +478,10 @@ async function handleDebloquer(env, interaction) {
 }
 
 async function handleRetirerAsync(env, interaction) {
-  const opts = getFlatOptions(interaction);
+  const sub = interaction.data.options?.[0];
+  if (sub?.name === 'pack') return handleRetirerPackAsync(env, interaction, sub);
+
+  const opts = Object.fromEntries((sub?.options || []).map((o) => [o.name, o.value]));
   const characters = await getCharacters(env);
   const charById = Object.fromEntries(characters.map((c) => [c.id, c]));
   const charId = opts.personnage;
@@ -489,15 +493,52 @@ async function handleRetirerAsync(env, interaction) {
   const ctx = await updatePlayersFile(env, (players) => {
     const player = findPlayer(players, targetUser.id);
     if (!player) return { skipWrite: true, notFound: true };
+    const possedait = (player.owned || []).includes(charId);
     player.owned = (player.owned || []).filter((id) => id !== charId);
-    return { message: `Retrait de ${character.name} à ${targetUser.username}` };
+    // Le personnage retiré redevient "à débloquer" (sinon il disparaîtrait des deux listes du site).
+    player.locked = [...new Set([...(player.locked || []), charId])];
+    if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => id !== charId);
+    return { message: `Retrait de ${character.name} à ${targetUser.username}`, possedait };
   });
 
   if (ctx.notFound) return `${targetUser.username} n'a aucun personnage enregistré.`;
+  if (!ctx.possedait) return `${targetUser.username} n'avait pas ${character.name} (rien n'a changé).`;
 
   await notifyPlayer(env, targetUser.id, `🔒 **${character.name}** vous a été retiré par ${interaction.member.user.username}.`);
 
   return `✅ ${character.name} retiré à ${targetUser.username}.`;
+}
+
+// /retirer pack : retire d'un coup tous les personnages d'un jeu (ex : pack donné par erreur).
+async function handleRetirerPackAsync(env, interaction, sub) {
+  const opts = Object.fromEntries((sub.options || []).map((o) => [o.name, o.value]));
+  const characters = await getCharacters(env);
+  const jeu = String(opts.jeu || '');
+  if (FREE_FACTIONS.includes(jeu)) return `**${jeu}** est offert à tous les joueurs : on ne retire pas ce pack.`;
+
+  const pack = characters.filter((c) => c.faction === jeu);
+  if (pack.length === 0) return `Jeu inconnu : \`${jeu}\`. Utilise l'autocomplétion pour choisir un jeu valide.`;
+
+  const packIds = pack.map((c) => c.id);
+  const targetUser = interaction.data.resolved.users[opts.joueur];
+
+  const ctx = await updatePlayersFile(env, (players) => {
+    const player = findPlayer(players, targetUser.id);
+    if (!player) return { skipWrite: true, notFound: true };
+    const retires = packIds.filter((id) => (player.owned || []).includes(id));
+    if (retires.length === 0) return { skipWrite: true, retires: 0 };
+    player.owned = player.owned.filter((id) => !packIds.includes(id));
+    player.locked = [...new Set([...(player.locked || []), ...packIds])];
+    if (player.vipGrantedIds) player.vipGrantedIds = player.vipGrantedIds.filter((id) => !packIds.includes(id));
+    return { message: `Retrait du pack ${jeu} à ${targetUser.username}`, retires: retires.length };
+  });
+
+  if (ctx.notFound) return `${targetUser.username} n'a aucun personnage enregistré.`;
+  if (ctx.retires === 0) return `${targetUser.username} n'avait aucun personnage de **${jeu}** (rien n'a changé).`;
+
+  await notifyPlayer(env, targetUser.id, `🔒 Le pack **${jeu}** vous a été retiré par ${interaction.member.user.username}.`);
+
+  return `✅ Pack **${jeu}** retiré à ${targetUser.username} : ${ctx.retires} personnage${ctx.retires > 1 ? 's' : ''} sur ${pack.length}.`;
 }
 
 async function handleRetirer(env, interaction) {

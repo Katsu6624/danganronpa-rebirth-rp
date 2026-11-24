@@ -66,12 +66,28 @@ const commands = [
   },
   {
     name: 'retirer',
-    description: 'Retirer un personnage à un joueur',
+    description: 'Retirer des personnages à un joueur',
     default_member_permissions: MANAGE_GUILD,
     dm_permission: false,
     options: [
-      { type: 6, name: 'joueur', description: 'Le joueur', required: true },
-      { type: 3, name: 'personnage', description: 'Le personnage', required: true, autocomplete: true },
+      {
+        type: 1,
+        name: 'perso',
+        description: 'Retirer un personnage à un joueur',
+        options: [
+          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+          { type: 3, name: 'personnage', description: 'Le personnage', required: true, autocomplete: true },
+        ],
+      },
+      {
+        type: 1,
+        name: 'pack',
+        description: "Retirer tous les personnages d'un jeu à un joueur",
+        options: [
+          { type: 6, name: 'joueur', description: 'Le joueur', required: true },
+          { type: 3, name: 'jeu', description: 'Le jeu (hors jeux gratuits)', required: true, autocomplete: true },
+        ],
+      },
     ],
   },
   {
